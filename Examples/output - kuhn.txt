@@ -1,0 +1,27 @@
+# Kuhn
+# ====
+#
+# This game file was automatically generated on 07-18-2017
+# by the Kuhn game generator, part of the efg_lib project
+#
+# Copyright © 2017 Carnegie Mellon University. All Rights Reserved.
+#
+#
+# Command line invocation
+# -----------------------
+#
+# > kuhn.py 
+#
+
+infoset /C:J? strategies c=0.2 r=0.8
+infoset /C:J?/P1:c/P2:r strategies c=0.7 f=0.3
+infoset /C:?J/P1:c strategies c=0.6 r=0.4
+infoset /C:?J/P1:r strategies c=0.7 f=0.3
+infoset /C:Q? strategies c=0.3 r=0.7
+infoset /C:Q?/P1:c/P2:r strategies c=0.7 f=0.3
+infoset /C:?Q/P1:c strategies c=0.6 r=0.4
+infoset /C:?Q/P1:r strategies c=0.7 f=0.3
+infoset /C:K? strategies c=0.1 r=0.9
+infoset /C:K?/P1:c/P2:r strategies c=0.7 f=0.3
+infoset /C:?K/P1:c strategies c=0.7 r=0.3
+infoset /C:?K/P1:r strategies c=0.7 f=0.3
