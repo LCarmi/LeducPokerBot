@@ -49,8 +49,9 @@ class Node(ABC):
 
 class TerminalNode(Node):
 
-    def __init__(self, name: str, father: 'Node', fatherAction: str):
+    def __init__(self, name: str, father: 'Node', fatherAction: str, payoff: int):
         super().__init__(name, father, fatherAction)
+        self.payoff = payoff
 
     def addChild(self, node: 'Node', action: str):
         pass
@@ -67,8 +68,10 @@ class TerminalNode(Node):
 
 class InternalNode(Node):
 
-    def __init__(self, name: str, father: 'Node', fatherAction: str):
+    def __init__(self, name: str, father: 'Node', fatherAction: str, actions: [str], player: int):
         super().__init__(name, father, fatherAction)
+        self.player = player
+        self.actions = actions
 
     def addChild(self, node: 'Node', action: str):
         pass
@@ -85,8 +88,10 @@ class InternalNode(Node):
 
 class ChanceNode(Node):
 
-    def __init__(self, name: str, father: 'Node', fatherAction: str):
+    def __init__(self, name: str, father: 'Node', fatherAction: str, actions: [str], probabilities: [int]):
         super().__init__(name, father, fatherAction)
+        self.actions = actions
+        self.probabilities = probabilities
 
     def addChild(self, node: 'Node', action: str):
         pass
