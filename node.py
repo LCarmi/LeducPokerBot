@@ -49,18 +49,19 @@ class Node(ABC):
 
 class TerminalNode(Node):
 
-    def __init__(self, name: str, payoff: int):
+    def __init__(self, name: str, payoff: float):
         super().__init__(name)
         self.payoff = payoff
 
     def addChild(self, node: 'Node', action: str):
         raise RuntimeError("Added a child to a terminal Node!")
 
-    def getPayoffRepresentation(self) -> [int]:
+    def getPayoffRepresentation(self) -> [float]:
         return [self.payoff]
 
     def mapWithSubtree(self, node: 'Node') -> ('Node', ['Node', 'Node']):
-        pass
+        assert isinstance(node, TerminalNode)
+        return TerminalNode(self.name + "##" + node.name, (self.payoff + node.payoff) / 2), []
 
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
@@ -74,14 +75,14 @@ class InternalNode(Node):
         self.actions = actions
         self.children = [None for _ in actions]
 
-        self.actions = sorted(self.actions)  # TODO: already guaranteed to be sorted?
+        #self.actions = sorted(self.actions)  # TODO: already guaranteed to be sorted?
 
     def addChild(self, node: 'Node', action: str):
         node.father = self
         idx = self.actions.index(action)
         self.children[idx] = node
 
-    def getPayoffRepresentation(self) -> [int]:
+    def getPayoffRepresentation(self) -> [float]:
         def concatenate(a, b):
             return a + b
 
@@ -96,7 +97,7 @@ class InternalNode(Node):
 
 class ChanceNode(Node):
 
-    def __init__(self, name: str, actions: [str], probabilities: [int]):
+    def __init__(self, name: str, actions: [str], probabilities: [float]):
         super().__init__(name)
         self.children = [None for _ in actions]
         self.actions = actions
@@ -108,8 +109,8 @@ class ChanceNode(Node):
         idx = self.actions.index(action)
         self.children[idx] = node
 
-    def getPayoffRepresentation(self) -> [int]:
-        def weightedAdditionList(a: (int, [int]), b: (int, [int])):
+    def getPayoffRepresentation(self) -> [float]:
+        def weightedAdditionList(a: (float, [float]), b: (float, [float])):
             a_w, a_l = a
             b_w, b_l = b
             if len(a_l) != len(b_l):
