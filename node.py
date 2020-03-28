@@ -4,11 +4,10 @@ import functools
 
 class Node(ABC):
 
-    def __init__(self, name: str, father: 'Node', fatherAction: str):
+    def __init__(self, name: str):
         self.name = name
-        self.father = father
         self.children = []
-        father.addChild(self, fatherAction)
+        self.father = None
 
     @abstractmethod
     def addChild(self, node: 'Node', action: str):
@@ -50,8 +49,8 @@ class Node(ABC):
 
 class TerminalNode(Node):
 
-    def __init__(self, name: str, father: 'Node', fatherAction: str, payoff: int):
-        super().__init__(name, father, fatherAction)
+    def __init__(self, name: str, payoff: int):
+        super().__init__(name)
         self.payoff = payoff
 
     def addChild(self, node: 'Node', action: str):
@@ -69,14 +68,18 @@ class TerminalNode(Node):
 
 class InternalNode(Node):
 
-    def __init__(self, name: str, father: 'Node', fatherAction: str, actions: [str], player: int):
-        super().__init__(name, father, fatherAction)
+    def __init__(self, name: str, actions: [str], player: int):
+        super().__init__(name)
         self.player = player
         self.actions = actions
+        self.children = [None for _ in actions]
+
         self.actions = sorted(self.actions)  # TODO: already guaranteed to be sorted?
 
     def addChild(self, node: 'Node', action: str):
-        pass
+        node.father = self
+        idx = self.actions.index(action)
+        self.children[idx] = node
 
     def getPayoffRepresentation(self) -> [int]:
         def concatenate(a, b):
@@ -93,14 +96,15 @@ class InternalNode(Node):
 
 class ChanceNode(Node):
 
-    def __init__(self, name: str, father: 'Node', fatherAction: str, actions: [str], probabilities: [int]):
-        super().__init__(name, father, fatherAction)
+    def __init__(self, name: str, actions: [str], probabilities: [int]):
+        super().__init__(name)
         self.children = [None for _ in actions]
         self.actions = actions
         self.probabilities = probabilities
-        # self.actions = sorted(self.actions) #TODO: already guaranteed to be sorted? Or better to use a single tuple?
+        # self.actions = sorted(self.actions) #TODO: already guaranteed to be sorted? Or better to use a single list of tuples?
 
     def addChild(self, node: 'Node', action: str):
+        node.father = self
         idx = self.actions.index(action)
         self.children[idx] = node
 
