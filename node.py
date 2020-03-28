@@ -48,6 +48,12 @@ class Node(ABC):
         """
         pass
 
+    def history_father(self):
+        index_last_backslash = self.name.rfind('/')
+        result = self.name[0:index_last_backslash]
+        return result
+
+
 
 class TerminalNode(Node):
 
