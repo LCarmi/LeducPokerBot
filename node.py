@@ -50,10 +50,24 @@ class Node(ABC):
 
     def history_father(self):
         index_last_backslash = self.name.rfind('/')
-        result = self.name[0:index_last_backslash]
+        result = self.name
+        result = result[0:index_last_backslash]
+        if index_last_backslash == 0: #root case
+            return '/'
         return result
 
+    def __str__(self ):
+        ret = "My name is "+ self.name
+        return ret
 
+    def __repr__(self):
+        return self.name
+
+    # TODO : Only for test - Eliminate also in the sub classes
+    @abstractmethod
+    def print_childrens(self):
+
+        pass
 
 class TerminalNode(Node):
 
@@ -76,6 +90,8 @@ class TerminalNode(Node):
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
 
+    def print_childrens(self):
+        print("I'm "+ self.name+" I don't have a children. However, my Payoff: "+ str(self.payoff))
 
 class InternalNode(Node):
 
@@ -142,6 +158,11 @@ class InternalNode(Node):
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
 
+    def print_childrens(self):
+        ret = "I'm "+self.name + " and my children are "
+        for child in self.children:
+            ret += child.name+' '
+        print(ret)
 
 class ChanceNode(Node):
 
@@ -289,6 +310,11 @@ class ChanceNode(Node):
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
 
+    def print_childrens(self):
+        ret = "I'm "+self.name + " and my children are "
+        for child in self.children:
+            ret += child.name+' '
+        print(ret)
 
 # TODO: put mapWithSubtree private method (~double __ in front of name)?
 
