@@ -1,4 +1,4 @@
-from myParser import is_node,is_infoset
+from myParser import is_node, is_infoset
 """This module contains a method that given a file path, it returns two list, one containing the node lines
    ordered by using a QuickSort algorithm and the history length as a metric. The other list contains the 
    information set lines."""
@@ -58,4 +58,4 @@ def quick_sort(lines):
 
 
 if __name__ == '__main__':
-    text_order_by_history_length("./Examples/input - leduc3.txt")
+    text_order_by_history_length("./Examples/input - kuhn.txt")

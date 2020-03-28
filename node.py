@@ -57,15 +57,20 @@ class Node(ABC):
         return result
 
     def __str__(self ):
-        ret = "My name is "+ self.name
+        ret = "My name is " + self.name
         return ret
 
     def __repr__(self):
         return self.name
 
+    @abstractmethod
+    def get_actions(self):
+
+        pass
+
     # TODO : Only for test - Eliminate also in the sub classes
     @abstractmethod
-    def print_childrens(self):
+    def print_children(self):
 
         pass
 
@@ -90,8 +95,11 @@ class TerminalNode(Node):
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
 
-    def print_childrens(self):
-        print("I'm "+ self.name+" I don't have a children. However, my Payoff: "+ str(self.payoff))
+    def print_children(self):
+        print("I'm " + self.name+" I don't have children. However, my payoff is: " + str(self.payoff))
+
+    def get_actions(self):
+        return None
 
 class InternalNode(Node):
 
@@ -158,7 +166,10 @@ class InternalNode(Node):
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
 
-    def print_childrens(self):
+    def get_actions(self):
+        return self.actions
+
+    def print_children(self):
         ret = "I'm "+self.name + " and my children are "
         for child in self.children:
             ret += child.name+' '
@@ -310,12 +321,14 @@ class ChanceNode(Node):
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
 
-    def print_childrens(self):
+    def print_children(self):
         ret = "I'm "+self.name + " and my children are "
         for child in self.children:
             ret += child.name+' '
         print(ret)
 
+    def get_actions(self):
+        return self.actions
 # TODO: put mapWithSubtree private method (~double __ in front of name)?
 
 

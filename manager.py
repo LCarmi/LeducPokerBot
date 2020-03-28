@@ -4,7 +4,7 @@ from orderFile import *
 
 class Manager:
 
-    # Contruct the Manager given the file path
+    # Construct the Manager given the file path
     def __init__(self, file_path: str):
 
         node_lines, infoset_lines = text_order_by_history_length(file_path)
@@ -12,12 +12,13 @@ class Manager:
         self.abstractedGame = Game().parse_game(node_lines, infoset_lines)
         self.information_set_mapping = {}
 
-    # TODO createAbstracted()
+    def create_abstraction(self):
+        self.information_set_mapping = self.abstractedGame.abstract_yourself()
 
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc5.txt"
+    file_path = "./Examples/input - leduc3.txt"
     manager = Manager(file_path)
     manager.originalGame.print_tree()
-
+    manager.originalGame.print_information_sets()

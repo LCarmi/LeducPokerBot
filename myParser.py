@@ -1,5 +1,6 @@
 import re
 from node import *
+from informationSet import *
 
 # TODO: Eliminate Prints
 # Regex definition
@@ -33,8 +34,12 @@ def parse_node_line(node_line):
             res_prob.append(float(prob))
         return ChanceNode(match.group('history'), res_actions, res_prob)
 
-    if match := re.fullmatch(reInfoSet, node_line):
-        print("Name : {}, Histories : {}".format(match.group('name'),match.group('histories')))
+
+def parse_infoset_line(infoset_line):
+
+    if match := re.fullmatch(reInfoSet, infoset_line):
+        print("Name : {}, Histories : {}".format(match.group('name'), match.group('histories')))
+        return InformationSet(match.group('name'), match.group('histories').split())
 
 
 def is_node(line):

@@ -20,19 +20,36 @@ class Game:
             self.history_dictionary.update({node.name: node})
             father = self.history_dictionary.get(node.history_father(), "empty")
             action_index = node.name.rfind(':')
-
-            if isinstance(father, InternalNode):
-                father.addChild(node, node.name[action_index+1:])
-
-            elif isinstance(father, ChanceNode):
-                father.addChild(node, node.name[action_index+1:])
+            father.addChild(node, node.name[action_index + 1:])
+        # Create the information sets
+        for i in range(0, len(infoset_lines)):
+            information_set = parse_infoset_line(infoset_lines[i])
+            first_node = self.history_dictionary.get(information_set.node_histories[0])
+            actions_first_node = first_node.get_actions()
+            # To prevent the case of terminal node, although in theory is not possible
+            if actions_first_node is not None:
+                information_set.add_strategies(actions_first_node)
+            self.information_sets.append(information_set)
 
         return self
 
-    # TODO : Only for test - To eliminate
+    def abstract_yourself(self):
+        # TODO abstractYourself
+
+        pass
+
+    # TODO : Only for tests - To eliminate both methods
     def print_tree(self):
         for node in self.history_dictionary.values():
-            node.print_childrens()
+            node.print_children()
+
+    def print_information_sets(self):
+        for information_set in self.information_sets:
+            ret = 'It contains '
+            for node_history in information_set.node_histories:
+                node = self.history_dictionary.get(node_history)
+                ret += node.name + ' '
+            print(information_set)
+            print(ret)
 
 
-    # TODO abstractYourself
