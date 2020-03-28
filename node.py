@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import functools
+import bisect
 
 
 class Node(ABC):
@@ -61,6 +62,8 @@ class TerminalNode(Node):
 
     def mapWithSubtree(self, node: 'Node') -> ('Node', ['Node', 'Node']):
         assert isinstance(node, TerminalNode)
+
+        # I'm sure to have no child, so just create new node and return no other mapping done
         return TerminalNode(self.name + "##" + node.name, (self.payoff + node.payoff) / 2), []
 
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
@@ -75,7 +78,7 @@ class InternalNode(Node):
         self.actions = actions
         self.children = [None for _ in actions]
 
-        #self.actions = sorted(self.actions)  # TODO: already guaranteed to be sorted?
+        # self.actions = sorted(self.actions)  # TODO: already guaranteed to be sorted?
 
     def addChild(self, node: 'Node', action: str):
         node.father = self
@@ -89,7 +92,44 @@ class InternalNode(Node):
         return functools.reduce(concatenate, [x.getPayoffRepresentation for x in self.children])
 
     def mapWithSubtree(self, node: 'Node') -> ('Node', ['Node', 'Node']):
-        pass
+        assert isinstance(node, InternalNode)
+        assert len(self.actions) == len(node.actions)
+        #TODO: remember that actions must be in alphabetical order in each node;
+        #TODO if we have the guarantee that we will map nodes in the same phase of game, then all assertions on actions should be satisfied
+        assert self.player == node.player
+        # Internal Node case:
+        # 1) create new Internal node -> newNode
+        # 2a) find correct mapping among actions
+        # 2b) for each action mapped pair, map relative child -> (newChild, listOfChanges)
+        # 2c) add each newChild as child of newNode
+        # 2d) merge all lists of changes in a uniqueListOfChanges
+        # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
+        # 4) return (newNode, uniqueListOfChanges)
+
+        # 1) create new Internal node -> newNode
+        newNode = InternalNode(self.name + "##" + node.name, self.actions, self.player)
+        uniqueListOfChanges = []
+
+        for i in range(len(self.actions)):
+            # 2a) find correct mapping among actions
+            assert self.actions[i] == node.actions[i]
+            # in the InternalNode case, same actions will be mapped onto each other
+            action = self.actions[i]
+
+            # 2b) for each action mapped pair, map relative child -> (newChild, listOfChanges)
+            newChild, listOfChanges = self.children[i].mapWithSubtree(node.children[i])
+
+            # 2c) add each newChild as child of newNode
+            newNode.addChild(newChild, action)
+
+            # 2d) merge all lists of changes in a uniqueListOfChanges
+            uniqueListOfChanges.append(listOfChanges)
+
+        # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
+        uniqueListOfChanges.append((self, node))
+
+        # 4) return (newNode, uniqueListOfChanges)
+        return newNode, uniqueListOfChanges
 
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
