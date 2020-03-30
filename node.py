@@ -48,6 +48,12 @@ class Node(ABC):
         """
         pass
 
+    def print_father(self):
+        if self.father is None:
+            print("I'm " + self.name + " and I don't have a father")
+        else:
+            print("I'm " + self.name + " and my father is " + self.father.name)
+
     def history_father(self):
         index_last_backslash = self.name.rfind('/')
         result = self.name

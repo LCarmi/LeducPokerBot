@@ -14,7 +14,7 @@ class InformationSet:
             self.strategies.update({action: 0})
 
     def __str__(self):
-        result = self.name + ' with strategies '
+        result = "Infoset: " + self.name + ' with strategies '
         for key in self.strategies:
             result += key + ':' + str(self.strategies[key]) + ' '
         return result
