@@ -133,7 +133,7 @@ class InternalNode(Node):
         def concatenate(a, b):
             return a + b
 
-        return functools.reduce(concatenate, [x.getPayoffRepresentation for x in self.children])
+        return functools.reduce(concatenate, [x.getPayoffRepresentation() for x in self.children])
 
     def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
         assert isinstance(node, InternalNode)
@@ -165,7 +165,7 @@ class InternalNode(Node):
             # so the old child is already mapped with respective subtree  and in place in current node
 
             # 2b) merge all lists of changes in a uniqueListOfChanges
-            uniqueListOfChanges.append(listOfChanges)
+            uniqueListOfChanges = uniqueListOfChanges + listOfChanges
 
         # 3) add (newName, oldName, node.name) to uniqueListOfChanges ~ change made in this function
         uniqueListOfChanges.append((self.name, oldName, node.name))
@@ -177,7 +177,7 @@ class InternalNode(Node):
         #does nothing in the node, just propagates the message
         allChanges = []
         for child in self.children:
-            allChanges.append(child.abstractSubtree())
+            allChanges = allChanges + child.abstractSubtree()
         return allChanges
 
     def get_actions(self):
@@ -340,11 +340,13 @@ class ChanceNode(Node):
         # K means algorithm
         # Put all the payOff of the children in a list
         payOffValues = []
+        length = 0
         for c in self.children:
             payOffValues.append(c.getPayoffRepresentation())
+            length = len(c.getPayoffRepresentation())
 
         # Transform the list in order to operate in the kmeans
-        payOffValues = np.asarray(payOffValues).reshape(-1, 1)
+        payOffValues = np.asarray(payOffValues).reshape(-1, length)
         # Do k-means algorithm
         # TODO: Elbow algorithm in order to find the best way of knowing the number of clusters
         N_CLUSTERS = 2;
@@ -379,26 +381,26 @@ class ChanceNode(Node):
         allChanges = []
 
         indexGroups = [[] for _ in range(N_CLUSTERS)]
-        for x in len(cluster):
+        for x in range(len(cluster)):
             #add each element index to a group where all with the same addresses are grouped
             indexGroups[cluster[x]].append(x)
 
         for group in indexGroups:
             firstIndex = group[0]
             child:Node = self.children[firstIndex]
-            action:str = self.action[firstIndex]
+            action:str = self.actions[firstIndex]
             for index in group[1:]:
                 changes = child.mapWithSubtree(self.children[index])
                 action = action + "##" + self.actions[index]
 
-                allChanges.append(changes)
+                allChanges = allChanges + changes
 
             newChildren.append(child)
             newActions.append(action)
 
         # Change  your children by using the new ones, change actions etc accordingly
         self.actions = newActions ## you missed this
-        self.children = []
+        self.children = [None for _ in self.actions] ##this should be initializad to the correct length
         # for i in range(len(newChildren)):
         #     self.addChild(newChildren[i], actionNameCluster[i])
         ## See this magic
@@ -408,7 +410,7 @@ class ChanceNode(Node):
 
         # Call abstract on the children
         for c in self.children:
-            allChanges.append(c.abstractSubtree())
+            allChanges = allChanges + c.abstractSubtree() ##Note doing .append and + between lists is different!
         # Return the changes
         return allChanges
 
