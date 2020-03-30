@@ -30,12 +30,11 @@ class Node(ABC):
         pass
 
     @abstractmethod
-    def mapWithSubtree(self, node: 'Node') -> ('Node', [('Node', 'Node')]):
+    def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
         """
-        Creates a new subtree born from the mapping of nodes in the subtrees rooted in self and node
+        Modifies current subtree mapping the nodes of current subtree with the nodes of the subtree rooted at node
         :param node: the root of the second subtree
-        :return: a tuple containing the root of the new subtree, and a list of tuples representing the pair of nodes
-        mapped onto each other
+        :return: list of tuples containing the (NewNameofNode,OldNameofNode, NameOfMappedNode) mapped onto each other
         """
         pass
 
@@ -86,11 +85,14 @@ class TerminalNode(Node):
     def getPayoffRepresentation(self) -> [float]:
         return [self.payoff]
 
-    def mapWithSubtree(self, node: 'Node') -> ('Node', ['Node', 'Node']):
+    def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
         assert isinstance(node, TerminalNode)
 
-        # I'm sure to have no child, so just create new node and return no other mapping done
-        return TerminalNode(self.name + "##" + node.name, (self.payoff + node.payoff) / 2), []
+        # I'm sure to have no child, so just modify my name and payoff and return this mapping
+        oldName = self.name
+        self.name = self.name + "##" + node.name
+        self.payoff = (self.payoff + node.payoff) / 2
+        return [(self.name, oldName, node.name)]
 
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
@@ -122,46 +124,49 @@ class InternalNode(Node):
 
         return functools.reduce(concatenate, [x.getPayoffRepresentation for x in self.children])
 
-    def mapWithSubtree(self, node: 'Node') -> ('Node', ['Node', 'Node']):
-        assert isinstance(node, InternalNode)
-        assert len(self.actions) == len(node.actions)
-        # remember that actions must be in alphabetical order in each node;
-        # if we have the guarantee that we will map nodes in the same phase of game, then all assertions on actions
-        # should be satisfied
-        assert self.player == node.player
-        # Internal Node case:
-        # 1) create new Internal node -> newNode
-        # 2a) find correct mapping among actions
-        # 2b) for each action mapped pair, map relative child -> (newChild, listOfChanges)
-        # 2c) add each newChild as child of newNode
-        # 2d) merge all lists of changes in a uniqueListOfChanges
-        # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
-        # 4) return (newNode, uniqueListOfChanges)
+    def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
+        pass
+        #TODO: modify previous implementations
 
-        # 1) create new Internal node -> newNode
-        newNode = InternalNode(self.name + "##" + node.name, self.actions, self.player)
-        uniqueListOfChanges = []
-
-        for i in range(len(self.actions)):
-            # 2a) find correct mapping among actions
-            assert self.actions[i] == node.actions[i]
-            # in the InternalNode case, same actions will be mapped onto each other
-            action = self.actions[i]
-
-            # 2b) for each action mapped pair, map relative child -> (newChild, listOfChanges)
-            newChild, listOfChanges = self.children[i].mapWithSubtree(node.children[i])
-
-            # 2c) add each newChild as child of newNode
-            newNode.addChild(newChild, action)
-
-            # 2d) merge all lists of changes in a uniqueListOfChanges
-            uniqueListOfChanges.append(listOfChanges)
-
-        # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
-        uniqueListOfChanges.append((self, node))
-
-        # 4) return (newNode, uniqueListOfChanges)
-        return newNode, uniqueListOfChanges
+        # assert isinstance(node, InternalNode)
+        # assert len(self.actions) == len(node.actions)
+        # # remember that actions must be in alphabetical order in each node;
+        # # if we have the guarantee that we will map nodes in the same phase of game, then all assertions on actions
+        # # should be satisfied
+        # assert self.player == node.player
+        # # Internal Node case:
+        # # 1) create new Internal node -> newNode
+        # # 2a) find correct mapping among actions
+        # # 2b) for each action mapped pair, map relative child -> (newChild, listOfChanges)
+        # # 2c) add each newChild as child of newNode
+        # # 2d) merge all lists of changes in a uniqueListOfChanges
+        # # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
+        # # 4) return (newNode, uniqueListOfChanges)
+        #
+        # # 1) create new Internal node -> newNode
+        # newNode = InternalNode(self.name + "##" + node.name, self.actions, self.player)
+        # uniqueListOfChanges = []
+        #
+        # for i in range(len(self.actions)):
+        #     # 2a) find correct mapping among actions
+        #     assert self.actions[i] == node.actions[i]
+        #     # in the InternalNode case, same actions will be mapped onto each other
+        #     action = self.actions[i]
+        #
+        #     # 2b) for each action mapped pair, map relative child -> (newChild, listOfChanges)
+        #     newChild, listOfChanges = self.children[i].mapWithSubtree(node.children[i])
+        #
+        #     # 2c) add each newChild as child of newNode
+        #     newNode.addChild(newChild, action)
+        #
+        #     # 2d) merge all lists of changes in a uniqueListOfChanges
+        #     uniqueListOfChanges.append(listOfChanges)
+        #
+        # # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
+        # uniqueListOfChanges.append((self, node))
+        #
+        # # 4) return (newNode, uniqueListOfChanges)
+        # return newNode, uniqueListOfChanges
 
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
@@ -203,120 +208,123 @@ class ChanceNode(Node):
                              range(len(self.children))]
         return functools.reduce(weightedAdditionList, weightsAndPayoffs)
 
-    def mapWithSubtree(self, node: 'Node') -> ('Node', ['Node', 'Node']):
-        assert isinstance(node, ChanceNode)
-        # no need to assert equal action array, since we don't have this guarantee
+    def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
+        pass
+        # TODO: modify previous implementations
 
-        # ChanceNode case:
-        # 1) find correct mapping among actions/children that minimizes loss -> indexPairs = [(indexInSelf, indexInNode)]
-        #    by using LinearProgramming
-        # 2a) do mappings of subtrees ~ for each pair in indexPairs, do mapWithSubtrees
-        # 2b) add child to newNode
-        # 2c) create a uniqueListOfChanges
-        # 2d) create new Chance Node -> newNode
-        # 3) add (self,node) to uniqueListOfChanges ~ change made in this method
-        # 4) return (newNode, uniqueListOfChanges)
-
-        # 1) find correct mapping among actions/children that minimizes loss -> indexPairs = [(indexInSelf, indexInNode)]
-        #    by using LinearProgramming
-        # 1a) computation of loss matrix
-        selfPayoffs = [x.getPayoffRepresentation() for x in self.children]
-        nodePayoffs = [x.getPayoffRepresentation() for x in node.children]
-
-        def loss(p1, p2):
-            assert len(p1) == len(p2)
-            return sum([(p1[i] - p2[i]) ** 2 for i in range(len(p1))])
-
-        lossMatrix = [[loss(x, y) for y in nodePayoffs] for x in selfPayoffs]
-        # 1b) definition of variables and problem
-        rows = range(len(self.children))
-        cols = range(len(node.children))
-
-        prob = pulp.LpProblem("Matching Ploblem", pulp.LpMinimize)
-        choices = pulp.LpVariable.dict("choice", (rows, cols), cat="Binary")
-        # 1c) objective function is added to 'prob' first
-        prob += pulp.lpSum([choices[r][c] * lossMatrix[r][c] for r in rows for c in cols])
-        # 1d) add constraints to problem
-        if len(self.children) == len(node.children):
-            # case of square matrix
-            for r in rows:
-                prob += pulp.lpSum([choices[r][c] for c in cols]) == 1
-            for c in cols:
-                prob += pulp.lpSum(choices[r][c] for r in rows) == 1
-        elif len(self.children) > len(node.children):
-            # case of more actions in self ~vertical rectangular matrix
-            for c in cols:
-                prob += pulp.lpSum(choices[r][c] for r in rows) == 1
-            for r in rows:  # TODO: is a probem if many are mapped to the same? YES because at the moment we don't know how to map more than one subtrees together
-                prob += pulp.lpSum(choices[r][c] for c in cols) <= 1
-        else:
-            # case of more actions in node ~horizontal rectangular matrix
-            for r in rows:
-                prob += pulp.lpSum([choices[r][c] for c in cols]) == 1
-            for c in cols:  # TODO: is a probem if many are mapped to the same?
-                prob += pulp.lpSum(choices[r][c] for r in rows) <= 1
-        # 1e) solve the problem
-        prob.solve()
-        # 1f) get the results in a list of matchings
-        indexPairs = []
-        rowAdded = [False for _ in rows]  # extra flags to remember rows not matched in case rows>cols
-        colAdded = [False for _ in cols]  # extra flags to remember cols not matched in case cols>rows
-
-        for r in rows:
-            for c in cols:
-                if pulp.value(choices[r][c]) == 1:
-                    indexPairs = indexPairs + [(r, c)]
-                    rowAdded[r] = True
-                    colAdded[c] = True
-            if not rowAdded[r]:  # add rows/cols not matched ~ in case rows != cols
-                indexPairs = indexPairs + [(r, -1)]
-
-        for c in cols:  # add rows/cols not matched ~ in case rows != cols
-            if not colAdded[c]:
-                indexPairs = [(-1, c)] + indexPairs
-
-        # 2a) do mappings of subtrees ~ for each pair in indexPairs, do mapWithSubtrees
-        # 2b) add child to newNode
-        # 2c) create a uniqueListOfChanges
-        actions = []
-        probabilities = []
-        children = []
-        uniqueListOfChanges = []
-
-        for pair in indexPairs:
-            iSelf, iNode = pair
-            if iSelf != -1:
-                if iNode != -1:
-                    #case of a matching
-                    actionName = self.actions[iSelf] + "##" + node.actions[iNode]
-                    actionProbability = self.probabilities[iSelf] + node.probabilities[iNode]
-                    newChild, listOfChanges = self.children[iNode].mapWithSubtree(node.children[iSelf])
-                else:
-                    #case of no matching ~single row
-                    actionName = self.actions[iSelf] + "##" + "_"
-                    actionProbability = self.probabilities[iSelf]
-                    newChild = self.children[iSelf]
-                    listOfChanges = []
-            else:
-                # case of no matching ~single column
-                actionName = "_" + "##" + self.actions[iSelf]
-                actionProbability = self.probabilities[iNode]
-                newChild = node.children[iNode]
-                listOfChanges = []
-
-            actions.append(actionName)
-            probabilities.append(actionProbability)
-            children.append(newChild)
-            uniqueListOfChanges.append(listOfChanges)
-
-        # 2d) create new Chance Node -> newNode
-        newNode = ChanceNode(self.name + "##" + node.name, actions, probabilities)
-
-        # 3) add (self,node) to uniqueListOfChanges ~ change made in this method
-        uniqueListOfChanges.append(self, node)
-
-        # 4) return (newNode, uniqueListOfChanges)
-        return newNode, uniqueListOfChanges
+        # assert isinstance(node, ChanceNode)
+        # # no need to assert equal action array, since we don't have this guarantee
+        #
+        # # ChanceNode case:
+        # # 1) find correct mapping among actions/children that minimizes loss -> indexPairs = [(indexInSelf, indexInNode)]
+        # #    by using LinearProgramming
+        # # 2a) do mappings of subtrees ~ for each pair in indexPairs, do mapWithSubtrees
+        # # 2b) add child to newNode
+        # # 2c) create a uniqueListOfChanges
+        # # 2d) create new Chance Node -> newNode
+        # # 3) add (self,node) to uniqueListOfChanges ~ change made in this method
+        # # 4) return (newNode, uniqueListOfChanges)
+        #
+        # # 1) find correct mapping among actions/children that minimizes loss -> indexPairs = [(indexInSelf, indexInNode)]
+        # #    by using LinearProgramming
+        # # 1a) computation of loss matrix
+        # selfPayoffs = [x.getPayoffRepresentation() for x in self.children]
+        # nodePayoffs = [x.getPayoffRepresentation() for x in node.children]
+        #
+        # def loss(p1, p2):
+        #     assert len(p1) == len(p2)
+        #     return sum([(p1[i] - p2[i]) ** 2 for i in range(len(p1))])
+        #
+        # lossMatrix = [[loss(x, y) for y in nodePayoffs] for x in selfPayoffs]
+        # # 1b) definition of variables and problem
+        # rows = range(len(self.children))
+        # cols = range(len(node.children))
+        #
+        # prob = pulp.LpProblem("Matching Ploblem", pulp.LpMinimize)
+        # choices = pulp.LpVariable.dict("choice", (rows, cols), cat="Binary")
+        # # 1c) objective function is added to 'prob' first
+        # prob += pulp.lpSum([choices[r][c] * lossMatrix[r][c] for r in rows for c in cols])
+        # # 1d) add constraints to problem
+        # if len(self.children) == len(node.children):
+        #     # case of square matrix
+        #     for r in rows:
+        #         prob += pulp.lpSum([choices[r][c] for c in cols]) == 1
+        #     for c in cols:
+        #         prob += pulp.lpSum(choices[r][c] for r in rows) == 1
+        # elif len(self.children) > len(node.children):
+        #     # case of more actions in self ~vertical rectangular matrix
+        #     for c in cols:
+        #         prob += pulp.lpSum(choices[r][c] for r in rows) == 1
+        #     for r in rows:  # TODO: is a probem if many are mapped to the same? YES because at the moment we don't know how to map more than one subtrees together
+        #         prob += pulp.lpSum(choices[r][c] for c in cols) <= 1
+        # else:
+        #     # case of more actions in node ~horizontal rectangular matrix
+        #     for r in rows:
+        #         prob += pulp.lpSum([choices[r][c] for c in cols]) == 1
+        #     for c in cols:  # TODO: is a probem if many are mapped to the same?
+        #         prob += pulp.lpSum(choices[r][c] for r in rows) <= 1
+        # # 1e) solve the problem
+        # prob.solve()
+        # # 1f) get the results in a list of matchings
+        # indexPairs = []
+        # rowAdded = [False for _ in rows]  # extra flags to remember rows not matched in case rows>cols
+        # colAdded = [False for _ in cols]  # extra flags to remember cols not matched in case cols>rows
+        #
+        # for r in rows:
+        #     for c in cols:
+        #         if pulp.value(choices[r][c]) == 1:
+        #             indexPairs = indexPairs + [(r, c)]
+        #             rowAdded[r] = True
+        #             colAdded[c] = True
+        #     if not rowAdded[r]:  # add rows/cols not matched ~ in case rows != cols
+        #         indexPairs = indexPairs + [(r, -1)]
+        #
+        # for c in cols:  # add rows/cols not matched ~ in case rows != cols
+        #     if not colAdded[c]:
+        #         indexPairs = [(-1, c)] + indexPairs
+        #
+        # # 2a) do mappings of subtrees ~ for each pair in indexPairs, do mapWithSubtrees
+        # # 2b) add child to newNode
+        # # 2c) create a uniqueListOfChanges
+        # actions = []
+        # probabilities = []
+        # children = []
+        # uniqueListOfChanges = []
+        #
+        # for pair in indexPairs:
+        #     iSelf, iNode = pair
+        #     if iSelf != -1:
+        #         if iNode != -1:
+        #             #case of a matching
+        #             actionName = self.actions[iSelf] + "##" + node.actions[iNode]
+        #             actionProbability = self.probabilities[iSelf] + node.probabilities[iNode]
+        #             newChild, listOfChanges = self.children[iNode].mapWithSubtree(node.children[iSelf])
+        #         else:
+        #             #case of no matching ~single row
+        #             actionName = self.actions[iSelf] + "##" + "_"
+        #             actionProbability = self.probabilities[iSelf]
+        #             newChild = self.children[iSelf]
+        #             listOfChanges = []
+        #     else:
+        #         # case of no matching ~single column
+        #         actionName = "_" + "##" + self.actions[iSelf]
+        #         actionProbability = self.probabilities[iNode]
+        #         newChild = node.children[iNode]
+        #         listOfChanges = []
+        #
+        #     actions.append(actionName)
+        #     probabilities.append(actionProbability)
+        #     children.append(newChild)
+        #     uniqueListOfChanges.append(listOfChanges)
+        #
+        # # 2d) create new Chance Node -> newNode
+        # newNode = ChanceNode(self.name + "##" + node.name, actions, probabilities)
+        #
+        # # 3) add (self,node) to uniqueListOfChanges ~ change made in this method
+        # uniqueListOfChanges.append(self, node)
+        #
+        # # 4) return (newNode, uniqueListOfChanges)
+        # return newNode, uniqueListOfChanges
 
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
