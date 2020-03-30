@@ -103,8 +103,9 @@ class TerminalNode(Node):
         self.payoff = (self.payoff + node.payoff) / 2
         return [(self.name, oldName, node.name)]
 
-    def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
-        pass
+    def abstractSubtree(self) -> ([(str, str, str)]):
+        #does nothing
+        return []
 
     def print_children(self):
         print("I'm " + self.name + " I don't have children. However, my payoff is: " + str(self.payoff))
@@ -172,8 +173,12 @@ class InternalNode(Node):
         # 4) return (newNode, uniqueListOfChanges)
         return uniqueListOfChanges
 
-    def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
-        pass
+    def abstractSubtree(self) -> ([(str, str, str)]):
+        #does nothing in the node, just propagates the message
+        allChanges = []
+        for child in self.children:
+            allChanges.append(child.abstractSubtree())
+        return allChanges
 
     def get_actions(self):
         return self.actions
@@ -286,23 +291,23 @@ class ChanceNode(Node):
                     actionName = self.actions[r] + "##" + node.actions[c]
                     actionProbability = self.probabilities[r] + node.probabilities[c]
                     listOfChanges = self.children[r].mapWithSubtree(node.children[c])
-                    #save computed matching
+                    # save computed matching
                     actions.append(actionName)
                     probabilities.append(actionProbability)
                     uniqueListOfChanges.append(listOfChanges)
                     children.append(self.children[r])
 
             if not rowAdded[r]:  # add rows/cols not matched ~ in case rows != cols
-                #case of no matching ~single row
+                # case of no matching ~single row
                 actionName = self.actions[r] + "##" + "_"
                 actionProbability = self.probabilities[r]
-                #no changes made
+                # no changes made
                 # save computed matching
                 actions.append(actionName)
                 probabilities.append(actionProbability)
                 children.append(self.children[r])
 
-        for c in cols: # add rows/cols not matched ~ in case rows != cols
+        for c in cols:  # add rows/cols not matched ~ in case rows != cols
             # case of no matching ~single column
             actionName = "_" + "##" + node.actions[c]
             actionProbability = node.probabilities[c]
@@ -316,7 +321,9 @@ class ChanceNode(Node):
         self.name = self.name + "##" + node.name
         self.actions = actions
         self.probabilities = probabilities
-        self.children = children
+        self.children = []
+        for action, child in zip(actions, children):
+            self.addChild(child, action)
 
         # 4) add (newName, oldName, node.name) to uniqueListOfChanges ~ change made in this function
         uniqueListOfChanges.append((self.name, oldName, node.name))
@@ -329,48 +336,81 @@ class ChanceNode(Node):
         if len(self.children) < 2:
             # No need of doing abstraction
             return []
-        else:
-            # K means algorithm
-            # Put all the payOff of the children in a list
-            payOffValues = []
-            for c in self.children:
-                payOffValues.append(c.gatPayoffRepresentation)
+        ##Why putting else here? it is useless since if you arrive here it means you have not returned
+        # K means algorithm
+        # Put all the payOff of the children in a list
+        payOffValues = []
+        for c in self.children:
+            payOffValues.append(c.getPayoffRepresentation())
 
-            # Transform the list in order to operate in the kmeans
-            payOffValues = np.asarray(payOffValues).reshape(-1, 1)
-            # Do k-means algorithm
-            # TODO: Elbow algorithm in order to find the best way of knowing the number of clusters
-            algokmeans = KMeans(n_clusters=2, init='k-means++', max_iter=300, n_init=10, random_state=0)
-            cluster = algokmeans.fit_predict(payOffValues)
-            # Put the cluster shape into couples
-            nodesToMap = []
-            j = 0
-            actionNameCluster = []
-            newChildren = []
-            allChanges = []
-            for valueInC in list(set(cluster)):
-                indexSameCluster = [index for index, value in enumerate(cluster) if value == valueInC]
-                for i in indexSameCluster:
-                    actionNameCluster[j] = actionNameCluster[j] + "##" + self.actions[i]
+        # Transform the list in order to operate in the kmeans
+        payOffValues = np.asarray(payOffValues).reshape(-1, 1)
+        # Do k-means algorithm
+        # TODO: Elbow algorithm in order to find the best way of knowing the number of clusters
+        N_CLUSTERS = 2;
+        algokmeans = KMeans(n_clusters=2, init='k-means++', max_iter=300, n_init=10, random_state=0)
+        cluster = algokmeans.fit_predict(payOffValues)
+        # # Put the cluster shape into couples
+        # j = 0
+        # actionNameCluster = []
+        # newChildren = []
+        # allChanges = []
+        # for valueInC in list(set(cluster)):
+        #     indexSameCluster = [index for index, value in enumerate(cluster) if value == valueInC]
+        #     for i in indexSameCluster:
+        #         actionNameCluster[j] = actionNameCluster[j] + "##" + self.actions[i]
+        #
+        #     # The first of the couple is always the first of the cluster, the it is put the other
+        #     newChildren[j] = self.children(indexSameCluster.pop(0))
+        #     for i in indexSameCluster:
+        #         # Join the nodes finded in the K-means using mapWithSubtree
+        #         changes = newChildren[j].mapWithSubtree(self.children[c])
+        #         allChanges.append(changes)
+        #     j = +1
+        ## Problems in the above code:
+        ## actionNameCluster is an empty list; so doing actionsNameCluster[j] gives exception
+        ## similarly for newChildren
+        ## there are too many lists that are filled and made empty; this makes the code less readable
+        ## also try to maintain lines short: it makes the code more readable
 
-                # The first of the couple is always the first of the cluster, the it is put the other
-                newChildren[j] = self.children(indexSameCluster.pop(0))
-                for i in indexSameCluster:
-                    # Join the nodes finded in the K-means using mapWithSubtree
-                    changes = newChildren[j].mapWithSubtree(self.children[c])
-                    allChanges.append(changes)
-                j = +1
+        ##my proposition
+        newChildren = []
+        newActions = []
+        allChanges = []
 
-            # Change  your children by using the new ones, change actions etc accordingly
-            self.children = []
-            for i in range(len(newChildren)):
-                self.addChild(newChildren[i], actionNameCluster[i])
+        indexGroups = [[] for _ in range(N_CLUSTERS)]
+        for x in len(cluster):
+            #add each element index to a group where all with the same addresses are grouped
+            indexGroups[cluster[x]].append(x)
 
-            # Call abstract on the children
-            for c in self.children:
-                allChanges.append(c.abstractSubtree())
-            # Return the changes
-            return allChanges
+        for group in indexGroups:
+            firstIndex = group[0]
+            child:Node = self.children[firstIndex]
+            action:str = self.action[firstIndex]
+            for index in group[1:]:
+                changes = child.mapWithSubtree(self.children[index])
+                action = action + "##" + self.actions[index]
+
+                allChanges.append(changes)
+
+            newChildren.append(child)
+            newActions.append(action)
+
+        # Change  your children by using the new ones, change actions etc accordingly
+        self.actions = newActions ## you missed this
+        self.children = []
+        # for i in range(len(newChildren)):
+        #     self.addChild(newChildren[i], actionNameCluster[i])
+        ## See this magic
+        for action,child in zip(newActions, newChildren):
+            self.addChild(child, action)
+
+
+        # Call abstract on the children
+        for c in self.children:
+            allChanges.append(c.abstractSubtree())
+        # Return the changes
+        return allChanges
 
     def print_children(self):
         ret = "I'm " + self.name + " and my children are "
