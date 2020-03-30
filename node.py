@@ -5,6 +5,7 @@ import pulp
 from sklearn.cluster import KMeans
 import numpy as np
 
+
 class Node(ABC):
 
     def __init__(self, name: str):
@@ -58,11 +59,11 @@ class Node(ABC):
         index_last_backslash = self.name.rfind('/')
         result = self.name
         result = result[0:index_last_backslash]
-        if index_last_backslash == 0: #root case
+        if index_last_backslash == 0:  # root case
             return '/'
         return result
 
-    def __str__(self ):
+    def __str__(self):
         ret = "My name is " + self.name
         return ret
 
@@ -79,6 +80,7 @@ class Node(ABC):
     def print_children(self):
 
         pass
+
 
 class TerminalNode(Node):
 
@@ -105,10 +107,11 @@ class TerminalNode(Node):
         pass
 
     def print_children(self):
-        print("I'm " + self.name+" I don't have children. However, my payoff is: " + str(self.payoff))
+        print("I'm " + self.name + " I don't have children. However, my payoff is: " + str(self.payoff))
 
     def get_actions(self):
         return None
+
 
 class InternalNode(Node):
 
@@ -132,48 +135,42 @@ class InternalNode(Node):
         return functools.reduce(concatenate, [x.getPayoffRepresentation for x in self.children])
 
     def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
-        pass
-        #TODO: modify previous implementations
+        assert isinstance(node, InternalNode)
+        assert len(self.actions) == len(node.actions)
+        # remember that actions must be in alphabetical order in each node;
+        # if we have the guarantee that we will map nodes in the same phase of game, then all assertions on actions
+        # should be satisfied
+        assert self.player == node.player
 
-        # assert isinstance(node, InternalNode)
-        # assert len(self.actions) == len(node.actions)
-        # # remember that actions must be in alphabetical order in each node;
-        # # if we have the guarantee that we will map nodes in the same phase of game, then all assertions on actions
-        # # should be satisfied
-        # assert self.player == node.player
-        # # Internal Node case:
-        # # 1) create new Internal node -> newNode
-        # # 2a) find correct mapping among actions
-        # # 2b) for each action mapped pair, map relative child -> (newChild, listOfChanges)
-        # # 2c) add each newChild as child of newNode
-        # # 2d) merge all lists of changes in a uniqueListOfChanges
-        # # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
-        # # 4) return (newNode, uniqueListOfChanges)
-        #
-        # # 1) create new Internal node -> newNode
-        # newNode = InternalNode(self.name + "##" + node.name, self.actions, self.player)
-        # uniqueListOfChanges = []
-        #
-        # for i in range(len(self.actions)):
-        #     # 2a) find correct mapping among actions
-        #     assert self.actions[i] == node.actions[i]
-        #     # in the InternalNode case, same actions will be mapped onto each other
-        #     action = self.actions[i]
-        #
-        #     # 2b) for each action mapped pair, map relative child -> (newChild, listOfChanges)
-        #     newChild, listOfChanges = self.children[i].mapWithSubtree(node.children[i])
-        #
-        #     # 2c) add each newChild as child of newNode
-        #     newNode.addChild(newChild, action)
-        #
-        #     # 2d) merge all lists of changes in a uniqueListOfChanges
-        #     uniqueListOfChanges.append(listOfChanges)
-        #
-        # # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
-        # uniqueListOfChanges.append((self, node))
-        #
-        # # 4) return (newNode, uniqueListOfChanges)
-        # return newNode, uniqueListOfChanges
+        for a1, a2 in zip(self.actions, node.actions):
+            assert a1 == a2
+
+        # Internal Node case:
+        # 1) rename Node
+        # 2a) for each children pair in zip(self.children, node.children) map current node child's subtree with the one from node
+        # 2b) merge all lists of changes in a uniqueListOfChanges
+        # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
+        # 4) return (newNode, uniqueListOfChanges)
+
+        # 1) rename Node
+        oldName = self.name
+        self.name = self.name + "##" + node.name
+        uniqueListOfChanges = []
+
+        # in the InternalNode case, same actions will be mapped onto each other, so the respective children will be in same order
+        for selfChild, nodeChild in zip(self.children, node.children):
+            # 2a) for each children mapped pair map current node child's subtree with the one from node
+            listOfChanges = selfChild.mapWithSubtree(nodeChild)
+            # so the old child is already mapped with respective subtree  and in place in current node
+
+            # 2b) merge all lists of changes in a uniqueListOfChanges
+            uniqueListOfChanges.append(listOfChanges)
+
+        # 3) add (self, node) to uniqueListOfChanges ~ change made in this function
+        uniqueListOfChanges.append((self.name, oldName, node.name))
+
+        # 4) return (newNode, uniqueListOfChanges)
+        return uniqueListOfChanges
 
     def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
         pass
@@ -182,10 +179,11 @@ class InternalNode(Node):
         return self.actions
 
     def print_children(self):
-        ret = "I'm "+self.name + " and my children are "
+        ret = "I'm " + self.name + " and my children are "
         for child in self.children:
-            ret += child.name+' '
+            ret += child.name + ' '
         print(ret)
+
 
 class ChanceNode(Node):
 
@@ -348,7 +346,7 @@ class ChanceNode(Node):
             # Transform the list in order to operate in the kmeans
             payOffValues = np.asarray(payOffValues).reshape(-1, 1)
             # Do k-means algorithm
-            #TODO: Elbow algorithm in order to find the best way of knowing the number of clusters
+            # TODO: Elbow algorithm in order to find the best way of knowing the number of clusters
             algokmeans = KMeans(n_clusters=2, init='k-means++', max_iter=300, n_init=10, random_state=0)
             cluster = algokmeans.fit_predict(payOffValues)
             # Put the cluster shape into couples
@@ -382,13 +380,15 @@ class ChanceNode(Node):
             return allChanges
 
     def print_children(self):
-        ret = "I'm "+self.name + " and my children are "
+        ret = "I'm " + self.name + " and my children are "
         for child in self.children:
-            ret += child.name+' '
+            ret += child.name + ' '
         print(ret)
 
     def get_actions(self):
         return self.actions
+
+
 # TODO: put mapWithSubtree private method (~double __ in front of name)?
 
 
