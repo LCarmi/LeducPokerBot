@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 import functools
 import bisect
 import pulp
-
+from sklearn.cluster import KMeans
+import numpy as np
 
 class Node(ABC):
 
@@ -326,8 +327,52 @@ class ChanceNode(Node):
         # # 4) return (newNode, uniqueListOfChanges)
         # return newNode, uniqueListOfChanges
 
-    def abstractSubtree(self) -> ('Node', ['Node', 'Node']):
-        pass
+    def abstractSubtree(self) -> ([(str, str, str)]):
+        # First see if it is needed to do the abstraction
+        if len(self.children) < 2:
+            # No need of doing abstraction
+            return []
+        else:
+            # K means algorithm
+            # Put all the payOff of the children in a list
+            payOffValues = []
+            for c in self.children:
+                payOffValues.append(c.gatPayoffRepresentation)
+
+            # Transform the list in order to operate in the kmeans
+            payOffValues = np.asarray(payOffValues).reshape(-1, 1)
+            # Do k-means algorithm
+            algokmeans = KMeans(n_clusters=2, init='k-means++', max_iter=300, n_init=10, random_state=0)
+            cluster = algokmeans.fit_predict(payOffValues)
+            # Put the cluster shape into couples
+            nodesToMap = []
+            j = 0
+            actionNameCluster = []
+            newChildren = []
+            allChanges = []
+            for valueInC in list(set(cluster)):
+                indexSameCluster = [index for index, value in enumerate(cluster) if value == valueInC]
+                for i in indexSameCluster:
+                    actionNameCluster[j] = actionNameCluster[j] + "##" + self.actions[i]
+
+                # The first of the couple is always the first of the cluster, the it is put the other
+                newChildren[j] = self.children(indexSameCluster.pop(0))
+                for i in indexSameCluster:
+                    # Join the nodes finded in the K-means using mapWithSubtree
+                    changes = newChildren[j].mapWithSubtree(self.children[c])
+                    allChanges.append(changes)
+                j = +1
+
+            # Change  your children by using the new ones, change actions etc accordingly
+            self.children = []
+            for i in range(len(newChildren)):
+                self.addChild(newChildren[i], actionNameCluster[i])
+
+            # Call abstract on the children
+            for c in self.children:
+                allChanges.append(c.abstractSubtree())
+            # Return the changes
+            return allChanges
 
     def print_children(self):
         ret = "I'm "+self.name + " and my children are "
