@@ -39,9 +39,49 @@ class Game:
         return self
 
     def abstract_yourself(self):
-        # TODO abstractYourself
+        #Abstract the game
+        changes=self.root_node.abstractSubtree()
+        #Make the changes in the dictionary of nodes and in the infoset
+        oldNodes=[]
+        oldSet=[]
+        for c in changes:
+            #Search the old nodes  information set. Put the name of the new node
+            if not c[1] in oldNodes:
+                oldNodes.append(c[1])
+            if not c[2] in oldNodes:
+                oldNodes.append(c[2])
+            oldNodeSet1=self.history_dictionary.get(c[1])
+            oldNodeSet2=self.history_dictionary.get(c[2])
 
-        pass
+            #Only make changes if the nodes are from different infoset
+            if oldNodeSet1 !=  oldNodeSet2:
+                #make new Infoset joined with the two previous sets
+                newNameInfoset=oldNodeSet1.name+"##"+oldNodeSet2
+                newNodeHistories=oldNodeSet1.node_histories.append(oldNodeSet2.node_histories)
+                #TODO: quit in the history_node the old node?
+                newInfoSet=InformationSet(newNameInfoset,newNodeHistories)
+                #TODO: Abstract correctly the strategies
+                newInfoSet.strategies.update(oldNodeSet1.strategies)
+                newInfoSet.strategies.update(oldNodeSet2.strategies)
+                #Add the new infoSet on the array
+                self.information_sets.append(newInfoSet)
+                #Update the list of old infoset
+                if not oldNodeSet1 in oldSet:
+                    oldSet.append(oldNodeSet1)
+                if not oldNodeSet2 in oldSet:
+                    oldSet.append(oldNodeSet2)
+                #Update the dictionary list of nodes and infoset with the new node and the new infoset
+                self.history_dictionary.update(c[0],newInfoSet)
+            else:
+                # Update the dictionary list of nodes and infoset with the new node
+                self.history_dictionary.update(c[0],oldNodeSet1)
+
+        #Delete previous informationSet
+        for oldS in oldSet:
+            self.information_sets.remove(oldS)
+        #Delete all the old nodes from the dictionary
+        for oldN in oldNodes:
+            del self.history_dictionary[oldN]
 
     # TODO : Only for tests - To eliminate both methods
     def print_tree(self, node: Node):

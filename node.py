@@ -348,6 +348,7 @@ class ChanceNode(Node):
             # Transform the list in order to operate in the kmeans
             payOffValues = np.asarray(payOffValues).reshape(-1, 1)
             # Do k-means algorithm
+            #TODO: Elbow algorithm in order to find the best way of knowing the number of clusters
             algokmeans = KMeans(n_clusters=2, init='k-means++', max_iter=300, n_init=10, random_state=0)
             cluster = algokmeans.fit_predict(payOffValues)
             # Put the cluster shape into couples
