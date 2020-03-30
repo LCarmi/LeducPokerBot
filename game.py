@@ -58,11 +58,15 @@ class Game:
                 #make new Infoset joined with the two previous sets
                 newNameInfoset=oldNodeSet1.name+"##"+oldNodeSet2
                 newNodeHistories=oldNodeSet1.node_histories.append(oldNodeSet2.node_histories)
+                newNodeHistories.append(c[0])
+                newNodeHistories.remove(c[1])
+                newNodeHistories.remove(c[2])
                 #TODO: quit in the history_node the old node?
                 newInfoSet=InformationSet(newNameInfoset,newNodeHistories)
+
                 #TODO: Abstract correctly the strategies
                 newInfoSet.strategies.update(oldNodeSet1.strategies)
-                newInfoSet.strategies.update(oldNodeSet2.strategies)
+
                 #Add the new infoSet on the array
                 self.information_sets.append(newInfoSet)
                 #Update the list of old infoset
@@ -74,6 +78,9 @@ class Game:
                 self.history_dictionary.update(c[0],newInfoSet)
             else:
                 # Update the dictionary list of nodes and infoset with the new node
+                oldNodeSet1.append(c[0])
+                oldNodeSet1.remove(c[1])
+                oldNodeSet1.remove(c[2])
                 self.history_dictionary.update(c[0],oldNodeSet1)
 
         #Delete previous informationSet
@@ -82,6 +89,8 @@ class Game:
         #Delete all the old nodes from the dictionary
         for oldN in oldNodes:
             del self.history_dictionary[oldN]
+        return
+
 
     # TODO : Only for tests - To eliminate both methods
     def print_tree(self, node: Node):
