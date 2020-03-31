@@ -42,20 +42,13 @@ class Game:
         # Abstract the game
         changes = self.root_node.abstractSubtree()
         # Make the changes in the dictionary of nodes and in the infoset
-        ## why deleting them only after? it is inefficient. I just eliminated them instead of adding them to list in every other part of code
-        # oldNodes = []
-        # oldSet = []
         for c in changes:
-            newNode, oldNode1, oldNode2 = c  ##Note: this are tuples, not lists
+            newNode, oldNode1, oldNode2 = c
             # Search the old nodes  information set. Put the name of the new node
-            # if not oldNode1 in oldNodes:
-            #     oldNodes.append(oldNode1)
-            # if not oldNode2 in oldNodes:
-            #     oldNodes.append(oldNode2)
             oldNodeSet1 = self.history_dictionary.get(oldNode1)
             oldNodeSet2 = self.history_dictionary.get(oldNode2)
 
-            # in case of chance nodes, oldNodesSets are bot none since the are chace node and do not belong to infoSets
+            # in case of chance nodes, oldNodesSets are bot none since the are chance node and do not belong to infoSets
             if (oldNodeSet1 == None and oldNodeSet2 == None):
                 continue
 
@@ -63,11 +56,11 @@ class Game:
             if oldNodeSet1 != oldNodeSet2:
                 # make new Infoset joined with the two previous sets
                 newNameInfoset = oldNodeSet1.name + "##" + oldNodeSet2.name
-                newNodeSetHistories = oldNodeSet1.node_histories + oldNodeSet2.node_histories  # append and + are different
+                newNodeSetHistories = oldNodeSet1.node_histories + oldNodeSet2.node_histories
                 newNodeSetHistories.append(newNode)
                 newNodeSetHistories.remove(oldNode1)
                 newNodeSetHistories.remove(oldNode2)
-                # TODO: quit in the history_node the old node? ## What do you mean? text me
+
                 newInfoSet = InformationSet(newNameInfoset, newNodeSetHistories)
 
                 # TODO: Abstract correctly the strategies
@@ -75,11 +68,6 @@ class Game:
 
                 # Add the new infoSet on the array
                 self.information_sets.append(newInfoSet)
-                # Update the list of old infoset
-                # if not oldNodeSet1 in oldSet:
-                #     oldSet.append(oldNodeSet1)
-                # if not oldNodeSet2 in oldSet:
-                #     oldSet.append(oldNodeSet2)
 
                 # Update the dictionary list of nodes and infoset with the new node and the new infoset
                 ## it must be updated also for all the nodes in the set!
@@ -98,12 +86,6 @@ class Game:
                 oldNodeSet1.node_histories.remove(oldNode2)
                 self.history_dictionary[newNode] = oldNodeSet1
 
-        # # Delete previous informationSet
-        # for oldS in oldSet:
-        #     self.information_sets.remove(oldS)
-        # # Delete all the old nodes from the dictionary
-        # for oldN in oldNodes:
-        #     del self.history_dictionary[oldN]
         return
 
     # TODO : Only for tests - To eliminate both methods
