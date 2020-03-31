@@ -297,7 +297,7 @@ class ChanceNode(Node):
                     # save computed matching
                     actions.append(actionName)
                     probabilities.append(actionProbability)
-                    uniqueListOfChanges.append(listOfChanges)
+                    uniqueListOfChanges = uniqueListOfChanges + listOfChanges
                     children.append(self.children[r])
 
             if not rowAdded:  # add rows/cols not matched ~ in case rows != cols
@@ -311,13 +311,14 @@ class ChanceNode(Node):
                 children.append(self.children[r])
 
         for c in cols:  # add rows/cols not matched ~ in case rows != cols
-            # case of no matching ~single column
-            actionName = "_" + "##" + node.actions[c]
-            actionProbability = node.probabilities[c]
-            # save computed matching
-            actions.append(actionName)
-            probabilities.append(actionProbability)
-            children.append(node.children[c])
+            if not colAdded[c]:
+                # case of no matching ~single column
+                actionName = "_" + "##" + node.actions[c]
+                actionProbability = node.probabilities[c]
+                # save computed matching
+                actions.append(actionName)
+                probabilities.append(actionProbability)
+                children.append(node.children[c])
 
         # 3) modify name, actions, probabilities, children of current Node
         oldName = self.name
