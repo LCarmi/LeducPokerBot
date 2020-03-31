@@ -249,7 +249,7 @@ class ChanceNode(Node):
         rows = range(len(self.children))
         cols = range(len(node.children))
 
-        prob = pulp.LpProblem("Matching Ploblem", pulp.LpMinimize)
+        prob = pulp.LpProblem("Matching_Ploblem", pulp.LpMinimize)
         choices = pulp.LpVariable.dict("choice", (rows,cols), cat="Binary")
         # 1c) objective function is added to 'prob' first
         prob += pulp.lpSum([choices[(r,c)] * lossMatrix[r][c] for r in rows for c in cols])
