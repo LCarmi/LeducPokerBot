@@ -1,3 +1,4 @@
+import json
 from abc import ABC, abstractmethod
 import functools
 import bisect
@@ -104,7 +105,7 @@ class TerminalNode(Node):
         return [(self.name, oldName, node.name)]
 
     def abstractSubtree(self) -> ([(str, str, str)]):
-        #does nothing
+        # does nothing
         return []
 
     def print_children(self):
@@ -174,7 +175,7 @@ class InternalNode(Node):
         return uniqueListOfChanges
 
     def abstractSubtree(self) -> ([(str, str, str)]):
-        #does nothing in the node, just propagates the message
+        # does nothing in the node, just propagates the message
         allChanges = []
         for child in self.children:
             allChanges = allChanges + child.abstractSubtree()
@@ -191,6 +192,8 @@ class InternalNode(Node):
 
 
 class ChanceNode(Node):
+
+    iterNum = 0
 
     def __init__(self, name: str, actions: [str], probabilities: [float]):
         super().__init__(name)
@@ -218,7 +221,7 @@ class ChanceNode(Node):
                              range(len(self.children))]
         result = [0.0 for _ in range(len(self.children[0].getPayoffRepresentation()))]
         for w, payoff in weightsAndPayoffs:
-            result = [r + w*p for r,p in zip(result,payoff)]
+            result = [r + w * p for r, p in zip(result, payoff)]
         return result
 
     def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
@@ -250,28 +253,28 @@ class ChanceNode(Node):
         cols = range(len(node.children))
 
         prob = pulp.LpProblem("Matching_Ploblem", pulp.LpMinimize)
-        choices = pulp.LpVariable.dict("choice", (rows,cols), cat="Binary")
+        choices = pulp.LpVariable.dict("choice", (rows, cols), cat="Binary")
         # 1c) objective function is added to 'prob' first
-        prob += pulp.lpSum([choices[(r,c)] * lossMatrix[r][c] for r in rows for c in cols])
+        prob += pulp.lpSum([choices[(r, c)] * lossMatrix[r][c] for r in rows for c in cols])
         # 1d) add constraints to problem
         if len(self.children) == len(node.children):
             # case of square matrix
             for r in rows:
-                prob += pulp.lpSum([choices[(r,c)] for c in cols]) == 1
+                prob += pulp.lpSum([choices[(r, c)] for c in cols]) == 1
             for c in cols:
-                prob += pulp.lpSum(choices[(r,c)] for r in rows) == 1
+                prob += pulp.lpSum(choices[(r, c)] for r in rows) == 1
         elif len(self.children) > len(node.children):
             # case of more actions in self ~vertical rectangular matrix
             for c in cols:
-                prob += pulp.lpSum(choices[(r,c)] for r in rows) == 1
+                prob += pulp.lpSum(choices[(r, c)] for r in rows) == 1
             for r in rows:  # TODO: is a probem if many are mapped to the same? YES because at the moment we don't know how to map more than one subtrees together
-                prob += pulp.lpSum(choices[(r,c)] for c in cols) <= 1
+                prob += pulp.lpSum(choices[(r, c)] for c in cols) <= 1
         else:
             # case of more actions in node ~horizontal rectangular matrix
             for r in rows:
-                prob += pulp.lpSum([choices[(r,c)] for c in cols]) == 1
+                prob += pulp.lpSum([choices[(r, c)] for c in cols]) == 1
             for c in cols:  # TODO: is a probem if many are mapped to the same?
-                prob += pulp.lpSum(choices[(r,c)] for r in rows) <= 1
+                prob += pulp.lpSum(choices[(r, c)] for r in rows) <= 1
         # 1e) solve the problem
         prob.solve()
 
@@ -286,7 +289,7 @@ class ChanceNode(Node):
         for r in rows:
             rowAdded = False
             for c in cols:
-                if pulp.value(choices[(r,c)]) == 1:
+                if pulp.value(choices[(r, c)]) == 1:
                     # case of a matching
                     rowAdded = True
                     colAdded[c] = True
@@ -349,6 +352,11 @@ class ChanceNode(Node):
             payOffValues.append(c.getPayoffRepresentation())
             length = len(c.getPayoffRepresentation())
 
+        # # export data
+        # with open('kuhn-{}.txt'.format(ChanceNode.iterNum), 'w') as outfile:
+        #     json.dump(payOffValues, outfile)
+        # ChanceNode.iterNum = ChanceNode.iterNum + 1
+
         # Transform the list in order to operate in the kmeans
         payOffValues = np.asarray(payOffValues).reshape(-1, length)
         # Do k-means algorithm
@@ -386,13 +394,13 @@ class ChanceNode(Node):
 
         indexGroups = [[] for _ in range(N_CLUSTERS)]
         for x in range(len(cluster)):
-            #add each element index to a group where all with the same addresses are grouped
+            # add each element index to a group where all with the same addresses are grouped
             indexGroups[cluster[x]].append(x)
 
         for group in indexGroups:
             firstIndex = group[0]
-            child:Node = self.children[firstIndex]
-            action:str = self.actions[firstIndex]
+            child: Node = self.children[firstIndex]
+            action: str = self.actions[firstIndex]
             for index in group[1:]:
                 changes = child.mapWithSubtree(self.children[index])
                 action = action + "##" + self.actions[index]
@@ -403,18 +411,17 @@ class ChanceNode(Node):
             newActions.append(action)
 
         # Change  your children by using the new ones, change actions etc accordingly
-        self.actions = newActions ## you missed this
-        self.children = [None for _ in self.actions] ##this should be initializad to the correct length
+        self.actions = newActions  ## you missed this
+        self.children = [None for _ in self.actions]  ##this should be initializad to the correct length
         # for i in range(len(newChildren)):
         #     self.addChild(newChildren[i], actionNameCluster[i])
         ## See this magic
-        for action,child in zip(newActions, newChildren):
+        for action, child in zip(newActions, newChildren):
             self.addChild(child, action)
-
 
         # Call abstract on the children
         for c in self.children:
-            allChanges = allChanges + c.abstractSubtree() ##Note doing .append and + between lists is different!
+            allChanges = allChanges + c.abstractSubtree()  ##Note doing .append and + between lists is different!
         # Return the changes
         return allChanges
 

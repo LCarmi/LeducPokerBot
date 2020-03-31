@@ -18,7 +18,7 @@ class Manager:
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc5.txt"
+    file_path = "./Examples/input - kuhn.txt"
     manager = Manager(file_path)
     manager.originalGame.print_tree(manager.originalGame.root_node)
     manager.originalGame.print_information_sets()
