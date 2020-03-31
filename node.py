@@ -344,7 +344,7 @@ class ChanceNode(Node):
         if len(self.children) < 2:
             # No need of doing abstraction
             return []
-        ##Why putting else here? it is useless since if you arrive here it means you have not returned
+
         # K means algorithm
         # Put all the payOff of the children in a list
         payOffValues = []
@@ -353,25 +353,39 @@ class ChanceNode(Node):
             payOffValues.append(c.getPayoffRepresentation())
             length = len(c.getPayoffRepresentation())
 
-        # # export data
+        # export data
         # with open('kuhn-{}.txt'.format(ChanceNode.iterNum), 'w') as outfile:
         #     json.dump(payOffValues, outfile)
-        # ChanceNode.iterNum = ChanceNode.iterNum + 1
+        # ChanceNode.iterNum = ChanceNode.iterNum + 1q
+
+        #count how many different data we have
+        differentPayoffs = 0
+        for i in range(len(payOffValues)):
+            if payOffValues[i] not in payOffValues[i+1:]:
+                differentPayoffs+=1
+
 
         # Transform the list in order to operate in the kmeans
-        payOffValues = np.asarray(payOffValues).reshape(-1, length)
-        # Do k-means algorithm
-        # Silhouette method for findng the optimal k in k-means
-        kmax=6
-        sil=[]
-        for k in range(2, kmax + 1):
-            kmeans = KMeans(n_clusters=k).fit(payOffValues)
-            labels = kmeans.labels_
-            sil.append(silhouette_score(payOffValues, labels, metric='euclidean'))
+        payOffValues = np.asarray(payOffValues)#.reshape(-1, length)
 
-        n_cluster_op = sil.index(max(sil))+2
-        algokmeans = KMeans(n_clusters=n_cluster_op, init='k-means++', max_iter=300, n_init=10, random_state=0)
-        cluster = algokmeans.fit_predict(payOffValues)
+        if differentPayoffs == 1:
+            # case in which all children are equal
+            cluster = [0 for _ in payOffValues]
+            n_cluster_op = 1
+        else:
+            # Do k-means algorithm
+            # Silhouette method for finding the optimal k in k-means
+            kmax=differentPayoffs
+            sil=[]
+            for k in range(2, kmax + 1):
+                kmeans = KMeans(n_clusters=k).fit(payOffValues)
+                labels = kmeans.labels_
+                sil.append(silhouette_score(payOffValues, labels, metric='euclidean'))
+
+            n_cluster_op = sil.index(max(sil))+2
+            algokmeans = KMeans(n_clusters=n_cluster_op, init='k-means++', max_iter=300, n_init=10, random_state=0)
+            cluster = algokmeans.fit_predict(payOffValues)
+
 
         #Put nodes together
         newChildren = []
