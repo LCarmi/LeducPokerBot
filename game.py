@@ -87,7 +87,7 @@ class Game:
                     self.history_dictionary[node] = newInfoSet
                 del self.history_dictionary[oldNode1]
                 del self.history_dictionary[oldNode2]
-                
+
                 self.information_sets.remove(oldNodeSet1)
                 self.information_sets.remove(oldNodeSet2)
 

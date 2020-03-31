@@ -205,18 +205,21 @@ class ChanceNode(Node):
         self.children[idx] = node
 
     def getPayoffRepresentation(self) -> [float]:
-        def weightedAdditionList(a: (float, [float]), b: (float, [float])):
-            a_w, a_l = a
-            b_w, b_l = b
-            if len(a_l) != len(b_l):
-                raise Exception
-            length = len(a_l)
-
-            return [a_w * a_l[i] + b_w * b_l[i] for i in range(length)]
+        # def weightedAdditionList(a: (float, [float]), b: (float, [float])):
+        #     a_w, a_l = a
+        #     b_w, b_l = b
+        #     if len(a_l) != len(b_l):
+        #         raise Exception
+        #     length = len(a_l)
+        #
+        #     return (a_w + b_w, [a_w * a_l[i] + b_w * b_l[i] for i in range(length)])
 
         weightsAndPayoffs = [(self.probabilities[i], self.children[i].getPayoffRepresentation()) for i in
                              range(len(self.children))]
-        return functools.reduce(weightedAdditionList, weightsAndPayoffs)
+        result = [0.0 for _ in range(len(self.children[0].getPayoffRepresentation()))]
+        for w, payoff in weightsAndPayoffs:
+            result = [r + w*p for r,p in zip(result,payoff)]
+        return result
 
     def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
         assert isinstance(node, ChanceNode)
@@ -247,28 +250,28 @@ class ChanceNode(Node):
         cols = range(len(node.children))
 
         prob = pulp.LpProblem("Matching Ploblem", pulp.LpMinimize)
-        choices = pulp.LpVariable.dict("choice", (rows, cols), cat="Binary")
+        choices = pulp.LpVariable.dict("choice", (rows,cols), cat="Binary")
         # 1c) objective function is added to 'prob' first
-        prob += pulp.lpSum([choices[r][c] * lossMatrix[r][c] for r in rows for c in cols])
+        prob += pulp.lpSum([choices[(r,c)] * lossMatrix[r][c] for r in rows for c in cols])
         # 1d) add constraints to problem
         if len(self.children) == len(node.children):
             # case of square matrix
             for r in rows:
-                prob += pulp.lpSum([choices[r][c] for c in cols]) == 1
+                prob += pulp.lpSum([choices[(r,c)] for c in cols]) == 1
             for c in cols:
-                prob += pulp.lpSum(choices[r][c] for r in rows) == 1
+                prob += pulp.lpSum(choices[(r,c)] for r in rows) == 1
         elif len(self.children) > len(node.children):
             # case of more actions in self ~vertical rectangular matrix
             for c in cols:
-                prob += pulp.lpSum(choices[r][c] for r in rows) == 1
+                prob += pulp.lpSum(choices[(r,c)] for r in rows) == 1
             for r in rows:  # TODO: is a probem if many are mapped to the same? YES because at the moment we don't know how to map more than one subtrees together
-                prob += pulp.lpSum(choices[r][c] for c in cols) <= 1
+                prob += pulp.lpSum(choices[(r,c)] for c in cols) <= 1
         else:
             # case of more actions in node ~horizontal rectangular matrix
             for r in rows:
-                prob += pulp.lpSum([choices[r][c] for c in cols]) == 1
+                prob += pulp.lpSum([choices[(r,c)] for c in cols]) == 1
             for c in cols:  # TODO: is a probem if many are mapped to the same?
-                prob += pulp.lpSum(choices[r][c] for r in rows) <= 1
+                prob += pulp.lpSum(choices[(r,c)] for r in rows) <= 1
         # 1e) solve the problem
         prob.solve()
 
@@ -283,7 +286,7 @@ class ChanceNode(Node):
         for r in rows:
             rowAdded = False
             for c in cols:
-                if pulp.value(choices[r][c]) == 1:
+                if pulp.value(choices[(r,c)]) == 1:
                     # case of a matching
                     rowAdded = True
                     colAdded[c] = True
@@ -297,7 +300,7 @@ class ChanceNode(Node):
                     uniqueListOfChanges.append(listOfChanges)
                     children.append(self.children[r])
 
-            if not rowAdded[r]:  # add rows/cols not matched ~ in case rows != cols
+            if not rowAdded:  # add rows/cols not matched ~ in case rows != cols
                 # case of no matching ~single row
                 actionName = self.actions[r] + "##" + "_"
                 actionProbability = self.probabilities[r]
@@ -321,7 +324,7 @@ class ChanceNode(Node):
         self.name = self.name + "##" + node.name
         self.actions = actions
         self.probabilities = probabilities
-        self.children = []
+        self.children = [None for _ in self.actions]
         for action, child in zip(actions, children):
             self.addChild(child, action)
 
