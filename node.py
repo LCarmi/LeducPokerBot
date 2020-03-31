@@ -5,6 +5,7 @@ import bisect
 import pulp
 from sklearn.cluster import KMeans
 import numpy as np
+from sklearn.metrics import silhouette_score
 
 
 class Node(ABC):
@@ -360,39 +361,24 @@ class ChanceNode(Node):
         # Transform the list in order to operate in the kmeans
         payOffValues = np.asarray(payOffValues).reshape(-1, length)
         # Do k-means algorithm
-        # TODO: Elbow algorithm in order to find the best way of knowing the number of clusters
-        N_CLUSTERS = 2;
-        algokmeans = KMeans(n_clusters=2, init='k-means++', max_iter=300, n_init=10, random_state=0)
-        cluster = algokmeans.fit_predict(payOffValues)
-        # # Put the cluster shape into couples
-        # j = 0
-        # actionNameCluster = []
-        # newChildren = []
-        # allChanges = []
-        # for valueInC in list(set(cluster)):
-        #     indexSameCluster = [index for index, value in enumerate(cluster) if value == valueInC]
-        #     for i in indexSameCluster:
-        #         actionNameCluster[j] = actionNameCluster[j] + "##" + self.actions[i]
-        #
-        #     # The first of the couple is always the first of the cluster, the it is put the other
-        #     newChildren[j] = self.children(indexSameCluster.pop(0))
-        #     for i in indexSameCluster:
-        #         # Join the nodes finded in the K-means using mapWithSubtree
-        #         changes = newChildren[j].mapWithSubtree(self.children[c])
-        #         allChanges.append(changes)
-        #     j = +1
-        ## Problems in the above code:
-        ## actionNameCluster is an empty list; so doing actionsNameCluster[j] gives exception
-        ## similarly for newChildren
-        ## there are too many lists that are filled and made empty; this makes the code less readable
-        ## also try to maintain lines short: it makes the code more readable
+        # Silhouette method for findng the optimal k in k-means
+        kmax=6
+        sil=[]
+        for k in range(2, kmax + 1):
+            kmeans = KMeans(n_clusters=k).fit(payOffValues)
+            labels = kmeans.labels_
+            sil.append(silhouette_score(payOffValues, labels, metric='euclidean'))
 
-        ##my proposition
+        n_cluster_op = sil.index(max(sil))+2
+        algokmeans = KMeans(n_clusters=n_cluster_op, init='k-means++', max_iter=300, n_init=10, random_state=0)
+        cluster = algokmeans.fit_predict(payOffValues)
+
+        #Put nodes together
         newChildren = []
         newActions = []
         allChanges = []
 
-        indexGroups = [[] for _ in range(N_CLUSTERS)]
+        indexGroups = [[] for _ in range(n_cluster_op)]
         for x in range(len(cluster)):
             # add each element index to a group where all with the same addresses are grouped
             indexGroups[cluster[x]].append(x)
@@ -411,17 +397,15 @@ class ChanceNode(Node):
             newActions.append(action)
 
         # Change  your children by using the new ones, change actions etc accordingly
-        self.actions = newActions  ## you missed this
-        self.children = [None for _ in self.actions]  ##this should be initializad to the correct length
-        # for i in range(len(newChildren)):
-        #     self.addChild(newChildren[i], actionNameCluster[i])
-        ## See this magic
-        for action, child in zip(newActions, newChildren):
+        self.actions = newActions
+        self.children = [None for _ in self.actions]
+
+        for action,child in zip(newActions, newChildren):
             self.addChild(child, action)
 
         # Call abstract on the children
         for c in self.children:
-            allChanges = allChanges + c.abstractSubtree()  ##Note doing .append and + between lists is different!
+            allChanges = allChanges + c.abstractSubtree()
         # Return the changes
         return allChanges
 
