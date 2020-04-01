@@ -17,14 +17,14 @@ reInfoSet ='infoset (?P<name>(\S)+) nodes (?P<histories>(((/(P1:\w+|P2:\w+|C:\w+
 def parse_node_line(node_line):
     # Internal player nodes
     if match := re.fullmatch(reTerminal, node_line):
-        print("History: {}, P1: {}, P2: {}".format(match.group('history'), match.group('payoff1'), match.group('payoff2')))
+        #print("History: {}, P1: {}, P2: {}".format(match.group('history'), match.group('payoff1'), match.group('payoff2')))
         return TerminalNode(match.group('history'), float(match.group('payoff1')))
     elif match := re.fullmatch(rePlayer, node_line):
-        print("History: {}, Player: {}, Actions: {}".format(match.group('history'), match.group('player'), match.group('actions')))
+        #print("History: {}, Player: {}, Actions: {}".format(match.group('history'), match.group('player'), match.group('actions')))
         return InternalNode(match.group('history'), match.group('actions').split(), int(match.group('player')))
     # Chance nodes
     elif match := re.fullmatch(reChance, node_line):
-        print("History : {}, Chance actions: {}".format(match.group('history'), match.group('chance_actions')))
+        #print("History : {}, Chance actions: {}".format(match.group('history'), match.group('chance_actions')))
         chance_actions = match.group('chance_actions').split()
         res_actions = []
         res_prob = []
@@ -38,7 +38,7 @@ def parse_node_line(node_line):
 def parse_infoset_line(infoset_line):
 
     if match := re.fullmatch(reInfoSet, infoset_line):
-        print("Name : {}, Histories : {}".format(match.group('name'), match.group('histories')))
+        #print("Name : {}, Histories : {}".format(match.group('name'), match.group('histories')))
         return InformationSet(match.group('name'), match.group('histories').split())
 
 

@@ -193,7 +193,6 @@ class InternalNode(Node):
 
 
 class ChanceNode(Node):
-
     iterNum = 0
 
     def __init__(self, name: str, actions: [str], probabilities: [float]):
@@ -209,21 +208,15 @@ class ChanceNode(Node):
         self.children[idx] = node
 
     def getPayoffRepresentation(self) -> [float]:
-        # def weightedAdditionList(a: (float, [float]), b: (float, [float])):
-        #     a_w, a_l = a
-        #     b_w, b_l = b
-        #     if len(a_l) != len(b_l):
-        #         raise Exception
-        #     length = len(a_l)
-        #
-        #     return (a_w + b_w, [a_w * a_l[i] + b_w * b_l[i] for i in range(length)])
 
-        weightsAndPayoffs = [(self.probabilities[i], self.children[i].getPayoffRepresentation()) for i in
-                             range(len(self.children))]
-        result = [0.0 for _ in range(len(self.children[0].getPayoffRepresentation()))]
-        for w, payoff in weightsAndPayoffs:
-            result = [r + w * p for r, p in zip(result, payoff)]
-        return result
+        payoffs = np.asarray([x.getPayoffRepresentation() for x in self.children])
+        probabilities = np.asarray(self.probabilities)
+        weighted_means = np.dot(probabilities, payoffs)
+        #std_dev = np.sqrt(np.subtract(np.dot(probabilities, np.multiply(payoffs, payoffs)), weighted_means))
+        weighted_means = weighted_means.tolist()
+        #std_dev = std_dev.tolist()
+
+        return weighted_means #TODO: decide whether or not std_dev are useful
 
     def mapWithSubtree(self, node: 'Node') -> ([(str, str, str)]):
         assert isinstance(node, ChanceNode)
@@ -358,15 +351,14 @@ class ChanceNode(Node):
         #     json.dump(payOffValues, outfile)
         # ChanceNode.iterNum = ChanceNode.iterNum + 1q
 
-        #count how many different data we have
+        # count how many different data we have
         differentPayoffs = 0
         for i in range(len(payOffValues)):
-            if payOffValues[i] not in payOffValues[i+1:]:
-                differentPayoffs+=1
-
+            if payOffValues[i] not in payOffValues[i + 1:]:
+                differentPayoffs += 1
 
         # Transform the list in order to operate in the kmeans
-        payOffValues = np.asarray(payOffValues)#.reshape(-1, length)
+        payOffValues = np.asarray(payOffValues)  # .reshape(-1, length)
 
         if differentPayoffs == 1:
             # case in which all children are equal
@@ -375,21 +367,21 @@ class ChanceNode(Node):
         else:
             # Do k-means algorithm
             # Silhouette method for finding the optimal k in k-means
-            kmax=differentPayoffs
-            sil=[]
+            kmax = differentPayoffs
+            sil = []
             for k in range(2, kmax + 1):
                 kmeans = KMeans(n_clusters=k).fit(payOffValues)
                 labels = kmeans.labels_
                 sil.append(silhouette_score(payOffValues, labels, metric='euclidean'))
 
-            n_cluster_op = sil.index(max(sil))+2
+            n_cluster_op = sil.index(max(sil)) + 2
             algokmeans = KMeans(n_clusters=n_cluster_op, init='k-means++', max_iter=300, n_init=10, random_state=0)
             cluster = algokmeans.fit_predict(payOffValues)
 
-
-        #Put nodes together
+        # Put nodes together
         newChildren = []
         newActions = []
+        newProbabilities = []
         allChanges = []
 
         indexGroups = [[] for _ in range(n_cluster_op)]
@@ -401,20 +393,24 @@ class ChanceNode(Node):
             firstIndex = group[0]
             child: Node = self.children[firstIndex]
             action: str = self.actions[firstIndex]
+            probability: float = self.probabilities[firstIndex]
             for index in group[1:]:
                 changes = child.mapWithSubtree(self.children[index])
                 action = action + "##" + self.actions[index]
+                probability = probability + self.probabilities[index]
 
                 allChanges = allChanges + changes
 
             newChildren.append(child)
             newActions.append(action)
+            newProbabilities.append(probability)
 
         # Change  your children by using the new ones, change actions etc accordingly
         self.actions = newActions
         self.children = [None for _ in self.actions]
+        self.probabilities = newProbabilities
 
-        for action,child in zip(newActions, newChildren):
+        for action, child in zip(newActions, newChildren):
             self.addChild(child, action)
 
         # Call abstract on the children

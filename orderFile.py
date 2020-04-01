@@ -19,8 +19,8 @@ def text_order_by_history_length(file_name):
 
     quick_sort(nodes_lines)
 
-    for line in nodes_lines:
-        print(line)
+    # for line in nodes_lines:
+    #     print(line)
 
     text_file.close()
     return nodes_lines, infoset_lines

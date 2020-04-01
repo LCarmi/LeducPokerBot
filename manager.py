@@ -23,3 +23,5 @@ if __name__ == '__main__':
     #manager.originalGame.print_tree(manager.originalGame.root_node)
     #manager.originalGame.print_information_sets()
     manager.abstractedGame.abstract_yourself()
+    #manager.abstractedGame.print_tree(manager.abstractedGame.root_node)
+    print("Ended!")
