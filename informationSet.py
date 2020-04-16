@@ -6,15 +6,29 @@ class InformationSet:
     def __init__(self, name: str, node_histories: [str]):
         self.name = name
         self.node_histories = node_histories
-        self.strategies = {}
+        self.actions = []
+        self.regret = []
+        self.strategy = []
 
     # The probabilities are set to 0 in the beginning
     def add_strategies(self, actions: [str]):
-        for action in actions:
-            self.strategies.update({action: 0})
+        self.actions = actions
 
     def __str__(self):
         result = "Infoset: " + self.name + ' with strategies '
         for key in self.strategies:
             result += key + ':' + str(self.strategies[key]) + ' '
         return result
+
+    def regret_matching_plus(self) -> [float]:  #TODO added
+        """
+        Computes the regret matching array for each child
+        :return: an array of floats containing the regret plus computed for each infoset
+        """
+        return []
+
+    def normalize_strategy(self):  #TODO: added
+        """
+        Normalizes strategies
+        :return: nothing
+        """
