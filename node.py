@@ -360,6 +360,17 @@ class ChanceNode(Node):
         # Transform the list in order to operate in the kmeans
         payOffValues = np.asarray(payOffValues)  # .reshape(-1, length)
 
+        # TODO: idea of lossless abstraction: ~ running in O(n)
+        # b = [] # List of tuples containing grouped indentical elements and their indices
+        # for idx, elem in enumerate(payOffValues):
+        # added = False
+        # for e, l in b:
+        #     if e == elem:
+        #         l.append(idx)
+        #         added = True
+        #         break
+        # if not added:
+        #     b.append((elem, [idx]))
         if differentPayoffs == 1:
             # case in which all children are equal
             cluster = [0 for _ in payOffValues]
