@@ -46,6 +46,10 @@ class Game:
         # case when we are dealing with a Terminal Node
         # no information sets/strategies/children involved, just return your payoff
         if isinstance(h, TerminalNode):
+            # in case player is adversary, return negative payoff (since zero sum game)
+            if i == 2:
+                return -h.payoff
+            #return player 1 payoff otherwise
             return h.payoff
 
         # case when we are dealing with a ChanceNode
