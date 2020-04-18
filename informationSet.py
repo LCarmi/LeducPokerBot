@@ -16,7 +16,7 @@ class InformationSet:
     def get_strategy_representation(self):
         result = "infoset " + self.name + " strategies "
         for action, strategy in zip(self.actions, self.strategy):
-            result += action+"="+str(strategy) + " "
+            result += action + "=" + str(strategy) + " "
         return result
 
     def update_strategies(self, infoset_to_copy: 'InformationSet'):
@@ -34,16 +34,16 @@ class InformationSet:
             result += key + ':' + str(self.strategies[key]) + ' '
         return result
 
-    def regret_matching_plus(self) -> [float]:  #TODO quit prints
+    def regret_matching_plus(self) -> [float]:  # TODO quit prints
         """
         Computes the regret matching array for each child
         :return: an array of floats containing the regret plus computed for each infoset
         """
 
-        if sum(self.regret)==0:
-            newStrategy=[1/len(self.actions) for _ in range(len(self.actions))]
+        if sum(self.regret) == 0:
+            newStrategy = [1 / len(self.actions) for _ in range(len(self.actions))]
         else:
-            newStrategy= [reg/sum(self.regret) for reg in self.regret]
+            newStrategy = [reg / sum(self.regret) for reg in self.regret]
 
         return newStrategy
 
@@ -52,7 +52,9 @@ class InformationSet:
         Normalizes strategies
         :return: nothing
         """
-        assert(sum(self.strategy) != 0)
-        self.strategy=[p/sum(self.strategy)for p in self.strategy]
-        print("The strategy is:",self.strategy)
-
+        # assert(sum(self.strategy) != 0)
+        if (sum(self.strategy) == 0):
+            print("Infoset never played" + self.name)
+        else:
+            self.strategy = [p / sum(self.strategy) for p in self.strategy]
+            print(self.name + " the strategy is:", self.strategy)
