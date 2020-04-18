@@ -27,8 +27,14 @@ class InformationSet:
         """
         return []
 
-    def normalize_strategy(self):  #TODO: added
+    def normalize_strategy(self):  #TODO: debug and quit prints
         """
         Normalizes strategies
         :return: nothing
         """
+
+        print("The strategy is going to be printed without normalize\n")
+        print(self.strategy)
+        self.strategy=[p/sum(self.strategy)for p in self.strategy]
+        print("strategy normalize")
+        print(self.strategy)
