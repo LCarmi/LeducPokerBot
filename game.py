@@ -207,9 +207,6 @@ class Game:
                 result.update({name_original_set: infoset})
         return result
 
-    def get_information_sets(self):
-        return self.information_sets
-
     def get_infoset_from_name(self, infoset_name: str) -> 'InformationSet':
         for infoset in self.information_sets:
             if infoset.name == infoset_name:

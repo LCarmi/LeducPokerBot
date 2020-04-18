@@ -22,10 +22,13 @@ class Manager:
             infoset_to_update = self.originalGame.get_infoset_from_name(key)
             infoset_to_update.update_strategies(infoset_to_copy)
 
-    def print_strategies_result(self):
-        infosets = self.originalGame.get_information_sets()
+    def write_result(self, file_path: str):
+        infosets = self.originalGame.information_sets
+        f = open(file_path, "w+")
         for infoset in infosets:
-            print(infoset.get_strategy_representation())
+            f.write(infoset.get_strategy_representation()+'\n')
+        f.close()
+        print("Write finished")
 
     # TODO Method used only to test the mapping and the output
     def test_mapping(self):
@@ -33,6 +36,11 @@ class Manager:
         manager.abstractedGame.init_personal_dist()
         manager.map_strategies()
         manager.print_strategies_result()
+
+    def print_strategies_result(self):
+        infosets = self.originalGame.information_sets
+        for infoset in infosets:
+            print(infoset.get_strategy_representation())
 
 
 if __name__ == '__main__':
@@ -46,5 +54,7 @@ if __name__ == '__main__':
     #manager.abstractedGame.print_tree(manager.abstractedGame.root_node)
     print("Ended!")
     manager.test_mapping()
+    file_path_output = "./Examples/output.txt"
+    #manager.write_result(file_path_output)
 
 
