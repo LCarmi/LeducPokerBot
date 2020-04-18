@@ -1,3 +1,5 @@
+from typing import Dict
+
 from informationSet import *
 from node import *
 from myParser import *
@@ -130,6 +132,13 @@ class Game:
     def abstract_yourself(self):
         # Abstract the game
         changes = self.root_node.abstractSubtree()
+        # Mapping between nameOriginalInfo -> abstractInfoSet
+        result = {}
+        # Create dictionary of the original game name_infoset -> history_one_node.It will be used to create the mapping
+        old_dictionary = {}
+        for key in self.history_dictionary:
+            temp = self.history_dictionary.get(key)
+            old_dictionary.update({key: temp.name})
         # Make the changes in the dictionary of nodes and in the infoset
         for c in changes:
             newNode, oldNode1, oldNode2 = c
@@ -153,7 +162,8 @@ class Game:
                 newInfoSet = InformationSet(newNameInfoset, newNodeSetHistories)
 
                 # TODO: Abstract correctly the strategies Actually not needed in this phase
-                newInfoSet.add_strategies(oldNodeSet1.strategy)
+                # TODO: correction -> instead of strategy, I put actions
+                newInfoSet.add_strategies(oldNodeSet1.actions)
 
                 # Add the new infoSet on the array
                 self.information_sets.append(newInfoSet)
@@ -162,9 +172,11 @@ class Game:
                 ## it must be updated also for all the nodes in the set!
                 for node in newNodeSetHistories:
                     self.history_dictionary[node] = newInfoSet
-                del self.history_dictionary[oldNode1]
-                del self.history_dictionary[oldNode2]
 
+                self.history_dictionary.pop(oldNode1)
+                self.history_dictionary.pop(oldNode2)
+                #del self.history_dictionary[oldNode1]
+                #del self.history_dictionary[oldNode2]
                 self.information_sets.remove(oldNodeSet1)
                 self.information_sets.remove(oldNodeSet2)
 
@@ -175,7 +187,34 @@ class Game:
                 oldNodeSet1.node_histories.remove(oldNode2)
                 self.history_dictionary[newNode] = oldNodeSet1
 
-        return
+                self.history_dictionary.pop(oldNode1)
+                self.history_dictionary.pop(oldNode2)
+                #del self.history_dictionary[oldNode1]
+                #del self.history_dictionary[oldNode2]
+
+        # For each abstract information set I retrieve the original node histories (thanks to the representation '##'),
+        ## then, using the dictionary of the original game (created before the abstraction), I can compute the mapping
+        for infoset in self.information_sets:
+            histories_node = []
+            temp = []
+            for history in infoset.node_histories:
+                temp.append(history.split('##'))
+            for words in temp:
+                for word in words:
+                    histories_node.append(word)
+            for history in histories_node:
+                name_original_set = old_dictionary.get(history)
+                result.update({name_original_set: infoset})
+        return result
+
+    def get_information_sets(self):
+        return self.information_sets
+
+    def get_infoset_from_name(self, infoset_name: str) -> 'InformationSet':
+        for infoset in self.information_sets:
+            if infoset.name == infoset_name:
+                return infoset
+
 
     # TODO : Only for tests - To eliminate both methods
     def print_tree(self, node: Node):
@@ -192,3 +231,17 @@ class Game:
                 ret += node.name + ' '
             print(information_set)
             print(ret)
+
+    # TODO: methods used to initialize the strategies in two ways - only for tests mapping
+    def init_uniform_dist(self):
+        for infoset in self.information_sets:
+            infoset.strategy = [0 for action in infoset.actions]
+            num_actions = len(infoset.actions)
+            for i in range(0, num_actions):
+                infoset.strategy[i] = 1/num_actions
+
+    def init_personal_dist(self):
+        for infoset in self.information_sets:
+            infoset.strategy = [0 for action in infoset.actions]
+            for i in range(0, len(infoset.actions)):
+                infoset.strategy[i] = i
