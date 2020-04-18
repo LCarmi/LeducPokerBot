@@ -34,21 +34,25 @@ class InformationSet:
             result += key + ':' + str(self.strategies[key]) + ' '
         return result
 
-    def regret_matching_plus(self) -> [float]:  #TODO added
+    def regret_matching_plus(self) -> [float]:  #TODO quit prints
         """
         Computes the regret matching array for each child
         :return: an array of floats containing the regret plus computed for each infoset
         """
-        return []
 
-    def normalize_strategy(self):  #TODO: debug and quit prints
+        if sum(self.regret)==0:
+            newStrategy=[1/len(self.actions) for _ in range(len(self.actions))]
+        else:
+            newStrategy= [reg/sum(self.regret) for reg in self.regret]
+
+        return newStrategy
+
+    def normalize_strategy(self):
         """
         Normalizes strategies
         :return: nothing
         """
-
-        print("The strategy is going to be printed without normalize\n")
-        print(self.strategy)
+        assert(sum(self.strategy) != 0)
         self.strategy=[p/sum(self.strategy)for p in self.strategy]
-        print("strategy normalize")
-        print(self.strategy)
+        print("The strategy is:",self.strategy)
+

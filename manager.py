@@ -50,10 +50,13 @@ if __name__ == '__main__':
     #manager.originalGame.print_tree(manager.originalGame.root_node)
     #manager.originalGame.print_information_sets()
     #manager.abstractedGame.abstract_yourself()
+    print("Game loaded!")
     manager.create_abstraction()
     #manager.abstractedGame.print_tree(manager.abstractedGame.root_node)
-    print("Ended!")
-    manager.test_mapping()
+    print("Abstraction ended!")
+    manager.abstractedGame.find_optimal_strategy()
+    print("Optimum strategy done!")
+    #manager.test_mapping()
     file_path_output = "./Examples/output.txt"
     #manager.write_result(file_path_output)
 
