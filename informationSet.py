@@ -10,9 +10,23 @@ class InformationSet:
         self.regret = []
         self.strategy = []
 
-    # The probabilities are set to 0 in the beginning
     def add_strategies(self, actions: [str]):
         self.actions = actions
+
+    def get_strategy_representation(self):
+        result = "infoset " + self.name + " strategies "
+        for action, strategy in zip(self.actions, self.strategy):
+            result += action+"="+str(strategy) + " "
+        return result
+
+    def update_strategies(self, infoset_to_copy: 'InformationSet'):
+        # To verify that two information sets were mapped correctly
+        assert len(self.actions) == len(infoset_to_copy.actions)
+        for a1, a2 in zip(self.actions, infoset_to_copy.actions):
+            assert a1 == a2
+        # update
+        for i in range(0, len(self.actions)):
+            self.strategy[i] = infoset_to_copy.strategy[i]
 
     def __str__(self):
         result = "Infoset: " + self.name + ' with strategies '
