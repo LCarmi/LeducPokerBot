@@ -41,7 +41,7 @@ class Game:
                 ex_p1 = self.exploit_player(self.root_node, 1)
                 ex_p2 = self.exploit_player(self.root_node, 2)
                 ex_val = self.expected_value(self.root_node)
-                print("Time: {}, Exploitability: P1-{} P2-{}, Expected Value: {}".format(t, ex_p1, ex_p2, ex_val))
+                print("Time: {}, Exploitability: P1 {} P2 {}, Expected Value: {}".format(t, ex_p1, ex_p2, ex_val))
 
         # normalize s for each infoset
         for i in self.information_sets:
@@ -100,7 +100,7 @@ class Game:
             for idx in range(len(h.actions)):
                 # update cumulative regret tables relative to the considered infoset
                 # RM+ computation and update will happen inside Infoset
-                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi
+                current_infoset.regret[idx] = max(current_infoset.regret[idx] + (expected_payoffs[idx] - expected_payoff),0)
 
         else:
             # case when internal node is of adversary of player currently under regret update
