@@ -248,3 +248,42 @@ class Game:
             infoset.strategy = [0 for action in infoset.actions]
             for i in range(0, len(infoset.actions)):
                 infoset.strategy[i] = i
+
+    def exploit_player(self, node: 'Node', player: int, pi: float) -> float:
+
+        if isinstance(node, TerminalNode):
+            if player == 1:
+                return node.payoff
+            return -1 * node.payoff
+
+        if isinstance(node, ChanceNode):
+            expected_value = 0
+            for probability, child in zip(node.probabilities, node.children):
+                expected_value += probability * self.exploit_player(child, player, pi)
+            return expected_value
+
+        infoset: InformationSet = self.history_dictionary.get(node.name)
+        expected_value = 0
+
+        assert isinstance(node, InternalNode)
+        if node.player == player:
+            for child, probability in zip(node.children, infoset.cumulative_strategy):
+                u = self.exploit_player(child, player, pi)
+                expected_value += u * probability
+
+        else:
+            expected_payoffs = []
+            for child, probability in zip(node.children, infoset.cumulative_strategy):
+                u = self.exploit_player(child, player, pi * probability)
+                expected_payoffs.append(u)
+            if player == 1:
+                expected_value = max(expected_payoffs)
+            else:
+                expected_value = min(expected_payoffs)
+        return expected_value
+
+    def compute_exploitability(self) -> float:
+        ex_pl1 = self.exploit_player(self.root_node, 1, 1)
+        ex_pl2 = self.exploit_player(self.root_node, 2, 1)
+        return (ex_pl1 + ex_pl2)/2
+
