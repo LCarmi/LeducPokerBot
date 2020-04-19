@@ -39,14 +39,6 @@ class InformationSet:
             result += key + ':' + str(self.cumulative_strategy[key]) + ' '
         return result
 
-    # def regret_matching_plus(self, ) -> [float]:
-    #     """
-    #     Computes the regret matching array for each child
-    #     :return: an array of floats containing the regret plus computed for each infoset
-    #     """
-    #     assert(time == self.__time)
-    #     return self.regret_strategy
-
     def update_regret_strategy(self, time):
         # a regret is asked for the next time step -> use updated regrets and update current time
         assert (time == self.__time + 1)
@@ -54,7 +46,7 @@ class InformationSet:
         # do final computation of R+ according to rules of CFR+avg
         # ~since all nodes in infoset must have been already explored by CFR_plus (since time has updated)
         for i in range(len(self.regret)):
-            self.regret[i] = max(self.regret[i], 0)
+            self.regret[i] = max(self.regret[i], 0.0)
         # update the regret strategy we offer to the nodes in the infoset
         self.__compute_regret_strategy()
 

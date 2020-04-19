@@ -6,8 +6,8 @@ from myParser import *
 
 
 class Game:
-    d = 100  # number of regret explorations without strategy update
-    total_iterations = 1000  # number of iteration to do
+    d = 20  # number of regret explorations without strategy update
+    total_iterations = 100  # number of iteration to do
 
     def __init__(self):
         self.root_node = None
@@ -15,31 +15,39 @@ class Game:
         self.history_dictionary = {}
 
     def find_optimal_strategy(self):
-        #CFR+ algorithm
-        #Initialization
+        # CFR+ algorithm
+        # Initialization
         for i in self.information_sets:
             # Initialize regret tables:
             i.regret = [0.0 for _ in i.actions]
             # Initialize cumulative strategy tables:
             i.strategy = [0.0 for _ in i.actions]
 
-        #call CFR_plus
+        # call CFR_plus
         for t in range(Game.total_iterations):
-            #w = max(t-Game.d, 0)
-            w=0
-            if t>Game.d: w = 1
+            w = max(t-Game.d, 0)
+            # w = 0
+            # if t > Game.d: w = 1
 
             for i in self.information_sets:
                 i.update_regret_strategy(t)
 
             self.CFR_plus(self.root_node, 1, w, 1)
             self.CFR_plus(self.root_node, 2, w, 1)
+            # self.CFR_Lanctot(self.root_node, 1, w, 1, 1)
+            # self.CFR_Lanctot(self.root_node, 2, w, 1, 1)
 
-        #normalize s for each infoset
+            if (w != 0 and t % 10 == 0):
+                ex_p1 = self.exploit_player(self.root_node, 1)
+                ex_p2 = self.exploit_player(self.root_node, 2)
+                ex_val = self.expected_value(self.root_node)
+                print("Time: {}, Exploitability: P1-{} P2-{}, Expected Value: {}".format(t, ex_p1, ex_p2, ex_val))
+
+        # normalize s for each infoset
         for i in self.information_sets:
             i.normalize_strategy()
 
-    def CFR_plus(self, h:Node,i,w,pi) -> float:
+    def CFR_plus(self, h: Node, i, w, pi) -> float:
         """
 
         :param h: current node that is examinated
@@ -57,22 +65,22 @@ class Game:
             # in case player is adversary, return negative payoff (since zero sum game)
             if i == 2:
                 return -h.payoff
-            #return player 1 payoff otherwise
+            # return player 1 payoff otherwise
             return h.payoff
 
         # case when we are dealing with a ChanceNode
         # no information sets/strategies involved, but children involved just return your children's payoff
         if isinstance(h, ChanceNode):
             expected_payoff = 0
-            for probability,node in zip(h.probabilities, h.children):
-                expected_payoff += probability * self.CFR_plus(node, i, w, pi) # TODO: check if multiplication per probability is needed
+            for probability, node in zip(h.probabilities, h.children):
+                expected_payoff += probability * self.CFR_plus(node, i, w, pi * probability)
             return expected_payoff
 
         # case when we are dealing with an InternalNode
-        assert(isinstance(h, InternalNode))
+        assert (isinstance(h, InternalNode))
         # fetch infoset of current node
-        current_infoset:InformationSet = self.history_dictionary.get(h.name)
-        assert(current_infoset is not None)
+        current_infoset: InformationSet = self.history_dictionary.get(h.name)
+        assert (current_infoset is not None)
         # produce a strategy using regret matching
         # we consume it immediately and don't need it anymore -> used as local variable
         regret_matched_strategy = current_infoset.regret_strategy
@@ -92,18 +100,76 @@ class Game:
             for idx in range(len(h.actions)):
                 # update cumulative regret tables relative to the considered infoset
                 # RM+ computation and update will happen inside Infoset
-                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi # TODO: check if multiplication per pi is needed
+                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi
 
         else:
             # case when internal node is of adversary of player currently under regret update
             # explore children in order to gather expected payoffs and compute expected payoff at node
             for child, probability in zip(h.children, regret_matched_strategy):
-                u = self.CFR_plus(child, i, w, pi*probability)
-                expected_payoff += u * probability  # TODO: check if multiplication per probability is needed
+                u = self.CFR_plus(child, i, w, pi * probability)
+                expected_payoff += u * probability
 
             for idx in range(len(h.actions)):
                 # update cumulative strategies
                 current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
+
+        return expected_payoff
+
+    def CFR_Lanctot(self, h: Node, i, w, pi_i, pi_adv) -> float:
+        """
+
+                :param h: current node that is examinated
+                :param i: current player whose regrets have to be updated
+                :param w: weight of current exploration of the tree
+                         increasing with the number of exploration to give more importance to later explorations
+                :param pi: probability that chance and other player play in such a way to arrive in h
+                            NOTE: pi must be greater than 0 to avoide useless computations
+                :return: expected utility from this node
+                """
+
+        # case when we are dealing with a Terminal Node
+        # no information sets/strategies/children involved, just return your payoff
+        if isinstance(h, TerminalNode):
+            # in case player is adversary, return negative payoff (since zero sum game)
+            if i == 2:
+                return -h.payoff
+            # return player 1 payoff otherwise
+            return h.payoff
+
+        # case when we are dealing with a ChanceNode
+        # no information sets/strategies involved, but children involved just return your children's payoff
+        if isinstance(h, ChanceNode):
+            expected_payoff = 0
+            for probability, node in zip(h.probabilities, h.children):
+                expected_payoff += probability * self.CFR_Lanctot(node, i, w, pi_i, pi_adv * probability)
+            return expected_payoff
+
+        # case when we are dealing with an InternalNode
+        assert (isinstance(h, InternalNode))
+        # fetch infoset of current node
+        current_infoset: InformationSet = self.history_dictionary.get(h.name)
+        assert (current_infoset is not None)
+        # produce a strategy using regret matching
+        # we consume it immediately and don't need it anymore -> used as local variable
+        regret_matched_strategy = current_infoset.regret_strategy
+        expected_payoff = 0
+
+        payoff_pure_actions = []
+
+        for child, probability in zip(h.children, regret_matched_strategy):
+            if h.player == i:
+                u = self.CFR_Lanctot(child, i, w, pi_i * probability, pi_adv)
+            else:
+                u = self.CFR_Lanctot(child, i, w, pi_i, pi_adv * probability)
+            payoff_pure_actions.append(u)
+            expected_payoff += u * probability
+
+        if h.player == i:
+            for idx in range(len(h.actions)):
+                # update cumulative regret tables relative to the considered infoset
+                # RM+ computation and update will happen inside Infoset
+                current_infoset.regret[idx] += (payoff_pure_actions[idx] - expected_payoff) * pi_adv
+                current_infoset.cumulative_strategy[idx] += pi_i*regret_matched_strategy[idx]
 
         return expected_payoff
 
@@ -181,8 +247,8 @@ class Game:
 
                 self.history_dictionary.pop(oldNode1)
                 self.history_dictionary.pop(oldNode2)
-                #del self.history_dictionary[oldNode1]
-                #del self.history_dictionary[oldNode2]
+                # del self.history_dictionary[oldNode1]
+                # del self.history_dictionary[oldNode2]
                 self.information_sets.remove(oldNodeSet1)
                 self.information_sets.remove(oldNodeSet2)
 
@@ -195,8 +261,8 @@ class Game:
 
                 self.history_dictionary.pop(oldNode1)
                 self.history_dictionary.pop(oldNode2)
-                #del self.history_dictionary[oldNode1]
-                #del self.history_dictionary[oldNode2]
+                # del self.history_dictionary[oldNode1]
+                # del self.history_dictionary[oldNode2]
 
         # For each abstract information set I retrieve the original node histories (thanks to the representation '##'),
         ## then, using the dictionary of the original game (created before the abstraction), I can compute the mapping
@@ -217,7 +283,6 @@ class Game:
         for infoset in self.information_sets:
             if infoset.name == infoset_name:
                 return infoset
-
 
     # TODO : Only for tests - To eliminate both methods
     def print_tree(self, node: Node):
@@ -241,7 +306,7 @@ class Game:
             infoset.strategy = [0 for action in infoset.actions]
             num_actions = len(infoset.actions)
             for i in range(0, num_actions):
-                infoset.strategy[i] = 1/num_actions
+                infoset.strategy[i] = 1 / num_actions
 
     def init_personal_dist(self):
         for infoset in self.information_sets:
@@ -249,41 +314,70 @@ class Game:
             for i in range(0, len(infoset.actions)):
                 infoset.strategy[i] = i
 
-    def exploit_player(self, node: 'Node', player: int, pi: float) -> float:
+    def exploit_player(self, node: 'Node', player: int) -> float:
 
         if isinstance(node, TerminalNode):
-            if player == 1:
-                return node.payoff
-            return -1 * node.payoff
+            return node.payoff
 
         if isinstance(node, ChanceNode):
             expected_value = 0
             for probability, child in zip(node.probabilities, node.children):
-                expected_value += probability * self.exploit_player(child, player, pi)
+                expected_value += probability * self.exploit_player(child, player)
             return expected_value
 
-        infoset: InformationSet = self.history_dictionary.get(node.name)
-        expected_value = 0
-
         assert isinstance(node, InternalNode)
-        if node.player == player:
-            for child, probability in zip(node.children, infoset.cumulative_strategy):
-                u = self.exploit_player(child, player, pi)
-                expected_value += u * probability
+        infoset: InformationSet = self.history_dictionary.get(node.name)
+        exploited_value = 0
 
+        # case when the player under evaluation is the player at node => play accordingly to current strategy
+        if node.player == player:
+            # Get strategies and normalize
+            player_strategy = infoset.cumulative_strategy
+            norm_factor = sum(player_strategy)
+            player_strategy = [s / norm_factor for s in player_strategy]
+
+            for child, probability in zip(node.children, player_strategy):
+                if probability>0:
+                    u = self.exploit_player(child, player)
+                    exploited_value += u * probability
+
+        # case when the player at the node is the exploiter that plays best response => maximize/minimize payoff
         else:
             expected_payoffs = []
             for child, probability in zip(node.children, infoset.cumulative_strategy):
-                u = self.exploit_player(child, player, pi * probability)
+                u = self.exploit_player(child, player)
                 expected_payoffs.append(u)
-            if player == 1:
-                expected_value = max(expected_payoffs)
-            else:
-                expected_value = min(expected_payoffs)
+            if node.player == 1:  # maximizer
+                exploited_value = max(expected_payoffs)
+            else:  # minimizer
+                exploited_value = min(expected_payoffs)
+        return exploited_value
+
+    def expected_value(self, node: Node) -> float:
+
+        if isinstance(node, TerminalNode):
+            return node.payoff
+
+        if isinstance(node, ChanceNode):
+            expected_value = 0
+            for probability, child in zip(node.probabilities, node.children):
+                expected_value += probability * self.expected_value(child)
+            return expected_value
+
+        assert isinstance(node, InternalNode)
+        infoset: InformationSet = self.history_dictionary.get(node.name)
+        expected_value = 0
+
+        # Get strategies and normalize
+        player_strategy = infoset.cumulative_strategy
+        norm_factor = sum(player_strategy)
+        player_strategy = [s / norm_factor for s in player_strategy]
+
+        for child, probability in zip(node.children, player_strategy):
+            if probability>0:
+                u = self.expected_value(child)
+                expected_value += u * probability
+
         return expected_value
 
-    def compute_exploitability(self) -> float:
-        ex_pl1 = self.exploit_player(self.root_node, 1, 1)
-        ex_pl2 = self.exploit_player(self.root_node, 2, 1)
-        return (ex_pl1 + ex_pl2)/2
 

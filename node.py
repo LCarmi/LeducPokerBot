@@ -357,9 +357,6 @@ class ChanceNode(Node):
             if payOffValues[i] not in payOffValues[i + 1:]:
                 differentPayoffs += 1
 
-        # Transform the list in order to operate in the kmeans
-        payOffValues = np.asarray(payOffValues)  # .reshape(-1, length)
-
         # TODO: idea of lossless abstraction: ~ running in O(n)
         # b = [] # List of tuples containing grouped indentical elements and their indices
         # for idx, elem in enumerate(payOffValues):
@@ -371,6 +368,10 @@ class ChanceNode(Node):
         #         break
         # if not added:
         #     b.append((elem, [idx]))
+
+        # Transform the list in order to operate in the kmeans
+        payOffValues = np.asarray(payOffValues)  # .reshape(-1, length)
+
         if differentPayoffs == 1:
             # case in which all children are equal
             cluster = [0 for _ in payOffValues]
@@ -389,16 +390,16 @@ class ChanceNode(Node):
             algokmeans = KMeans(n_clusters=n_cluster_op, init='k-means++', max_iter=300, n_init=10, random_state=0)
             cluster = algokmeans.fit_predict(payOffValues)
 
+        indexGroups = [[] for _ in range(n_cluster_op)]
+        for x in range(len(cluster)):
+            # add each element index to a group where all with the same addresses are grouped
+            indexGroups[cluster[x]].append(x)
+
         # Put nodes together
         newChildren = []
         newActions = []
         newProbabilities = []
         allChanges = []
-
-        indexGroups = [[] for _ in range(n_cluster_op)]
-        for x in range(len(cluster)):
-            # add each element index to a group where all with the same addresses are grouped
-            indexGroups[cluster[x]].append(x)
 
         for group in indexGroups:
             firstIndex = group[0]

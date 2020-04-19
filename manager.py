@@ -59,7 +59,6 @@ if __name__ == '__main__':
     #manager.map_strategies()
     res = manager.write_result()
     print(res)
-    print(manager.originalGame.compute_exploitability())
     # file_path_output = "./Examples/output.txt"
     # f = open(file_path_output, "w+")
     # f.write(out)
