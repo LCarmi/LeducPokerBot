@@ -115,64 +115,6 @@ class Game:
 
         return expected_payoff
 
-    def CFR_Lanctot(self, h: Node, i, w, pi_i, pi_adv) -> float:
-        """
-
-                :param h: current node that is examinated
-                :param i: current player whose regrets have to be updated
-                :param w: weight of current exploration of the tree
-                         increasing with the number of exploration to give more importance to later explorations
-                :param pi: probability that chance and other player play in such a way to arrive in h
-                            NOTE: pi must be greater than 0 to avoide useless computations
-                :return: expected utility from this node
-                """
-
-        # case when we are dealing with a Terminal Node
-        # no information sets/strategies/children involved, just return your payoff
-        if isinstance(h, TerminalNode):
-            # in case player is adversary, return negative payoff (since zero sum game)
-            if i == 2:
-                return -h.payoff
-            # return player 1 payoff otherwise
-            return h.payoff
-
-        # case when we are dealing with a ChanceNode
-        # no information sets/strategies involved, but children involved just return your children's payoff
-        if isinstance(h, ChanceNode):
-            expected_payoff = 0
-            for probability, node in zip(h.probabilities, h.children):
-                expected_payoff += probability * self.CFR_Lanctot(node, i, w, pi_i, pi_adv * probability)
-            return expected_payoff
-
-        # case when we are dealing with an InternalNode
-        assert (isinstance(h, InternalNode))
-        # fetch infoset of current node
-        current_infoset: InformationSet = self.history_dictionary.get(h.name)
-        assert (current_infoset is not None)
-        # produce a strategy using regret matching
-        # we consume it immediately and don't need it anymore -> used as local variable
-        regret_matched_strategy = current_infoset.regret_strategy
-        expected_payoff = 0
-
-        payoff_pure_actions = []
-
-        for child, probability in zip(h.children, regret_matched_strategy):
-            if h.player == i:
-                u = self.CFR_Lanctot(child, i, w, pi_i * probability, pi_adv)
-            else:
-                u = self.CFR_Lanctot(child, i, w, pi_i, pi_adv * probability)
-            payoff_pure_actions.append(u)
-            expected_payoff += u * probability
-
-        if h.player == i:
-            for idx in range(len(h.actions)):
-                # update cumulative regret tables relative to the considered infoset
-                # RM+ computation and update will happen inside Infoset
-                current_infoset.regret[idx] += (payoff_pure_actions[idx] - expected_payoff) * pi_adv
-                current_infoset.cumulative_strategy[idx] += pi_i*regret_matched_strategy[idx]
-
-        return expected_payoff
-
     def parse_game(self, node_lines: [str], infoset_lines: [str]):
         node_dictionary = {}
         # Create the root node
@@ -379,5 +321,3 @@ class Game:
                 expected_value += u * probability
 
         return expected_value
-
-
