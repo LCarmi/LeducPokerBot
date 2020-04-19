@@ -20,15 +20,16 @@ class Manager:
         for key in self.information_set_mapping:
             infoset_to_copy = self.information_set_mapping.get(key)
             infoset_to_update = self.originalGame.get_infoset_from_name(key)
-            infoset_to_update.update_strategies(infoset_to_copy)
+            infoset_to_update.update_actions(infoset_to_copy)
 
-    def write_result(self, file_path: str):
+    def write_result(self) -> str:
         infosets = self.originalGame.information_sets
-        f = open(file_path, "w+")
+        result = ""
         for infoset in infosets:
-            f.write(infoset.get_strategy_representation()+'\n')
-        f.close()
-        print("Write finished")
+            result = result + infoset.get_strategy_representation() + '\n'
+
+        return result
+
 
     # TODO Method used only to test the mapping and the output
     def test_mapping(self):
@@ -45,19 +46,24 @@ class Manager:
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - kuhn.txt"
+    file_path = "./Examples/input - leduc3.txt"
     manager = Manager(file_path)
-    #manager.originalGame.print_tree(manager.originalGame.root_node)
-    #manager.originalGame.print_information_sets()
-    #manager.abstractedGame.abstract_yourself()
+
     print("Game loaded!")
     manager.create_abstraction()
     #manager.abstractedGame.print_tree(manager.abstractedGame.root_node)
     print("Abstraction ended!")
     manager.abstractedGame.find_optimal_strategy()
+    #manager.originalGame.find_optimal_strategy()
     print("Optimum strategy done!")
-    #manager.test_mapping()
-    file_path_output = "./Examples/output.txt"
-    #manager.write_result(file_path_output)
+    manager.map_strategies()
+    res = manager.write_result()
+    print(res)
+    # file_path_output = "./Examples/output.txt"
+    # f = open(file_path_output, "w+")
+    # f.write(out)
+    # f.close()
+    # print("Write finished")
+
 
 

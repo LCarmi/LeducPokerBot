@@ -6,8 +6,8 @@ from myParser import *
 
 
 class Game:
-    d = 15  # number of regret explorations without strategy update
-    total_iterations = 50  # number of iteration to do
+    d = 100  # number of regret explorations without strategy update
+    total_iterations = 1000  # number of iteration to do
 
     def __init__(self):
         self.root_node = None
@@ -19,13 +19,19 @@ class Game:
         #Initialization
         for i in self.information_sets:
             # Initialize regret tables:
-            i.regret = [0 for _ in i.actions]
+            i.regret = [0.0 for _ in i.actions]
             # Initialize cumulative strategy tables:
-            i.strategy = [0 for _ in i.actions]
+            i.strategy = [0.0 for _ in i.actions]
 
         #call CFR_plus
         for t in range(Game.total_iterations):
-            w = max(t-Game.d, 0)
+            #w = max(t-Game.d, 0)
+            w=0
+            if t>Game.d: w = 1
+
+            for i in self.information_sets:
+                i.update_regret_strategy(t)
+
             self.CFR_plus(self.root_node, 1, w, 1)
             self.CFR_plus(self.root_node, 2, w, 1)
 
@@ -59,7 +65,7 @@ class Game:
         if isinstance(h, ChanceNode):
             expected_payoff = 0
             for probability,node in zip(h.probabilities, h.children):
-                expected_payoff += probability * self.CFR_plus(node, i, w, pi)
+                expected_payoff += probability * self.CFR_plus(node, i, w, pi) # TODO: check if multiplication per probability is needed
             return expected_payoff
 
         # case when we are dealing with an InternalNode
@@ -69,7 +75,7 @@ class Game:
         assert(current_infoset is not None)
         # produce a strategy using regret matching
         # we consume it immediately and don't need it anymore -> used as local variable
-        regret_matched_strategy = current_infoset.regret_matching_plus()
+        regret_matched_strategy = current_infoset.regret_strategy
         expected_payoff = 0
 
         if h.player == i:
@@ -85,8 +91,8 @@ class Game:
 
             for idx in range(len(h.actions)):
                 # update cumulative regret tables relative to the considered infoset
-                # RM+ computation and update happen together
-                current_infoset.regret[idx] = max(current_infoset.regret[idx] + expected_payoffs[idx] - expected_payoff, 0)
+                # RM+ computation and update will happen inside Infoset
+                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi # TODO: check if multiplication per pi is needed
 
         else:
             # case when internal node is of adversary of player currently under regret update
@@ -97,7 +103,7 @@ class Game:
 
             for idx in range(len(h.actions)):
                 # update cumulative strategies
-                current_infoset.strategy[idx] = current_infoset.strategy[idx] + pi * regret_matched_strategy[idx] * w
+                current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
 
         return expected_payoff
 
