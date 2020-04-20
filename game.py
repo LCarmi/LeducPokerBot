@@ -16,28 +16,43 @@ class Game:
 
     def find_optimal_strategy(self):
         #CFR+ algorithm
-        #Initialization
-        for i in self.information_sets:
-            # Initialize regret tables:
-            i.regret = [0.0 for _ in i.actions]
-            # Initialize cumulative strategy tables:
-            i.strategy = [0.0 for _ in i.actions]
 
-        #call CFR_plus
+        self.CFR_plus_optimize()
+        #self.CFR_optimize()
+
+
+    def CFR_optimize(self):
         for t in range(Game.total_iterations):
-            #w = max(t-Game.d, 0)
-            w=0
-            if t>Game.d: w = 1
+            w = max(t - Game.d, 0)
 
             for i in self.information_sets:
-                i.update_regret_strategy(t)
+                i.update_regret_strategy()
+
+            self.CFR(self.root_node, 1, w, 1)
+            self.CFR(self.root_node, 2, w, 1)
+
+            if (w != 0 and t % 10 == 0):
+                ex_p1 = self.exploit_player(self.root_node, 1)
+                ex_p2 = self.exploit_player(self.root_node, 2)
+                ex_val = self.expected_value(self.root_node)
+                print("Time: {}, Exploitability: P1 {} P2 {}, Expected Value: {}".format(t, ex_p1, ex_p2, ex_val))
+
+    def CFR_plus_optimize(self):
+        # call CFR_plus
+        for t in range(Game.total_iterations):
+            w = max(t - Game.d, 0)
+
+            for i in self.information_sets:
+                i.update_regret_strategy_plus()
 
             self.CFR_plus(self.root_node, 1, w, 1)
             self.CFR_plus(self.root_node, 2, w, 1)
 
-        #normalize s for each infoset
-        for i in self.information_sets:
-            i.normalize_strategy()
+            if (w != 0 and t % 10 == 0):
+                ex_p1 = self.exploit_player(self.root_node, 1)
+                ex_p2 = self.exploit_player(self.root_node, 2)
+                ex_val = self.expected_value(self.root_node)
+                print("Time: {}, Exploitability: P1 {} P2 {}, Expected Value: {}".format(t, ex_p1, ex_p2, ex_val))
 
     def CFR_plus(self, h:Node,i,w,pi) -> float:
         """
@@ -121,12 +136,11 @@ class Game:
             father.addChild(node, node.name[action_index + 1:])
         # Create the information sets
         for i in range(0, len(infoset_lines)):
-            information_set = parse_infoset_line(infoset_lines[i])
-            first_node = node_dictionary.get(information_set.node_histories[0])
+            name, histories = parse_infoset_line(infoset_lines[i])
+            first_node = node_dictionary.get(histories[0])
             actions_first_node = first_node.get_actions()
-            # To prevent the case of terminal node, although in theory is not possible
-            if actions_first_node is not None:
-                information_set.add_strategies(actions_first_node)
+            assert(actions_first_node is not None)
+            information_set = InformationSet(name, histories, actions_first_node)
             self.information_sets.append(information_set)
         # create the entries of the history dict
         for infoset in self.information_sets:
@@ -165,11 +179,7 @@ class Game:
                 newNodeSetHistories.remove(oldNode1)
                 newNodeSetHistories.remove(oldNode2)
 
-                newInfoSet = InformationSet(newNameInfoset, newNodeSetHistories)
-
-                # TODO: Abstract correctly the strategies Actually not needed in this phase
-                # TODO: correction -> instead of strategy, I put actions
-                newInfoSet.add_strategies(oldNodeSet1.actions)
+                newInfoSet = InformationSet(newNameInfoset, newNodeSetHistories, oldNodeSet1.actions)
 
                 # Add the new infoSet on the array
                 self.information_sets.append(newInfoSet)
@@ -181,8 +191,7 @@ class Game:
 
                 self.history_dictionary.pop(oldNode1)
                 self.history_dictionary.pop(oldNode2)
-                #del self.history_dictionary[oldNode1]
-                #del self.history_dictionary[oldNode2]
+
                 self.information_sets.remove(oldNodeSet1)
                 self.information_sets.remove(oldNodeSet2)
 
@@ -195,8 +204,6 @@ class Game:
 
                 self.history_dictionary.pop(oldNode1)
                 self.history_dictionary.pop(oldNode2)
-                #del self.history_dictionary[oldNode1]
-                #del self.history_dictionary[oldNode2]
 
         # For each abstract information set I retrieve the original node histories (thanks to the representation '##'),
         ## then, using the dictionary of the original game (created before the abstraction), I can compute the mapping
@@ -218,33 +225,64 @@ class Game:
             if infoset.name == infoset_name:
                 return infoset
 
+    def exploit_player(self, node: 'Node', player: int) -> float:
 
-    # TODO : Only for tests - To eliminate both methods
-    def print_tree(self, node: Node):
-        node.print_father()
-        node.print_children()
-        for children in node.children:
-            self.print_tree(children)
+        if isinstance(node, TerminalNode):
+            return node.payoff
 
-    def print_information_sets(self):
-        for information_set in self.information_sets:
-            ret = 'It contains '
-            for node_history in information_set.node_histories:
-                node = self.history_dictionary.get(node_history)
-                ret += node.name + ' '
-            print(information_set)
-            print(ret)
+        if isinstance(node, ChanceNode):
+            expected_value = 0
+            for probability, child in zip(node.probabilities, node.children):
+                expected_value += probability * self.exploit_player(child, player)
+            return expected_value
 
-    # TODO: methods used to initialize the strategies in two ways - only for tests mapping
-    def init_uniform_dist(self):
-        for infoset in self.information_sets:
-            infoset.strategy = [0 for action in infoset.actions]
-            num_actions = len(infoset.actions)
-            for i in range(0, num_actions):
-                infoset.strategy[i] = 1/num_actions
+        assert isinstance(node, InternalNode)
+        infoset: InformationSet = self.history_dictionary.get(node.name)
+        exploited_value = 0
 
-    def init_personal_dist(self):
-        for infoset in self.information_sets:
-            infoset.strategy = [0 for action in infoset.actions]
-            for i in range(0, len(infoset.actions)):
-                infoset.strategy[i] = i
+        # case when the player under evaluation is the player at node => play accordingly to current strategy
+        if node.player == player:
+            # Get strategies and normalize
+            player_strategy = infoset.get_average_strategy()
+
+            for child, probability in zip(node.children, player_strategy):
+                if probability > 0:
+                    u = self.exploit_player(child, player)
+                    exploited_value += u * probability
+
+        # case when the player at the node is the exploiter that plays best response => maximize/minimize payoff
+        else:
+            expected_payoffs = []
+            for child in node.children:
+                u = self.exploit_player(child, player)
+                expected_payoffs.append(u)
+            if node.player == 1:  # maximizer
+                exploited_value = max(expected_payoffs)
+            else:  # minimizer
+                exploited_value = min(expected_payoffs)
+        return exploited_value
+
+    def expected_value(self, node: Node) -> float:
+
+        if isinstance(node, TerminalNode):
+            return node.payoff
+
+        if isinstance(node, ChanceNode):
+            expected_value = 0
+            for probability, child in zip(node.probabilities, node.children):
+                expected_value += probability * self.expected_value(child)
+            return expected_value
+
+        assert isinstance(node, InternalNode)
+        infoset: InformationSet = self.history_dictionary.get(node.name)
+        expected_value = 0
+
+        # Get strategies and normalize
+        player_strategy = infoset.get_average_strategy()
+
+        for child, probability in zip(node.children, player_strategy):
+            if probability > 0:
+                u = self.expected_value(child)
+                expected_value += u * probability
+
+        return expected_value

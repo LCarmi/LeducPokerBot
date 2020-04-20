@@ -38,8 +38,7 @@ def parse_node_line(node_line):
 def parse_infoset_line(infoset_line):
 
     if match := re.fullmatch(reInfoSet, infoset_line):
-        #print("Name : {}, Histories : {}".format(match.group('name'), match.group('histories')))
-        return InformationSet(match.group('name'), match.group('histories').split())
+        return match.group('name'), match.group('histories').split()
 
 
 def is_node(line):

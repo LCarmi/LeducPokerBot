@@ -26,7 +26,7 @@ class Manager:
         infosets = self.originalGame.information_sets
         result = ""
         for infoset in infosets:
-            result = result + infoset.get_strategy_representation() + '\n'
+            result = result + str(infoset) + '\n'
 
         return result
 
@@ -46,17 +46,17 @@ class Manager:
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc3.txt"
+    file_path = "./Examples/input - kuhn.txt"
     manager = Manager(file_path)
 
     print("Game loaded!")
     manager.create_abstraction()
     #manager.abstractedGame.print_tree(manager.abstractedGame.root_node)
     print("Abstraction ended!")
-    manager.abstractedGame.find_optimal_strategy()
-    #manager.originalGame.find_optimal_strategy()
+    #manager.abstractedGame.find_optimal_strategy()
+    manager.originalGame.find_optimal_strategy()
     print("Optimum strategy done!")
-    manager.map_strategies()
+    #manager.map_strategies()
     res = manager.write_result()
     print(res)
     # file_path_output = "./Examples/output.txt"
