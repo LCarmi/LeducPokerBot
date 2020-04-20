@@ -7,6 +7,7 @@ class InformationSet:
         self.name = name
         self.node_histories = node_histories
         self.actions = []
+        self.pure_outcomes =[]
         self.regret = []
         self.regret_strategy = []
         self.cumulative_strategy = []
@@ -14,9 +15,10 @@ class InformationSet:
 
     def add_strategies(self, actions: [str]):
         self.actions = actions
-        self.regret = [0.0 for _ in actions]
-        self.regret_strategy = [0.0 for _ in actions]
-        self.cumulative_strategy = [0.0 for _ in actions]
+        self.regret = [0 for _ in actions]
+        self.regret_strategy = [0 for _ in actions]
+        self.cumulative_strategy = [0 for _ in actions]
+        self.pure_outcomes =[0 for _ in actions]
 
     def get_strategy_representation(self):
         result = "infoset " + self.name + " strategies "
@@ -45,8 +47,10 @@ class InformationSet:
         self.__time += 1
         # do final computation of R+ according to rules of CFR+avg
         # ~since all nodes in infoset must have been already explored by CFR_plus (since time has updated)
+        exp_payoff = sum([outcome * probability for outcome, probability in zip(self.pure_outcomes, self.regret_strategy)])
         for i in range(len(self.regret)):
-            self.regret[i] = max(self.regret[i], 0.0)
+            self.regret[i] = max(self.regret[i] + self.pure_outcomes[i] - exp_payoff, 0)
+            self.pure_outcomes[i] = 0
         # update the regret strategy we offer to the nodes in the infoset
         self.__compute_regret_strategy()
 
@@ -54,10 +58,11 @@ class InformationSet:
         """
         Computes and stores the new regret strategy associated to the current cumulative regret
         """
-        if sum(self.regret) == 0:
+        s = sum(self.regret)
+        if s == 0:
             new_strategy = [1 / len(self.actions) for _ in range(len(self.actions))]
         else:
-            new_strategy = [reg / sum(self.regret) for reg in self.regret]
+            new_strategy = [reg / s for reg in self.regret]
 
         self.regret_strategy = new_strategy
 
@@ -67,7 +72,7 @@ class InformationSet:
         :return: nothing
         """
         # assert(sum(self.strategy) != 0)
-        if (sum(self.cumulative_strategy) == 0):
+        if sum(self.cumulative_strategy) == 0:
             #print("Infoset never played" + self.name)
             return
         else:

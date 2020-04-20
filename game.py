@@ -6,7 +6,7 @@ from myParser import *
 
 
 class Game:
-    d = 20  # number of regret explorations without strategy update
+    d = 10  # number of regret explorations without strategy update
     total_iterations = 100  # number of iteration to do
 
     def __init__(self):
@@ -32,8 +32,8 @@ class Game:
             for i in self.information_sets:
                 i.update_regret_strategy(t)
 
-            self.CFR_plus(self.root_node, 1, w, 1)
-            self.CFR_plus(self.root_node, 2, w, 1)
+            self.CFR_plus(self.root_node, 1, w, 1, 1)
+            self.CFR_plus(self.root_node, 2, w, 1, 1)
             # self.CFR_Lanctot(self.root_node, 1, w, 1, 1)
             # self.CFR_Lanctot(self.root_node, 2, w, 1, 1)
 
@@ -47,7 +47,7 @@ class Game:
         for i in self.information_sets:
             i.normalize_strategy()
 
-    def CFR_plus(self, h: Node, i, w, pi) -> float:
+    def CFR_plus(self, h: Node, i, w, pi_adv, pi_chance) -> float:
         """
 
         :param h: current node that is examinated
@@ -73,7 +73,7 @@ class Game:
         if isinstance(h, ChanceNode):
             expected_payoff = 0
             for probability, node in zip(h.probabilities, h.children):
-                expected_payoff += probability * self.CFR_plus(node, i, w, pi * probability)
+                expected_payoff += probability * self.CFR_plus(node, i, w, pi_adv, pi_chance * probability)
             return expected_payoff
 
         # case when we are dealing with an InternalNode
@@ -90,28 +90,29 @@ class Game:
             # case when internal node is of player currently under regret update
             expected_payoffs = []
             # explore children in order to gather expected payoffs
-            for child, probability in zip(h.children, regret_matched_strategy):
-                u = self.CFR_plus(child, i, w, pi)
+            for child, probability, idx in zip(h.children, regret_matched_strategy, range(len(h.actions))):
+                u = self.CFR_plus(child, i, w, pi_adv, pi_chance)
                 # expected payoffs are saved -> used for regret computation as payoffs in case of choosing action with
                 # probability 1
-                expected_payoffs.append(u)
+                current_infoset.pure_outcomes[idx] += u * pi_adv * pi_chance
+                # expected_payoffs.append(u)
                 expected_payoff += u * probability  # update total expected payoff at this node
 
-            for idx in range(len(h.actions)):
-                # update cumulative regret tables relative to the considered infoset
-                # RM+ computation and update will happen inside Infoset
-                current_infoset.regret[idx] = max(current_infoset.regret[idx] + (expected_payoffs[idx] - expected_payoff),0)
+            # for idx in range(len(h.actions)):
+            #     # update cumulative regret tables relative to the considered infoset
+            #     # RM+ computation and update will happen inside Infoset
+            #     current_infoset.regret[idx] = current_infoset.regret[idx] + (expected_payoffs[idx] - expected_payoff) *pi
 
         else:
             # case when internal node is of adversary of player currently under regret update
             # explore children in order to gather expected payoffs and compute expected payoff at node
             for child, probability in zip(h.children, regret_matched_strategy):
-                u = self.CFR_plus(child, i, w, pi * probability)
+                u = self.CFR_plus(child, i, w, pi_adv * probability, pi_chance)
                 expected_payoff += u * probability
 
             for idx in range(len(h.actions)):
                 # update cumulative strategies
-                current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
+                current_infoset.cumulative_strategy[idx] += pi_adv * regret_matched_strategy[idx] * w
 
         return expected_payoff
 
