@@ -200,6 +200,7 @@ class ChanceNode(Node):
         self.children = [None for _ in actions]
         self.actions = actions
         self.probabilities = probabilities
+        self.normalize_probabilites()
 
     def addChild(self, node: 'Node', action: str):
         node.father = self
@@ -324,6 +325,7 @@ class ChanceNode(Node):
         self.children = [None for _ in self.actions]
         for action, child in zip(actions, children):
             self.addChild(child, action)
+        self.normalize_probabilites()
 
         # 4) add (newName, oldName, node.name) to uniqueListOfChanges ~ change made in this function
         uniqueListOfChanges.append((self.name, oldName, node.name))
@@ -438,8 +440,11 @@ class ChanceNode(Node):
     def get_actions(self):
         return self.actions
 
+    def normalize_probabilites(self):
+        s = sum(self.probabilities)
+        for i, p in enumerate(self.probabilities):
+            self.probabilities[i] = p / s
 
-# TODO: put mapWithSubtree private method (~double __ in front of name)?
 
 
 if __name__ == "__main__":

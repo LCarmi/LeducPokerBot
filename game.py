@@ -7,7 +7,7 @@ from myParser import *
 
 class Game:
     d = 100  # number of regret explorations without strategy update
-    total_iterations = 100000  # number of iteration to do
+    total_iterations = 1000  # number of iteration to do
 
     def __init__(self):
         self.root_node = None
@@ -17,8 +17,8 @@ class Game:
     def find_optimal_strategy(self):
         #CFR+ algorithm
 
-        #self.CFR_plus_optimize()
-        self.CFR_optimize()
+        self.CFR_plus_optimize()
+        #self.CFR_optimize()
 
 
     def CFR_optimize(self):
