@@ -200,7 +200,6 @@ class ChanceNode(Node):
         self.children = [None for _ in actions]
         self.actions = actions
         self.probabilities = probabilities
-        # no need to sort actions here, see mapWithSubtree
 
     def addChild(self, node: 'Node', action: str):
         node.father = self

@@ -7,7 +7,7 @@ from myParser import *
 
 class Game:
     d = 100  # number of regret explorations without strategy update
-    total_iterations = 1000  # number of iteration to do
+    total_iterations = 100000  # number of iteration to do
 
     def __init__(self):
         self.root_node = None
@@ -17,8 +17,8 @@ class Game:
     def find_optimal_strategy(self):
         #CFR+ algorithm
 
-        self.CFR_plus_optimize()
-        #self.CFR_optimize()
+        #self.CFR_plus_optimize()
+        self.CFR_optimize()
 
 
     def CFR_optimize(self):
@@ -28,14 +28,48 @@ class Game:
             for i in self.information_sets:
                 i.update_regret_strategy()
 
-            self.CFR(self.root_node, 1, w, 1)
-            self.CFR(self.root_node, 2, w, 1)
+            self.CFR(self.root_node, 1, 1, 1)
+            self.CFR(self.root_node, 2, 1, 1)
 
             if (w != 0 and t % 10 == 0):
                 ex_p1 = self.exploit_player(self.root_node, 1)
                 ex_p2 = self.exploit_player(self.root_node, 2)
                 ex_val = self.expected_value(self.root_node)
                 print("Time: {}, Exploitability: P1 {} P2 {}, Expected Value: {}".format(t, ex_p1, ex_p2, ex_val))
+
+    def CFR(self, h: Node, i, pi1, pi2):
+        if (isinstance(h, TerminalNode)):
+            if i == 2:
+                return -1 * h.payoff
+            return h.payoff
+
+        if (isinstance(h, ChanceNode)):
+            if i ==1:
+                return sum(prob * self.CFR(child, i, pi1, pi2*prob) for prob,child in zip(h.probabilities,h.children))
+            else:
+                return sum(prob * self.CFR(child, i, pi1*prob, pi2) for prob,child in zip(h.probabilities,h.children))
+
+        assert(isinstance(h, InternalNode))
+        infoset : InformationSet = self.history_dictionary.get(h.name)
+        strategy = infoset.regret_strategy
+        pure_payoffs = []
+        expected_payoff = 0
+
+        for child,p in zip(h.children, strategy):
+            if(h.player == 1):
+                u = self.CFR(child, i, p * pi1, pi2)
+            else:
+                u = self.CFR(child,i,pi1, pi2 * p)
+            expected_payoff += u*p
+            pure_payoffs.append(u)
+
+        if (h.player == i):
+            pi_i, pi_adv = (pi1 , pi2) if i==1 else (pi2, pi1)
+            for idx in range(len(infoset.actions)):
+                infoset.regret[idx] += pi_adv * (pure_payoffs[idx] - expected_payoff)
+                infoset.cumulative_strategy[idx] += pi_i * strategy[idx]
+
+        return expected_payoff
 
     def CFR_plus_optimize(self):
         # call CFR_plus
