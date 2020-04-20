@@ -32,10 +32,17 @@ class Game:
             self.CFR(self.root_node, 2, 1, 1)
 
             if (w != 0 and t % 10 == 0):
-                ex_p1 = self.exploit_player(self.root_node, 1)
-                ex_p2 = self.exploit_player(self.root_node, 2)
+                # regret_P1 = 0
+                # regret_P2 = 0
+                # for i in self.information_sets:
+                #     assert(isinstance(i, InformationSet))
+                #     if i.player == 1:
+                #         regret_P1 += sum(i.regret)
+                #     else:
+                #         regret_P2 += sum(i.regret)
+                # ex = (regret_P1 + regret_P2)/2.0
                 ex_val = self.expected_value(self.root_node)
-                print("Time: {}, Exploitability: P1 {} P2 {}, Expected Value: {}".format(t, ex_p1, ex_p2, ex_val))
+                print("Time: {}, Expected Value: {}".format(t, ex_val))
 
     def CFR(self, h: Node, i, pi1, pi2):
         if (isinstance(h, TerminalNode)):
@@ -83,11 +90,18 @@ class Game:
             self.CFR_plus(self.root_node, 2, w, 1)
 
             if (w != 0 and t % 10 == 0):
-                ex_p1 = self.exploit_player(self.root_node, 1)
-                ex_p2 = self.exploit_player(self.root_node, 2)
+                # regret_P1 = 0
+                # regret_P2 = 0
+                # for i in self.information_sets:
+                #     assert (isinstance(i, InformationSet))
+                #     if i.player == 1:
+                #         regret_P1 += sum(i.regret)
+                #     else:
+                #         regret_P2 += sum(i.regret)
+                # ex = (regret_P1 + regret_P2) / 2.0
                 ex_val = self.expected_value(self.root_node)
-                print("Time: {}, Exploitability: P1 {} P2 {}, Expected Value: {}".format(t, ex_p1, ex_p2, ex_val))
-
+                print("Time: {}, Expected Value: {}".format(t, ex_val))
+                
     def CFR_plus(self, h:Node,i,w,pi) -> float:
         """
 
@@ -173,8 +187,9 @@ class Game:
             name, histories = parse_infoset_line(infoset_lines[i])
             first_node = node_dictionary.get(histories[0])
             actions_first_node = first_node.get_actions()
+            player = first_node.player
             assert(actions_first_node is not None)
-            information_set = InformationSet(name, histories, actions_first_node)
+            information_set = InformationSet(name, player, histories, actions_first_node)
             self.information_sets.append(information_set)
         # create the entries of the history dict
         for infoset in self.information_sets:
@@ -213,7 +228,7 @@ class Game:
                 newNodeSetHistories.remove(oldNode1)
                 newNodeSetHistories.remove(oldNode2)
 
-                newInfoSet = InformationSet(newNameInfoset, newNodeSetHistories, oldNodeSet1.actions)
+                newInfoSet = InformationSet(newNameInfoset, oldNodeSet1.player, newNodeSetHistories, oldNodeSet1.actions)
 
                 # Add the new infoSet on the array
                 self.information_sets.append(newInfoSet)
@@ -258,43 +273,6 @@ class Game:
         for infoset in self.information_sets:
             if infoset.name == infoset_name:
                 return infoset
-
-    def exploit_player(self, node: 'Node', player: int) -> float:
-
-        if isinstance(node, TerminalNode):
-            return node.payoff
-
-        if isinstance(node, ChanceNode):
-            expected_value = 0
-            for probability, child in zip(node.probabilities, node.children):
-                expected_value += probability * self.exploit_player(child, player)
-            return expected_value
-
-        assert isinstance(node, InternalNode)
-        infoset: InformationSet = self.history_dictionary.get(node.name)
-        exploited_value = 0
-
-        # case when the player under evaluation is the player at node => play accordingly to current strategy
-        if node.player == player:
-            # Get strategies and normalize
-            player_strategy = infoset.get_average_strategy()
-
-            for child, probability in zip(node.children, player_strategy):
-                if probability > 0:
-                    u = self.exploit_player(child, player)
-                    exploited_value += u * probability
-
-        # case when the player at the node is the exploiter that plays best response => maximize/minimize payoff
-        else:
-            expected_payoffs = []
-            for child in node.children:
-                u = self.exploit_player(child, player)
-                expected_payoffs.append(u)
-            if node.player == 1:  # maximizer
-                exploited_value = max(expected_payoffs)
-            else:  # minimizer
-                exploited_value = min(expected_payoffs)
-        return exploited_value
 
     def expected_value(self, node: Node) -> float:
 
