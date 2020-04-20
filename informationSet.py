@@ -1,81 +1,77 @@
 from random import *
-
+import numpy as np
 
 class InformationSet:
 
-    def __init__(self, name: str, node_histories: [str]):
+    def __init__(self, name: str, node_histories: [str], actions):
         self.name = name
         self.node_histories = node_histories
-        self.actions = []
-        self.pure_outcomes =[]
-        self.regret = []
-        self.regret_strategy = []
-        self.cumulative_strategy = []
-        self.__time = -1
-
-    def add_strategies(self, actions: [str]):
         self.actions = actions
-        self.regret = [0 for _ in actions]
-        self.regret_strategy = [0 for _ in actions]
-        self.cumulative_strategy = [0 for _ in actions]
-        self.pure_outcomes =[0 for _ in actions]
+
+        self.regret_sum = np.zeros(len(self.actions))
+        self.strategy_sum = np.zeros(len(self.actions))
+        self.strategy = np.repeat(1 / len(self.actions), len(self.actions))
+        self.reach_pr = 0
+        self.reach_pr_sum = 0
+
+    def next_strategy(self):
+        self.strategy_sum += (self.strategy * self.reach_pr)
+        self.strategy = self.calc_strategy()
+        self.reach_pr_sum += self.reach_pr
+        self.reach_pr = 0
+
+    def calc_strategy(self):
+        """
+        Calculate current strategy from the sum of regret.
+        """
+        strategy = self.make_positive(self.regret_sum)
+        total = sum(strategy)
+        if total > 0:
+            strategy = strategy / total
+        else:
+            n = len(self.actions)
+            strategy = np.repeat(1 / n, n)
+        return strategy
+
+    def get_average_strategy(self):
+        """
+        Calculate average strategy over all iterations. This is the
+        Nash equilibrium strategy.
+        """
+        strategy = self.strategy_sum / self.reach_pr_sum
+        # Purify to remove actions that are likely a mistake
+        strategy = np.where(strategy < 0.01, 0, strategy)
+        # Re-normalize
+        total = sum(strategy)
+        strategy /= total
+        return strategy
+
+    def make_positive(self, x):
+        return np.where(x > 0, x, 0)
+
+    def __str__(self):
+        strategies = ['{:03.2f}'.format(x) for x in self.get_average_strategy()]
+        return '{} {}'.format(self.name.ljust(6), strategies)
 
     def get_strategy_representation(self):
         result = "infoset " + self.name + " strategies "
-        for action, strategy in zip(self.actions, self.cumulative_strategy):
+        for action, strategy in zip(self.actions, self.get_average_strategy()):
             result += action + "=" + str(strategy) + " "
         return result
+    #
+    # def update_actions(self, infoset_to_copy: 'InformationSet'):
+    #     # To verify that two information sets were mapped correctly
+    #     assert len(self.actions) == len(infoset_to_copy.actions)
+    #     for a1, a2 in zip(self.actions, infoset_to_copy.actions):
+    #         assert a1 == a2
+    #     # update
+    #     for i in range(0, len(self.actions)):
+    #         self.cumulative_strategy[i] = infoset_to_copy.cumulative_strategy[i]
+    #
+    # def __str__(self):
+    #     result = "Infoset: " + self.name + ' with strategies '
+    #     for key in self.cumulative_strategy:
+    #         result += key + ':' + str(self.cumulative_strategy[key]) + ' '
+    #     return result
 
-    def update_actions(self, infoset_to_copy: 'InformationSet'):
-        # To verify that two information sets were mapped correctly
-        assert len(self.actions) == len(infoset_to_copy.actions)
-        for a1, a2 in zip(self.actions, infoset_to_copy.actions):
-            assert a1 == a2
-        # update
-        for i in range(0, len(self.actions)):
-            self.cumulative_strategy[i] = infoset_to_copy.cumulative_strategy[i]
 
-    def __str__(self):
-        result = "Infoset: " + self.name + ' with strategies '
-        for key in self.cumulative_strategy:
-            result += key + ':' + str(self.cumulative_strategy[key]) + ' '
-        return result
-
-    def update_regret_strategy(self, time):
-        # a regret is asked for the next time step -> use updated regrets and update current time
-        assert (time == self.__time + 1)
-        self.__time += 1
-        # do final computation of R+ according to rules of CFR+avg
-        # ~since all nodes in infoset must have been already explored by CFR_plus (since time has updated)
-        exp_payoff = sum([outcome * probability for outcome, probability in zip(self.pure_outcomes, self.regret_strategy)])
-        for i in range(len(self.regret)):
-            self.regret[i] = max(self.regret[i] + self.pure_outcomes[i] - exp_payoff, 0)
-            self.pure_outcomes[i] = 0
-        # update the regret strategy we offer to the nodes in the infoset
-        self.__compute_regret_strategy()
-
-    def __compute_regret_strategy(self):
-        """
-        Computes and stores the new regret strategy associated to the current cumulative regret
-        """
-        s = sum(self.regret)
-        if s == 0:
-            new_strategy = [1 / len(self.actions) for _ in range(len(self.actions))]
-        else:
-            new_strategy = [reg / s for reg in self.regret]
-
-        self.regret_strategy = new_strategy
-
-    def normalize_strategy(self):
-        """
-        Normalizes strategies
-        :return: nothing
-        """
-        # assert(sum(self.strategy) != 0)
-        if sum(self.cumulative_strategy) == 0:
-            #print("Infoset never played" + self.name)
-            return
-        else:
-            self.cumulative_strategy = [p / sum(self.cumulative_strategy) for p in self.cumulative_strategy]
-            # print(self.name + " the strategy is:", self.cumulative_strategy)
-            return
