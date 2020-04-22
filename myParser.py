@@ -13,6 +13,7 @@ reTerminal = "node " + reHistory + " leaf payoffs 1=(?P<payoff1>-?\d+.\d+) 2=(?P
 rePlayer = 'node ' + reHistory + ' player (?P<player>\d) actions (?P<actions>(\w+ )*\w+)\n?'
 reChance = 'node ' + reHistory + ' chance actions (?P<chance_actions>(\w+=\d+.\d+ )*(\w+=\d+.\d+))\n?'
 reInfoSet ='infoset (?P<name>(\S)+) nodes (?P<histories>(((/(P1:\w+|P2:\w+|C:\w+|))+ )*((/(P1:\w+|P2:\w+|C:\w+|))+)))\n?'
+reFindCard = 'infoset /(C:|)(?P<card>\w+)?(.+)\n?'
 
 def parse_node_line(node_line):
     # Internal player nodes
@@ -36,9 +37,12 @@ def parse_node_line(node_line):
 
 
 def parse_infoset_line(infoset_line):
-
     if match := re.fullmatch(reInfoSet, infoset_line):
         return match.group('name'), match.group('histories').split()
+
+def parse_card_from_infoset(infoset_line:str):
+    if match := re.fullmatch(reFindCard, infoset_line):
+        return match.group('card')
 
 
 def is_node(line):
@@ -50,6 +54,6 @@ def is_infoset(line):
 
 
 if __name__ == "__main__":
-    file = open('./Examples/input - kuhn.txt', "r")
+    file = open('./Examples/input - leduc5.txt', "r")
     for line in file:
         parse_node_line(line)
