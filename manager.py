@@ -3,6 +3,7 @@ from orderFile import *
 from informationSet import *
 import time
 
+
 class Manager:
 
     # Construct the Manager given the file path
@@ -57,8 +58,12 @@ if __name__ == '__main__':
     manager.originalGame.find_optimal_strategy()
     print("Optimum strategy done!")
     #manager.map_strategies()
-    res = manager.write_result()
-    print(res)
+    #res = manager.write_result()
+    #print(res)
+    print(manager.write_result())
+    print(manager.originalGame.exploit_player(manager.originalGame.root_node, 1))
+    print(manager.originalGame.exploit_player(manager.originalGame.root_node, 2))
+    print(manager.originalGame.expected_value(manager.originalGame.root_node))
     # file_path_output = "./Examples/output.txt"
     # f = open(file_path_output, "w+")
     # f.write(out)
