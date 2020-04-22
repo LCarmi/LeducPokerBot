@@ -3,16 +3,21 @@ from typing import Dict
 from informationSet import *
 from node import *
 from myParser import *
+from operator import itemgetter
 
 
+# TODO: eliminate print
 class Game:
     d = 100  # number of regret explorations without strategy update
     total_iterations = 1000  # number of iteration to do
+    n = 2  # number of card in a group (abstraction)
 
     def __init__(self):
         self.root_node = None
         self.information_sets = []
         self.history_dictionary = {}
+        self.cards = []
+        self.cards_sorted = []
 
     def find_optimal_strategy(self):
         #CFR+ algorithm
@@ -182,7 +187,7 @@ class Game:
             father = node_dictionary.get(node.history_father(), "empty")
             action_index = node.name.rfind(':')
             father.addChild(node, node.name[action_index + 1:])
-        # Create the information sets
+        # Create the information sets , also retrieve the cards in the current game
         for i in range(0, len(infoset_lines)):
             name, histories = parse_infoset_line(infoset_lines[i])
             first_node = node_dictionary.get(histories[0])
@@ -191,11 +196,21 @@ class Game:
             assert(actions_first_node is not None)
             information_set = InformationSet(name, player, histories, actions_first_node)
             self.information_sets.append(information_set)
+            # find card from a infoset
+            card = parse_card_from_infoset(infoset_lines[i])
+            # prevent the case in which the card is not in the first position - for instance ?K
+            if card is not None:
+                if card not in self.cards:
+                    self.cards.append(card)
         # create the entries of the history dict
         for infoset in self.information_sets:
             for history in infoset.node_histories:
                 self.history_dictionary.update({history: infoset})
-
+        #print(self.cards)
+        # sort the cards by the strength
+        self.cards_sorted = self.cards_sorted_by_strength(self.cards, self.root_node)
+        #print(self.cards_sorted)
+        print(self.group_hands(self.cards_sorted))
         return self
 
     def abstract_yourself(self):
@@ -298,3 +313,45 @@ class Game:
                 expected_value += u * probability
 
         return expected_value
+
+    # This method returns the list of the cards sorted by the strength, growing -> for instance: J-Q-K
+    def cards_sorted_by_strength(self, cards: [str], root_node: 'Node') -> [str]:
+        cards_strength = {}
+        result = []
+        assert isinstance(root_node, ChanceNode)
+        actions = root_node.actions
+        # create a local dictionary card - strength
+        for card in cards:
+            card_strength = 0
+            for action, child in zip(actions, root_node.children):
+                assert isinstance(action, str)
+                if action.startswith(card):
+                    card_strength += sum(child.getPayoffRepresentation())
+            cards_strength.update({card: card_strength})
+        print(cards_strength)
+        # use the dictionary to find the order
+        for key, value in sorted(cards_strength.items(), key=itemgetter(1), reverse=False):
+            result.append(key)
+        print(result)
+        return result
+
+    # This method creates the groups for the abstraction, given the cards sorted by the strength (growing)
+    # It returns a list containing the groups of cards that have to be merged.
+    def group_hands(self, cards: [str]) -> [[str]]:
+        number_elements = Game.n
+        result = []
+        groups = []
+        k = len(cards)
+        for i in range(0, k, number_elements):
+            groups.append(cards[i:i+number_elements])
+        print(groups)
+        for g_i in groups:
+            for g_q in groups:
+                hands_set = []
+                for card_i in g_i:
+                    for card_q in g_q:
+                        hand = card_i+card_q
+                        hands_set.append(hand)
+                result.append(hands_set)
+        #print(result)
+        return result
