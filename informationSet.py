@@ -3,26 +3,48 @@ from random import *
 
 class InformationSet:
 
-    def __init__(self, name: str, node_histories: [str]):
+    def __init__(self, name: str, player: str, node_histories: [str], actions: [str]):
         self.name = name
+        self.player = player
         self.node_histories = node_histories
-        self.actions = []
-        self.regret = []
-        self.regret_strategy = []
-        self.cumulative_strategy = []
         self.__time = -1
-
-    def add_strategies(self, actions: [str]):
         self.actions = actions
         self.regret = [0.0 for _ in actions]
         self.regret_strategy = [0.0 for _ in actions]
         self.cumulative_strategy = [0.0 for _ in actions]
 
-    def get_strategy_representation(self):
-        result = "infoset " + self.name + " strategies "
-        for action, strategy in zip(self.actions, self.cumulative_strategy):
-            result += action + "=" + str(strategy) + " "
-        return result
+    def update_regret_strategy(self):
+        self.regret_strategy = self.__compute_regret_strategy()
+
+    def update_regret_strategy_plus(self):
+
+        for i in range(len(self.regret)):
+            self.regret[i] = max(self.regret[i], 0)
+
+        self.regret_strategy = self.__compute_regret_strategy()
+
+    def __compute_regret_strategy(self):
+        """
+        Computes and stores the new regret strategy associated to the current cumulative regret
+        """
+        regret_plus = [max(r, 0) for r in self.regret]
+        s = sum(regret_plus)
+        if  s == 0:
+            new_strategy = [1 / len(self.actions) for _ in range(len(self.actions))]
+        else:
+            new_strategy = [r / s for r in regret_plus]
+
+        return new_strategy
+
+    def get_average_strategy(self):
+        """
+        Returns normalized average strategy
+        """
+        if (sum(self.cumulative_strategy) == 0):
+            return [1/len(self.actions) for _ in self.actions]
+        else:
+            return [round(p / sum(self.cumulative_strategy),6) for p in self.cumulative_strategy]
+
 
     def update_actions(self, infoset_to_copy: 'InformationSet'):
         # To verify that two information sets were mapped correctly
@@ -35,42 +57,7 @@ class InformationSet:
 
     def __str__(self):
         result = "Infoset: " + self.name + ' with strategies '
-        for key in self.cumulative_strategy:
-            result += key + ':' + str(self.cumulative_strategy[key]) + ' '
+        avg_s = self.get_average_strategy()
+        for idx in range(len(self.actions)):
+            result += self.actions[idx] + ':' + str(avg_s[idx]) + ' '
         return result
-
-    def update_regret_strategy(self, time):
-        # a regret is asked for the next time step -> use updated regrets and update current time
-        assert (time == self.__time + 1)
-        self.__time += 1
-        # do final computation of R+ according to rules of CFR+avg
-        # ~since all nodes in infoset must have been already explored by CFR_plus (since time has updated)
-        for i in range(len(self.regret)):
-            self.regret[i] = max(self.regret[i], 0.0)
-        # update the regret strategy we offer to the nodes in the infoset
-        self.__compute_regret_strategy()
-
-    def __compute_regret_strategy(self):
-        """
-        Computes and stores the new regret strategy associated to the current cumulative regret
-        """
-        if sum(self.regret) == 0:
-            new_strategy = [1 / len(self.actions) for _ in range(len(self.actions))]
-        else:
-            new_strategy = [reg / sum(self.regret) for reg in self.regret]
-
-        self.regret_strategy = new_strategy
-
-    def normalize_strategy(self):
-        """
-        Normalizes strategies
-        :return: nothing
-        """
-        # assert(sum(self.strategy) != 0)
-        if (sum(self.cumulative_strategy) == 0):
-            #print("Infoset never played" + self.name)
-            return
-        else:
-            self.cumulative_strategy = [p / sum(self.cumulative_strategy) for p in self.cumulative_strategy]
-            # print(self.name + " the strategy is:", self.cumulative_strategy)
-            return

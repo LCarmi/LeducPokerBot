@@ -26,7 +26,7 @@ class Manager:
         infosets = self.originalGame.information_sets
         result = ""
         for infoset in infosets:
-            result = result + infoset.get_strategy_representation() + '\n'
+            result = result + str(infoset) + '\n'
 
         return result
 
