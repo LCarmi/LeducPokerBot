@@ -10,8 +10,10 @@ class Manager:
     def __init__(self, file_path: str):
 
         node_lines, infoset_lines = text_order_by_history_length(file_path)
-        self.originalGame = Game().parse_game(node_lines, infoset_lines)
-        self.abstractedGame = Game().parse_game(node_lines, infoset_lines)
+        self.originalGame = Game()
+        self.originalGame.parse_game(node_lines, infoset_lines)
+        self.abstractedGame = Game()
+        self.abstractedGame.parse_game(node_lines, infoset_lines)
         self.information_set_mapping = {}
 
     def create_abstraction(self):

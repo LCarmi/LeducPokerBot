@@ -230,20 +230,23 @@ class ChanceNode(Node):
         children = []
         list_of_changes = []
 
-        # 2) scan both action lists  to merge them
+        # 2) scan both action lists to merge them -> Efficiently by using relative ordering of each list -> double scan
         i_self = 0
         i_node = 0
         while i_self < len(self.actions) and i_node < len(node.actions):
+
             if self.actions[i_self] > node.actions[i_node]:
                 actions.append(node.actions[i_node])
                 probabilities.append(node.probabilities[i_node])
                 children.append(node.children[i_node])
                 i_node += 1
+
             elif self.actions[i_self] < node.actions[i_node]:
                 actions.append(self.actions[i_self])
                 probabilities.append(self.probabilities[i_self])
                 children.append(self.children[i_self])
                 i_self += 1
+
             else:
                 actions.append(self.actions[i_self])
                 probabilities.append(self.probabilities[i_self] * weight + node.probabilities[i_node] * weight_node)
@@ -252,6 +255,18 @@ class ChanceNode(Node):
                 children.append(self.children[i_self])
                 i_self += 1
                 i_node += 1
+
+        while i_self < len(self.actions):
+            actions.append(self.actions[i_self])
+            probabilities.append(self.probabilities[i_self])
+            children.append(self.children[i_self])
+            i_self += 1
+
+        while i_node < len(node.actions):
+            actions.append(node.actions[i_node])
+            probabilities.append(node.probabilities[i_node])
+            children.append(node.children[i_node])
+            i_node += 1
 
         # 3) modify name, actions, probabilities, children of current Node
         old_name = self.name

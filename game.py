@@ -207,13 +207,11 @@ class Game:
         for infoset in self.information_sets:
             for history in infoset.node_histories:
                 self.history_dictionary.update({history: infoset})
-        #print(self.cards)
+
         # sort the cards by the strength
         self.cards_sorted = self.cards_sorted_by_strength(self.cards, self.root_node)
-        #print(self.cards_sorted)
         self.card_groups = self.group_hands(self.cards_sorted)
-        print(self.card_groups)
-        return self
+        return
 
     def abstract_yourself(self):
         # Abstract the game
@@ -330,11 +328,10 @@ class Game:
                 if action.startswith(card):
                     card_strength += sum(child.getPayoffRepresentation())
             cards_strength.update({card: card_strength})
-        print(cards_strength)
+
         # use the dictionary to find the order
         for key, value in sorted(cards_strength.items(), key=itemgetter(1), reverse=False):
             result.append(key)
-        print(result)
         return result
 
     # This method creates the groups for the abstraction, given the cards sorted by the strength (growing)
@@ -346,7 +343,6 @@ class Game:
         k = len(cards)
         for i in range(0, k, number_elements):
             groups.append(cards[i:i+number_elements])
-        print(groups)
         for g_i in groups:
             for g_q in groups:
                 hands_set = []
@@ -355,5 +351,4 @@ class Game:
                         hand = card_i+card_q
                         hands_set.append(hand)
                 result.append(hands_set)
-        #print(result)
         return result
