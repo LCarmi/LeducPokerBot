@@ -47,7 +47,7 @@ class Manager:
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - kuhn.txt"
+    file_path = "./Examples/input - leduc3.txt"
     manager = Manager(file_path)
 
     print("Game loaded!")
@@ -61,8 +61,6 @@ if __name__ == '__main__':
     #res = manager.write_result()
     #print(res)
     print(manager.write_result())
-    print(manager.originalGame.exploit_player(manager.originalGame.root_node, 1))
-    print(manager.originalGame.exploit_player(manager.originalGame.root_node, 2))
     print(manager.originalGame.expected_value(manager.originalGame.root_node))
     # file_path_output = "./Examples/output.txt"
     # f = open(file_path_output, "w+")

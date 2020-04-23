@@ -18,6 +18,7 @@ class Game:
         self.history_dictionary = {}
         self.cards = []
         self.cards_sorted = []
+        self.card_groups = [[]]
 
     def find_optimal_strategy(self):
         #CFR+ algorithm
@@ -210,7 +211,8 @@ class Game:
         # sort the cards by the strength
         self.cards_sorted = self.cards_sorted_by_strength(self.cards, self.root_node)
         #print(self.cards_sorted)
-        print(self.group_hands(self.cards_sorted))
+        self.card_groups = self.group_hands(self.cards_sorted)
+        print(self.card_groups)
         return self
 
     def abstract_yourself(self):
