@@ -215,7 +215,7 @@ class Game:
 
     def abstract_yourself(self):
         # Abstract the game
-        changes = self.root_node.abstractSubtree()
+        changes = self.abstractSubtree(self.root_node)
         # Mapping between nameOriginalInfo -> abstractInfoSet
         result = {}
         # Create dictionary of the original game name_infoset -> history_one_node.It will be used to create the mapping
@@ -283,6 +283,64 @@ class Game:
                 name_original_set = old_dictionary.get(history)
                 result.update({name_original_set: infoset})
         return result
+
+    def abstractSubtree(self, n:Node) -> ([(str, str, str)]):
+        all_changes = []
+        newChildren = []
+        newActions = []
+        newProbabilities = []
+        n.reorderNode()
+        if isinstance(n, TerminalNode):
+            # does nothing
+            return []
+
+        if isinstance(n, ChanceNode):
+            indexGroups=[[] for _ in self.card_groups]
+            for group in self.card_groups:
+                for a in n.actions:
+                    if a in group:
+                        indexGroups[self.card_groups.index(group)].append(n.actions.index(a))
+
+            for group,card_g in zip(indexGroups,self.card_groups):
+                if group != []:
+                    firstIndex = group[0]
+                    child: Node = n.children[firstIndex]
+                    action: str = card_g[0]
+                    probability: float = n.probabilities[firstIndex]
+                    for index in group[1:]:
+                        print(child.get_actions())
+                        print(n.children[index].get_actions())
+                        print(type(n.children[index]))
+                        print(type(child))
+                        changes = child.mapWithSubtree(n.children[index],probability,n.probabilities[index])
+                        probability = probability + n.probabilities[index]
+
+                        all_changes = all_changes + changes
+
+                    newChildren.append(child)
+                    newActions.append(action)
+                    newProbabilities.append(probability)
+
+            n.actions = newActions
+            n.children = [None for _ in n.actions]
+            n.probabilities = newProbabilities
+
+            for action, child in zip(newActions, newChildren):
+                n.addChild(child, action)
+
+            for child in n.children:
+                all_changes = all_changes + self.abstractSubtree(child)
+
+            return all_changes
+
+        assert isinstance(n, InternalNode)
+        # Put nodes together
+
+        for child in n.children:
+            all_changes = all_changes + self.abstractSubtree(child)
+
+        return all_changes
+
 
     def get_infoset_from_name(self, infoset_name: str) -> 'InformationSet':
         for infoset in self.information_sets:
