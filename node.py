@@ -221,8 +221,10 @@ class ChanceNode(Node):
     def mapWithSubtree(self, node: 'Node', weight: float, weight_node: float) -> ([(str, str, str)]):
         assert isinstance(node, ChanceNode)
         # assert both action arrays as alphabetically ordered
-        assert (all(node.actions[i] <= node.actions[i + 1] for i in range(len(node.actions) - 1)))
-        assert (all(self.actions[i] <= self.actions[i + 1] for i in range(len(self.actions) - 1)))
+        if not (all(node.actions[i] <= node.actions[i + 1] for i in range(len(node.actions) - 1))):
+            node.alphabetically_order_actions()
+        if not (all(self.actions[i] <= self.actions[i + 1] for i in range(len(self.actions) - 1))):
+            self.alphabetically_order_actions()
 
         # 1) initialize data structures needed to store intermediate data structures
         actions = []

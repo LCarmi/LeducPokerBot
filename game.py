@@ -289,7 +289,7 @@ class Game:
         newChildren = []
         newActions = []
         newProbabilities = []
-        n.reorderNode()
+
         if isinstance(n, TerminalNode):
             # does nothing
             return []
