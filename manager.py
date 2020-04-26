@@ -53,9 +53,10 @@ if __name__ == '__main__':
     manager = Manager(file_path)
 
     print("Game loaded!")
-    manager.create_abstraction()
+    #manager.create_abstraction()
     #manager.abstractedGame.print_tree(manager.abstractedGame.root_node)
     print("Abstraction ended!")
+    manager.originalGame.root_node.alphabetically_order_actions()
     #manager.abstractedGame.find_optimal_strategy()
     manager.originalGame.find_optimal_strategy()
     print("Optimum strategy done!")
