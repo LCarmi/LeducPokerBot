@@ -4,7 +4,7 @@ from informationSet import *
 from node import *
 from myParser import *
 from operator import itemgetter
-
+import math
 
 # TODO: eliminate print
 class Game:
@@ -284,59 +284,67 @@ class Game:
                 result.update({name_original_set: infoset})
         return result
 
-    def abstractSubtree(self, n:Node) -> ([(str, str, str)]):
+    def abstractSubtree(self, nd:Node) -> ([(str, str, str)]):
         all_changes = []
         newChildren = []
         newActions = []
         newProbabilities = []
 
-        if isinstance(n, TerminalNode):
+        if isinstance(nd, TerminalNode):
             # does nothing
             return []
 
-        if isinstance(n, ChanceNode):
-            indexGroups=[[] for _ in self.card_groups]
-            for group in self.card_groups:
-                for a in n.actions:
-                    if a in group:
-                        indexGroups[self.card_groups.index(group)].append(n.actions.index(a))
+        if isinstance(nd, ChanceNode):
 
-            for group,card_g in zip(indexGroups,self.card_groups):
+            if nd == self.root_node:
+                indexGroups = [[] for _ in self.card_groups]
+                for group in self.card_groups:
+                    for a in nd.actions:
+                        if a in group:
+                            indexGroups[self.card_groups.index(group)].append(nd.actions.index(a))
+                cardGroup=self.card_groups
+            else:
+
+                numberGroups=math.floor(len(self.cards_sorted)/self.n)
+                cardGroup=[self.cards_sorted[i*self.n:i*self.n+self.n]for i in range(numberGroups)]
+                if  len(self.cards_sorted)%self.n != 0:
+                    cardGroup.append(self.cards_sorted[numberGroups*self.n:])
+                indexGroups = [[] for _ in cardGroup]
+                for group in cardGroup:
+                    for a in nd.actions:
+                        if a in group:
+                            indexGroups[cardGroup.index(group)].append(nd.actions.index(a))
+            for group,card_g in zip(indexGroups,cardGroup):
                 if group != []:
                     firstIndex = group[0]
-                    child: Node = n.children[firstIndex]
+                    child: Node = nd.children[firstIndex]
                     action: str = card_g[0]
-                    probability: float = n.probabilities[firstIndex]
+                    probability: float = nd.probabilities[firstIndex]
                     for index in group[1:]:
-                        print(child.get_actions())
-                        print(n.children[index].get_actions())
-                        print(type(n.children[index]))
-                        print(type(child))
-                        changes = child.mapWithSubtree(n.children[index],probability,n.probabilities[index])
-                        probability = probability + n.probabilities[index]
-
+                        changes = child.mapWithSubtree(nd.children[index],probability,nd.probabilities[index])
+                        probability = probability + nd.probabilities[index]
                         all_changes = all_changes + changes
 
                     newChildren.append(child)
                     newActions.append(action)
                     newProbabilities.append(probability)
 
-            n.actions = newActions
-            n.children = [None for _ in n.actions]
-            n.probabilities = newProbabilities
+            nd.actions = newActions
+            nd.children = [None for _ in nd.actions]
+            nd.probabilities = newProbabilities
 
             for action, child in zip(newActions, newChildren):
-                n.addChild(child, action)
-
-            for child in n.children:
+                nd.addChild(child, action)
+            #Need to be done in internal node and in chance node
+            for child in nd.children:
                 all_changes = all_changes + self.abstractSubtree(child)
 
             return all_changes
 
-        assert isinstance(n, InternalNode)
+        assert isinstance(nd, InternalNode)
         # Put nodes together
 
-        for child in n.children:
+        for child in nd.children:
             all_changes = all_changes + self.abstractSubtree(child)
 
         return all_changes
