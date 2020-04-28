@@ -42,15 +42,6 @@ class Node(ABC):
         """
         pass
 
-    @abstractmethod
-    def abstractSubtree(self) -> [('Node', 'Node')]:
-        """
-        Modifies the subtree rooted in the node (by compressing isomorphic "similar" subtrees) and returns a list of the
-        mapped nodes in the process
-        :return: a list of pair of nodes mapped one on the other
-        """
-        pass
-
     def print_father(self):
         if self.father is None:
             print("I'm " + self.name + " and I don't have a father")
@@ -104,10 +95,6 @@ class TerminalNode(Node):
         self.name = self.name + "##" + node.name
         self.payoff = (self.payoff * weight + node.payoff * weight_node) / (weight + weight_node)
         return [(self.name, oldName, node.name)]
-
-    def abstractSubtree(self) -> ([(str, str, str)]):
-        # does nothing
-        return []
 
     def print_children(self):
         print("I'm " + self.name + " I don't have children. However, my payoff is: " + str(self.payoff))
@@ -174,13 +161,6 @@ class InternalNode(Node):
 
         # 4) return (newNode, uniqueListOfChanges)
         return uniqueListOfChanges
-
-    def abstractSubtree(self) -> ([(str, str, str)]):
-        # does nothing in the node, just propagates the message
-        allChanges = []
-        for child in self.children:
-            allChanges = allChanges + child.abstractSubtree()
-        return allChanges
 
     def get_actions(self):
         return self.actions
@@ -285,105 +265,6 @@ class ChanceNode(Node):
 
         # 5) return uniqueListOfChanges
         return list_of_changes
-
-    def abstractSubtree(self) -> ([(str, str, str)]):
-        # First see if it is needed to do the abstraction
-        if len(self.children) < 2:
-            # No need of doing abstraction
-            return []
-
-        # K means algorithm
-        # Put all the payOff of the children in a list
-        payOffValues = []
-        length = 0
-        for c in self.children:
-            payOffValues.append(c.getPayoffRepresentation())
-            length = len(c.getPayoffRepresentation())
-
-        # export data
-        # with open('kuhn-{}.txt'.format(ChanceNode.iterNum), 'w') as outfile:
-        #     json.dump(payOffValues, outfile)
-        # ChanceNode.iterNum = ChanceNode.iterNum + 1q
-
-        # count how many different data we have
-        differentPayoffs = 0
-        for i in range(len(payOffValues)):
-            if payOffValues[i] not in payOffValues[i + 1:]:
-                differentPayoffs += 1
-
-        # TODO: idea of lossless abstraction: ~ running in O(n)
-        # b = [] # List of tuples containing grouped indentical elements and their indices
-        # for idx, elem in enumerate(payOffValues):
-        # added = False
-        # for e, l in b:
-        #     if e == elem:
-        #         l.append(idx)
-        #         added = True
-        #         break
-        # if not added:
-        #     b.append((elem, [idx]))
-
-        # Transform the list in order to operate in the kmeans
-        payOffValues = np.asarray(payOffValues)  # .reshape(-1, length)
-
-        if differentPayoffs == 1:
-            # case in which all children are equal
-            cluster = [0 for _ in payOffValues]
-            n_cluster_op = 1
-        else:
-            # Do k-means algorithm
-            # Silhouette method for finding the optimal k in k-means
-            kmax = differentPayoffs
-            sil = []
-            for k in range(2, kmax + 1):
-                kmeans = KMeans(n_clusters=k).fit(payOffValues)
-                labels = kmeans.labels_
-                sil.append(silhouette_score(payOffValues, labels, metric='euclidean'))
-
-            n_cluster_op = sil.index(max(sil)) + 2
-            algokmeans = KMeans(n_clusters=n_cluster_op, init='k-means++', max_iter=300, n_init=10, random_state=0)
-            cluster = algokmeans.fit_predict(payOffValues)
-
-        indexGroups = [[] for _ in range(n_cluster_op)]
-        for x in range(len(cluster)):
-            # add each element index to a group where all with the same addresses are grouped
-            indexGroups[cluster[x]].append(x)
-
-        # Put nodes together
-        newChildren = []
-        newActions = []
-        newProbabilities = []
-        allChanges = []
-
-        for group in indexGroups:
-            firstIndex = group[0]
-            child: Node = self.children[firstIndex]
-            action: str = self.actions[firstIndex]
-            probability: float = self.probabilities[firstIndex]
-            for index in group[1:]:
-                changes = child.mapWithSubtree(self.children[index])
-                action = action + "##" + self.actions[index]
-                probability = probability + self.probabilities[index]
-
-                allChanges = allChanges + changes
-
-            newChildren.append(child)
-            newActions.append(action)
-            newProbabilities.append(probability)
-
-        # Change  your children by using the new ones, change actions etc accordingly
-        self.actions = newActions
-        self.children = [None for _ in self.actions]
-        self.probabilities = newProbabilities
-
-        for action, child in zip(newActions, newChildren):
-            self.addChild(child, action)
-
-        # Call abstract on the children
-        for c in self.children:
-            allChanges = allChanges + c.abstractSubtree()
-        # Return the changes
-        return allChanges
 
     def print_children(self):
         ret = "I'm " + self.name + " and my children are "

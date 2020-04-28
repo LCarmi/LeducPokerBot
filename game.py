@@ -18,7 +18,8 @@ class Game:
         self.history_dictionary = {}
         self.cards = []
         self.cards_sorted = []
-        self.card_groups = [[]]
+        self.card_groups = []
+        self.card_pair_groups = [[]]
 
     def find_optimal_strategy(self):
         #CFR+ algorithm
@@ -107,7 +108,7 @@ class Game:
                 # ex = (regret_P1 + regret_P2) / 2.0
                 ex_val = self.expected_value(self.root_node)
                 print("Time: {}, Expected Value: {}".format(t, ex_val))
-                
+
     def CFR_plus(self, h:Node,i,w,pi) -> float:
         """
 
@@ -210,7 +211,7 @@ class Game:
 
         # sort the cards by the strength
         self.cards_sorted = self.cards_sorted_by_strength(self.cards, self.root_node)
-        self.card_groups = self.group_hands(self.cards_sorted)
+        self.card_pair_groups = self.group_hands(self.cards_sorted)
         return
 
     def abstract_yourself(self):
@@ -297,23 +298,16 @@ class Game:
         if isinstance(nd, ChanceNode):
 
             if nd == self.root_node:
-                indexGroups = [[] for _ in self.card_groups]
-                for group in self.card_groups:
-                    for a in nd.actions:
-                        if a in group:
-                            indexGroups[self.card_groups.index(group)].append(nd.actions.index(a))
-                cardGroup=self.card_groups
+                cardGroup=self.card_pair_groups
             else:
+                cardGroup=self.card_groups
 
-                numberGroups=math.floor(len(self.cards_sorted)/self.n)
-                cardGroup=[self.cards_sorted[i*self.n:i*self.n+self.n]for i in range(numberGroups)]
-                if  len(self.cards_sorted)%self.n != 0:
-                    cardGroup.append(self.cards_sorted[numberGroups*self.n:])
-                indexGroups = [[] for _ in cardGroup]
-                for group in cardGroup:
-                    for a in nd.actions:
-                        if a in group:
-                            indexGroups[cardGroup.index(group)].append(nd.actions.index(a))
+            indexGroups = [[] for _ in cardGroup]
+            for group in cardGroup:
+                for a in nd.actions:
+                    if a in group:
+                        indexGroups[cardGroup.index(group)].append(nd.actions.index(a))
+
             for group,card_g in zip(indexGroups,cardGroup):
                 if group != []:
                     firstIndex = group[0]
@@ -335,13 +329,8 @@ class Game:
 
             for action, child in zip(newActions, newChildren):
                 nd.addChild(child, action)
-            #Need to be done in internal node and in chance node
-            for child in nd.children:
-                all_changes = all_changes + self.abstractSubtree(child)
 
-            return all_changes
-
-        assert isinstance(nd, InternalNode)
+        #Needs to be done in internal node and in chance node
         # Put nodes together
 
         for child in nd.children:
@@ -405,12 +394,11 @@ class Game:
     def group_hands(self, cards: [str]) -> [[str]]:
         number_elements = Game.n
         result = []
-        groups = []
         k = len(cards)
         for i in range(0, k, number_elements):
-            groups.append(cards[i:i+number_elements])
-        for g_i in groups:
-            for g_q in groups:
+            self.card_groups.append(cards[i:i+number_elements])
+        for g_i in self.card_groups:
+            for g_q in self.card_groups:
                 hands_set = []
                 for card_i in g_i:
                     for card_q in g_q:
