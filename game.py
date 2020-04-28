@@ -6,6 +6,7 @@ from myParser import *
 from operator import itemgetter
 import math
 
+
 # TODO: eliminate print
 class Game:
     d = 100  # number of regret explorations without strategy update
@@ -22,11 +23,10 @@ class Game:
         self.card_pair_groups = [[]]
 
     def find_optimal_strategy(self):
-        #CFR+ algorithm
+        # CFR+ algorithm
 
-        self.CFR_plus_optimize()
-        #self.CFR_optimize()
-
+        # self.CFR_plus_optimize()
+        self.CFR_optimize()
 
     def CFR_optimize(self):
         for t in range(Game.total_iterations):
@@ -38,7 +38,7 @@ class Game:
             self.CFR(self.root_node, 1, 1, 1)
             self.CFR(self.root_node, 2, 1, 1)
 
-            if (w != 0 and t % 10 == 0):
+            if (w != 0 and t % 100 == 0):
                 # regret_P1 = 0
                 # regret_P2 = 0
                 # for i in self.information_sets:
@@ -58,27 +58,29 @@ class Game:
             return h.payoff
 
         if (isinstance(h, ChanceNode)):
-            if i ==1:
-                return sum(prob * self.CFR(child, i, pi1, pi2*prob) for prob,child in zip(h.probabilities,h.children))
+            if i == 1:
+                return sum(
+                    prob * self.CFR(child, i, pi1, pi2 * prob) for prob, child in zip(h.probabilities, h.children))
             else:
-                return sum(prob * self.CFR(child, i, pi1*prob, pi2) for prob,child in zip(h.probabilities,h.children))
+                return sum(
+                    prob * self.CFR(child, i, pi1 * prob, pi2) for prob, child in zip(h.probabilities, h.children))
 
-        assert(isinstance(h, InternalNode))
-        infoset : InformationSet = self.history_dictionary.get(h.name)
+        assert (isinstance(h, InternalNode))
+        infoset: InformationSet = self.history_dictionary.get(h.name)
         strategy = infoset.regret_strategy
         pure_payoffs = []
         expected_payoff = 0
 
-        for child,p in zip(h.children, strategy):
-            if(h.player == 1):
+        for child, p in zip(h.children, strategy):
+            if (h.player == 1):
                 u = self.CFR(child, i, p * pi1, pi2)
             else:
-                u = self.CFR(child,i,pi1, pi2 * p)
-            expected_payoff += u*p
+                u = self.CFR(child, i, pi1, pi2 * p)
+            expected_payoff += u * p
             pure_payoffs.append(u)
 
         if (h.player == i):
-            pi_i, pi_adv = (pi1 , pi2) if i==1 else (pi2, pi1)
+            pi_i, pi_adv = (pi1, pi2) if i == 1 else (pi2, pi1)
             for idx in range(len(infoset.actions)):
                 infoset.regret[idx] += pi_adv * (pure_payoffs[idx] - expected_payoff)
                 infoset.cumulative_strategy[idx] += pi_i * strategy[idx]
@@ -96,7 +98,7 @@ class Game:
             self.CFR_plus(self.root_node, 1, w, 1)
             self.CFR_plus(self.root_node, 2, w, 1)
 
-            if (w != 0 and t % 10 == 0):
+            if (w != 0 and t % 100 == 0):
                 # regret_P1 = 0
                 # regret_P2 = 0
                 # for i in self.information_sets:
@@ -109,7 +111,7 @@ class Game:
                 ex_val = self.expected_value(self.root_node)
                 print("Time: {}, Expected Value: {}".format(t, ex_val))
 
-    def CFR_plus(self, h:Node,i,w,pi) -> float:
+    def CFR_plus(self, h: Node, i, w, pi) -> float:
         """
 
         :param h: current node that is examinated
@@ -127,22 +129,22 @@ class Game:
             # in case player is adversary, return negative payoff (since zero sum game)
             if i == 2:
                 return -h.payoff
-            #return player 1 payoff otherwise
+            # return player 1 payoff otherwise
             return h.payoff
 
         # case when we are dealing with a ChanceNode
         # no information sets/strategies involved, but children involved just return your children's payoff
         if isinstance(h, ChanceNode):
             expected_payoff = 0
-            for probability,node in zip(h.probabilities, h.children):
-                expected_payoff += probability * self.CFR_plus(node, i, w, pi) # TODO: check if multiplication per probability is needed
+            for probability, node in zip(h.probabilities, h.children):
+                expected_payoff += probability * self.CFR_plus(node, i, w, pi * probability)
             return expected_payoff
 
         # case when we are dealing with an InternalNode
-        assert(isinstance(h, InternalNode))
+        assert (isinstance(h, InternalNode))
         # fetch infoset of current node
-        current_infoset:InformationSet = self.history_dictionary.get(h.name)
-        assert(current_infoset is not None)
+        current_infoset: InformationSet = self.history_dictionary.get(h.name)
+        assert (current_infoset is not None)
         # produce a strategy using regret matching
         # we consume it immediately and don't need it anymore -> used as local variable
         regret_matched_strategy = current_infoset.regret_strategy
@@ -162,14 +164,14 @@ class Game:
             for idx in range(len(h.actions)):
                 # update cumulative regret tables relative to the considered infoset
                 # RM+ computation and update will happen inside Infoset
-                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi # TODO: check if multiplication per pi is needed
+                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi
 
         else:
             # case when internal node is of adversary of player currently under regret update
             # explore children in order to gather expected payoffs and compute expected payoff at node
             for child, probability in zip(h.children, regret_matched_strategy):
-                u = self.CFR_plus(child, i, w, pi*probability)
-                expected_payoff += u * probability  # TODO: check if multiplication per probability is needed
+                u = self.CFR_plus(child, i, w, pi * probability)
+                expected_payoff += u * probability
 
             for idx in range(len(h.actions)):
                 # update cumulative strategies
@@ -195,7 +197,7 @@ class Game:
             first_node = node_dictionary.get(histories[0])
             actions_first_node = first_node.get_actions()
             player = first_node.player
-            assert(actions_first_node is not None)
+            assert (actions_first_node is not None)
             information_set = InformationSet(name, player, histories, actions_first_node)
             self.information_sets.append(information_set)
             # find card from a infoset
@@ -244,7 +246,8 @@ class Game:
                 newNodeSetHistories.remove(oldNode1)
                 newNodeSetHistories.remove(oldNode2)
 
-                newInfoSet = InformationSet(newNameInfoset, oldNodeSet1.player, newNodeSetHistories, oldNodeSet1.actions)
+                newInfoSet = InformationSet(newNameInfoset, oldNodeSet1.player, newNodeSetHistories,
+                                            oldNodeSet1.actions)
 
                 # Add the new infoSet on the array
                 self.information_sets.append(newInfoSet)
@@ -285,7 +288,7 @@ class Game:
                 result.update({name_original_set: infoset})
         return result
 
-    def abstractSubtree(self, nd:Node) -> ([(str, str, str)]):
+    def abstractSubtree(self, nd: Node) -> ([(str, str, str)]):
         all_changes = []
         newChildren = []
         newActions = []
@@ -298,9 +301,9 @@ class Game:
         if isinstance(nd, ChanceNode):
 
             if nd == self.root_node:
-                cardGroup=self.card_pair_groups
+                cardGroup = self.card_pair_groups
             else:
-                cardGroup=self.card_groups
+                cardGroup = self.card_groups
 
             indexGroups = [[] for _ in cardGroup]
             for group in cardGroup:
@@ -308,14 +311,14 @@ class Game:
                     if a in group:
                         indexGroups[cardGroup.index(group)].append(nd.actions.index(a))
 
-            for group,card_g in zip(indexGroups,cardGroup):
+            for group, card_g in zip(indexGroups, cardGroup):
                 if group != []:
                     firstIndex = group[0]
                     child: Node = nd.children[firstIndex]
                     action: str = card_g[0]
                     probability: float = nd.probabilities[firstIndex]
                     for index in group[1:]:
-                        changes = child.mapWithSubtree(nd.children[index],probability,nd.probabilities[index])
+                        changes = child.mapWithSubtree(nd.children[index], probability, nd.probabilities[index])
                         probability = probability + nd.probabilities[index]
                         all_changes = all_changes + changes
 
@@ -331,14 +334,13 @@ class Game:
                 nd.addChild(child, action)
             nd.normalize_probabilites()
 
-        #Needs to be done in internal node and in chance node
+        # Needs to be done in internal node and in chance node
         # Put nodes together
 
         for child in nd.children:
             all_changes = all_changes + self.abstractSubtree(child)
 
         return all_changes
-
 
     def get_infoset_from_name(self, infoset_name: str) -> 'InformationSet':
         for infoset in self.information_sets:
@@ -397,13 +399,13 @@ class Game:
         result = []
         k = len(cards)
         for i in range(0, k, number_elements):
-            self.card_groups.append(cards[i:i+number_elements])
+            self.card_groups.append(cards[i:i + number_elements])
         for g_i in self.card_groups:
             for g_q in self.card_groups:
                 hands_set = []
                 for card_i in g_i:
                     for card_q in g_q:
-                        hand = card_i+card_q
+                        hand = card_i + card_q
                         hands_set.append(hand)
                 result.append(hands_set)
         return result
