@@ -33,20 +33,6 @@ class Manager:
 
         return result
 
-
-    # TODO Method used only to test the mapping and the output
-    def test_mapping(self):
-        manager.originalGame.init_uniform_dist()
-        manager.abstractedGame.init_personal_dist()
-        manager.map_strategies()
-        manager.print_strategies_result()
-
-    def print_strategies_result(self):
-        infosets = self.originalGame.information_sets
-        for infoset in infosets:
-            print(infoset.get_strategy_representation())
-
-
 if __name__ == '__main__':
 
     file_path = "./Examples/input - leduc3.txt"
@@ -61,8 +47,6 @@ if __name__ == '__main__':
     manager.map_strategies()
     res = manager.write_result()
     print(res)
-    #print(manager.write_result())
-    print(manager.abstractedGame.expected_value(manager.originalGame.root_node))
     # file_path_output = "./Examples/output.txt"
     # f = open(file_path_output, "w+")
     # f.write(out)

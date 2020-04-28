@@ -329,6 +329,7 @@ class Game:
 
             for action, child in zip(newActions, newChildren):
                 nd.addChild(child, action)
+            nd.normalize_probabilites()
 
         #Needs to be done in internal node and in chance node
         # Put nodes together
