@@ -10,7 +10,7 @@ import math
 # TODO: eliminate print
 class Game:
     d = 100  # number of regret explorations without strategy update
-    total_iterations = 1000  # number of iteration to do
+    total_iterations = 10000  # number of iteration to do
     n = 2  # number of card in a group (abstraction)
 
     def __init__(self):
@@ -25,8 +25,8 @@ class Game:
     def find_optimal_strategy(self):
         # CFR+ algorithm
 
-        # self.CFR_plus_optimize()
-        self.CFR_optimize()
+        self.CFR_plus_optimize()
+        #self.CFR_optimize()
 
     def CFR_optimize(self):
         for t in range(Game.total_iterations):
@@ -98,7 +98,7 @@ class Game:
             self.CFR_plus(self.root_node, 1, w, 1)
             self.CFR_plus(self.root_node, 2, w, 1)
 
-            if (w != 0 and t % 100 == 0):
+            if (w != 0 and t % 10 == 0):
                 # regret_P1 = 0
                 # regret_P2 = 0
                 # for i in self.information_sets:
@@ -213,7 +213,8 @@ class Game:
 
         # sort the cards by the strength
         self.cards_sorted = self.cards_sorted_by_strength(self.cards, self.root_node)
-        self.card_pair_groups = self.group_hands(self.cards_sorted)
+        self.card_groups = self.group_cards(self.cards_sorted)
+        self.card_pair_groups = self.group_pairs(self.card_groups)
         return
 
     def abstract_yourself(self):
@@ -394,18 +395,22 @@ class Game:
 
     # This method creates the groups for the abstraction, given the cards sorted by the strength (growing)
     # It returns a list containing the groups of cards that have to be merged.
-    def group_hands(self, cards: [str]) -> [[str]]:
-        number_elements = Game.n
+    def group_pairs(self, cards: [str]) -> [[str]]:
         result = []
-        k = len(cards)
-        for i in range(0, k, number_elements):
-            self.card_groups.append(cards[i:i + number_elements])
-        for g_i in self.card_groups:
-            for g_q in self.card_groups:
+        for g_i in cards:
+            for g_q in cards:
                 hands_set = []
                 for card_i in g_i:
                     for card_q in g_q:
                         hand = card_i + card_q
                         hands_set.append(hand)
                 result.append(hands_set)
+        return result
+
+    def group_cards(self, cards: [str]) -> [[str]]:
+        number_elements = Game.n
+        result = []
+        k = len(cards)
+        for i in range(0, k, number_elements):
+            result.append(cards[i:i + number_elements])
         return result
