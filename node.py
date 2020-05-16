@@ -13,7 +13,6 @@ class Node(ABC):
     def __init__(self, name: str):
         self.name = name
         self.children = []
-        self.father = None
 
     @abstractmethod
     def addChild(self, node: 'Node', action: str):
@@ -41,12 +40,6 @@ class Node(ABC):
         :return: list of tuples containing the (NewNameofNode,OldNameofNode, NameOfMappedNode) mapped onto each other
         """
         pass
-
-    def print_father(self):
-        if self.father is None:
-            print("I'm " + self.name + " and I don't have a father")
-        else:
-            print("I'm " + self.name + " and my father is " + self.father.name)
 
     def history_father(self):
         index_last_backslash = self.name.rfind('/')
@@ -114,7 +107,6 @@ class InternalNode(Node):
         self.actions = sorted(self.actions)  # To ease the match in mapWithSubtree
 
     def addChild(self, node: 'Node', action: str):
-        node.father = self
         idx = self.actions.index(action)
         self.children[idx] = node
 
@@ -175,15 +167,18 @@ class InternalNode(Node):
 class ChanceNode(Node):
     iterNum = 0
 
-    def __init__(self, name: str, actions: [str], probabilities: [float]):
+    def __init__(self, name: str, actions: [str], probabilities: [float], children: [Node] = None):
         super().__init__(name)
-        self.children = [None for _ in actions]
+        if children is None:
+            self.children = [None for _ in actions]
+        else:
+            self.children = children
         self.actions = actions
         self.probabilities = probabilities
         self.normalize_probabilites()
 
+
     def addChild(self, node: 'Node', action: str):
-        node.father = self
         idx = self.actions.index(action)
         self.children[idx] = node
 

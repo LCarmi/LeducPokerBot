@@ -416,7 +416,7 @@ class Game:
             result.append(cards[i:i + number_elements])
         return result
 
-    def find_nodes_at_depth_with_reach_probability(self, node: Node, p: int, depth: int, prob: float) -> [
+    def find_nodes_at_depth_with_reach_probability(self, p: int, depth: int) -> [
         (Node, float)]:
         def recursive_helper(self, node: Node, p: int, depth: int, prob: float):
             if isinstance(node, TerminalNode):
@@ -442,4 +442,4 @@ class Game:
                                   for child, probability in zip(node.children, node.probabilities)]
                 return itertools.chain.from_iterable(nested_results)
 
-        return list(recursive_helper(self, node, p, depth, prob))
+        return list(recursive_helper(self, self.root_node, p, depth, 1.0))
