@@ -88,6 +88,7 @@ class Game:
 
         return expected_payoff
 
+
     def CFR_plus_optimize(self):
         # call CFR_plus
         for t in range(Game.total_iterations):
@@ -443,3 +444,61 @@ class Game:
                 return itertools.chain.from_iterable(nested_results)
 
         return list(recursive_helper(self, self.root_node, p, depth, 1.0))
+
+    # This method will be called to solve the subgame.
+    def solve_subgame(self, player_to_update: int):
+
+        for i in self.information_sets:
+            i.prepare_for_CFR()
+
+        for t in range(Game.total_iterations):
+            w = max(t - Game.d, 0)
+
+            for i in self.information_sets:
+                i.update_regret_strategy_plus()
+
+            self.CFR_solving_subgame(self.root_node, 1, w, 1, 0, player_to_update)
+            self.CFR_solving_subgame(self.root_node, 2, w, 1, 0, player_to_update)
+
+    def CFR_solving_subgame(self, h: Node, i, w, pi, curr_dist, player_to_update) -> float:
+
+        if isinstance(h, TerminalNode):
+            if i == 2:
+                return -h.payoff
+            return h.payoff
+
+        if isinstance(h, ChanceNode):
+            expected_payoff = 0
+            for prob, node in zip(h.probabilities, h.children):
+                expected_payoff += prob * self.CFR_solving_subgame(node, i, w, pi*prob, curr_dist+1, player_to_update)
+            return expected_payoff
+
+        assert (isinstance(h, InternalNode))
+
+        current_infoset: InformationSet = self.history_dictionary.get(h.name)
+        regret_matched_strategy = current_infoset.regret_strategy
+        expected_payoff = 0
+
+        # Consider the nodes of the player we want to update as chance node. In theory the nodes with curr_dist == 1 are
+        # the only ones belonging to such player that won't be considered as chance nodes.
+        if curr_dist > 1:
+            if h.player == player_to_update:
+                for prob, node in zip(current_infoset.final_strategy, h.children):
+                    expected_payoff += prob * self.CFR_solving_subgame(node, i, w, pi*prob,curr_dist+1,player_to_update)
+                return expected_payoff
+        # Compute CFR plus as usual. See CFR_plus() for more info.
+        if h.player == i:
+            expected_payoffs = []
+            for child, probability in zip(h.children, regret_matched_strategy):
+                u = self.CFR_solving_subgame(child, i, w, pi, curr_dist+1, player_to_update)
+                expected_payoffs.append(u)
+                expected_payoff += u * probability
+            for idx in range(len(h.actions)):
+                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff)*pi
+        else:
+            for child, probability in zip(h.children, regret_matched_strategy):
+                u = self.CFR_solving_subgame(child, i, w, pi*probability, curr_dist+1, player_to_update)
+                expected_payoff += u * probability
+            for idx in range(len(h.actions)):
+                current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
+        return expected_payoff
