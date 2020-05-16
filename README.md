@@ -4,6 +4,5 @@
 
 ### The components of the team are : 
 - ### Luca Carminati 
-- ### Juan Felipe Calderon
 - ### Teresa Costa Cañones 
 - ### Robert Stefano Chinga Barazorda ([@robertsteven97](https://github.com/robertsteven97))
