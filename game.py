@@ -1,3 +1,4 @@
+import itertools
 from typing import Dict
 
 from informationSet import *
@@ -26,7 +27,7 @@ class Game:
         # CFR+ algorithm
 
         self.CFR_plus_optimize()
-        #self.CFR_optimize()
+        # self.CFR_optimize()
 
     def CFR_optimize(self):
         for t in range(Game.total_iterations):
@@ -414,3 +415,31 @@ class Game:
         for i in range(0, k, number_elements):
             result.append(cards[i:i + number_elements])
         return result
+
+    def find_nodes_at_depth_with_reach_probability(self, node: Node, p: int, depth: int, prob: float) -> [
+        (Node, float)]:
+        def recursive_helper(self, node: Node, p: int, depth: int, prob: float):
+            if isinstance(node, TerminalNode):
+                if depth == 0:
+                    return [(node, prob)]
+                return []
+            if isinstance(node, InternalNode):
+                if depth == 0:
+                    if node.player == p:
+                        return [(node, prob)]
+                    return []
+
+                infoset: InformationSet = self.history_dictionary.get(node.name)
+                nested_results = [recursive_helper(self, child, p, depth, prob * probability)
+                                  for child, probability in zip(node.children, infoset.final_strategy)]
+                return itertools.chain.from_iterable(nested_results)
+
+            assert (isinstance(node, ChanceNode))
+            if depth == 0:
+                return []
+            else:
+                nested_results = [recursive_helper(self, child, p, depth, prob * probability)
+                                  for child, probability in zip(node.children, node.probabilities)]
+                return itertools.chain.from_iterable(nested_results)
+
+        return list(recursive_helper(self, node, p, depth, prob))

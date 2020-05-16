@@ -9,9 +9,13 @@ class InformationSet:
         self.node_histories = node_histories
         self.__time = -1
         self.actions = actions
-        self.regret = [0.0 for _ in actions]
-        self.regret_strategy = [0.0 for _ in actions]
-        self.cumulative_strategy = [0.0 for _ in actions]
+        self.prepare_for_CFR()
+        self.final_strategy = []
+
+    def prepare_for_CFR(self):
+        self.regret = [0.0 for _ in self.actions]
+        self.regret_strategy = [0.0 for _ in self.actions]
+        self.cumulative_strategy = [0.0 for _ in self.actions]
 
     def update_regret_strategy(self):
         self.regret_strategy = self.__compute_regret_strategy()
