@@ -25,6 +25,7 @@ class Manager:
             infoset_to_update = self.originalGame.get_infoset_from_name(key)
             infoset_to_update.update_actions(infoset_to_copy)
 
+
     def write_result(self) -> str:
         infosets = self.originalGame.information_sets
         result = ""
@@ -33,7 +34,7 @@ class Manager:
 
         return result
 
-    def __create_virtual_game(self, game:Game, p:int, depth: int) -> Game:
+    def create_virtual_game(self, game:Game, p:int, depth: int) -> Game:
         res = game.find_nodes_at_depth_with_reach_probability(p,depth)
         actions = [str(i) for i in range(len(res))]
         probabilities = []
@@ -71,17 +72,47 @@ class Manager:
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc3.txt"
+    file_path = "./Examples/input - kuhn.txt"
     manager = Manager(file_path)
-
     print("Game loaded!")
+
     manager.create_abstraction()
     print("Abstraction ended!")
-    #manager.abstractedGame.find_optimal_strategy()
-    manager.originalGame.find_optimal_strategy()
-    print("Optimum strategy done!")
-    #manager.map_strategies()
+
+    manager.abstractedGame.find_optimal_strategy()
+    #manager.originalGame.find_optimal_strategy()
+    print("Blue print strategy done in abstract game!")
+
+    manager.map_strategies()
+    print("Blue print mapped on the real game")
+
     #res = manager.write_result()
+    print("Refine strategy start")
+    player=1
+    other_player=2
+    #Initialize the final strategy
+    for infoset in manager.originalGame.information_sets:
+        infoset.final_strategy=infoset.cumulative_strategy
+    #Do the subgame for each level
+    depth=1
+    virtual_game1 = manager.create_virtual_game(manager.originalGame, player, depth )
+    virtual_game2 = manager.create_virtual_game(manager.originalGame, player, depth)
+    while virtual_game1.root_node.children !=[] or virtual_game2.root_node.children !=[]:
+        if virtual_game1.root_node.children !=[]:
+            virtual_game1.solve_subgame(player)
+            infoset_to_change = virtual_game1.information_sets
+            for infoset in infoset_to_change:
+                manager.originalGame.get_infoset_from_name(infoset.name).final_strategy=infoset.cumulative_strategy
+        if virtual_game2.root_node.children !=[]:
+            virtual_game2.solve_subgame(player)
+            infoset_to_change = virtual_game2.information_sets
+            for infoset in infoset_to_change:
+                manager.originalGame.get_infoset_from_name(infoset.name).final_strategy=infoset.cumulative_strategy
+        depth+=1
+        virtual_game1 = manager.create_virtual_game(manager.originalGame, player, depth )
+        virtual_game2 = manager.create_virtual_game(manager.originalGame, other_player, depth)
+
+    print("Refine strategy done")
     #print(res)
     # file_path_output = "./Examples/output.txt"
     # f = open(file_path_output, "w+")

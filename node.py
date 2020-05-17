@@ -272,8 +272,9 @@ class ChanceNode(Node):
 
     def normalize_probabilites(self):
         s = sum(self.probabilities)
-        for i, p in enumerate(self.probabilities):
-            self.probabilities[i] = p / s
+        if s != 0:
+            for i, p in enumerate(self.probabilities):
+                self.probabilities[i] = p / s
 
     def alphabetically_order_actions(self):
         def swap(i, j):
