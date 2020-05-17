@@ -431,7 +431,7 @@ class Game:
                     return []
 
                 infoset: InformationSet = self.history_dictionary.get(node.name)
-                nested_results = [recursive_helper(self, child, p, depth, prob * probability)
+                nested_results = [recursive_helper(self, child, p, depth-1, prob * probability)
                                   for child, probability in zip(node.children, infoset.final_strategy)]
                 return itertools.chain.from_iterable(nested_results)
 
@@ -439,7 +439,7 @@ class Game:
             if depth == 0:
                 return []
             else:
-                nested_results = [recursive_helper(self, child, p, depth, prob * probability)
+                nested_results = [recursive_helper(self, child, p, depth-1, prob * probability)
                                   for child, probability in zip(node.children, node.probabilities)]
                 return itertools.chain.from_iterable(nested_results)
 
