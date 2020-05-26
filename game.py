@@ -502,3 +502,16 @@ class Game:
             for idx in range(len(h.actions)):
                 current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
         return expected_payoff
+
+    # This method will update the root information sets by considering the children of virtual root
+    def update_infoset_from_subgame(self):
+        name_nodes = [i.name for i in self.root_node.children]
+        infoset_updated = []
+        for name in name_nodes:
+            infoset_to_update: InformationSet = self.history_dictionary.get(name)
+            # Consider case in which the node is a terminal node, so the get will return None
+            if infoset_to_update is not None:
+                if infoset_to_update.name not in infoset_updated:
+                    infoset_to_update.final_strategy = infoset_to_update.cumulative_strategy
+                    infoset_updated.append(infoset_to_update.name)
+
