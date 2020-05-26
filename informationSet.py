@@ -1,4 +1,3 @@
-from random import *
 
 
 class InformationSet:
@@ -61,7 +60,11 @@ class InformationSet:
 
     def __str__(self):
         result = "Infoset: " + self.name + ' with strategies '
-        avg_s = self.get_average_strategy()
+        if self.final_strategy != []:
+            avg_s = self.final_strategy
+        else:
+            avg_s = self.get_average_strategy()
+
         for idx in range(len(self.actions)):
             result += self.actions[idx] + ':' + str(avg_s[idx]) + ' '
         return result

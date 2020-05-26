@@ -1,11 +1,6 @@
-import json
 from abc import ABC, abstractmethod
 import functools
-import bisect
-import pulp
-from sklearn.cluster import KMeans
 import numpy as np
-from sklearn.metrics import silhouette_score
 
 
 class Node(ABC):

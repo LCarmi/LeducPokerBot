@@ -1,7 +1,5 @@
 from game import *
 from orderFile import *
-from informationSet import *
-import time
 
 
 class Manager:
@@ -72,7 +70,7 @@ class Manager:
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc3.txt"
+    file_path = "./Examples/input - leduc5.txt"
     manager = Manager(file_path)
     print("Game loaded!")
 
@@ -86,13 +84,14 @@ if __name__ == '__main__':
     manager.map_strategies()
     print("Blue print mapped on the real game")
 
+    print(manager.write_result())
     #res = manager.write_result()
     print("Refine strategy start")
     player = 1
     other_player = 2
     #Initialize the final strategy
     for infoset in manager.originalGame.information_sets:
-        infoset.final_strategy=infoset.cumulative_strategy
+        infoset.final_strategy=infoset.get_average_strategy()
     #Do the subgame for each level
     depth=1
     virtual_game1 = manager.create_virtual_game(manager.originalGame, player, depth)
@@ -100,17 +99,25 @@ if __name__ == '__main__':
     while virtual_game1.root_node.children != [] or virtual_game2.root_node.children != []:
         if virtual_game1.root_node.children:
             virtual_game1.solve_subgame(player)
-            virtual_game1.update_infoset_from_subgame()
 
         if virtual_game2.root_node.children:
             virtual_game2.solve_subgame(other_player)
+
+        if virtual_game1.root_node.children:
+            virtual_game1.update_infoset_from_subgame()
+
+        if virtual_game2.root_node.children:
             virtual_game2.update_infoset_from_subgame()
+
+        print("Refined level: " + str(depth))
 
         depth += 1
         virtual_game1 = manager.create_virtual_game(manager.originalGame, player, depth)
         virtual_game2 = manager.create_virtual_game(manager.originalGame, other_player, depth)
 
     print("Refine strategy done")
+    print(manager.write_result())
+    print("Expected Value: {}".format(manager.originalGame.expected_value(manager.originalGame.root_node)))
     #print(res)
     # file_path_output = "./Examples/output.txt"
     # f = open(file_path_output, "w+")

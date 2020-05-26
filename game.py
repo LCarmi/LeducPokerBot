@@ -1,8 +1,4 @@
 import itertools
-from typing import Dict
-
-from informationSet import *
-from node import *
 from myParser import *
 from operator import itemgetter
 import math
@@ -10,8 +6,10 @@ import math
 
 # TODO: eliminate print
 class Game:
-    d = 100  # number of regret explorations without strategy update
-    total_iterations = 10000  # number of iteration to do
+    d = 2000  # number of regret explorations without strategy update
+    total_iterations = 5000  # number of iteration to do
+    d_subgame = 500
+    total_iterations_subgame = 1000
     n = 2  # number of card in a group (abstraction)
 
     def __init__(self):
@@ -421,8 +419,9 @@ class Game:
         (Node, float)]:
         def recursive_helper(self, node: Node, p: int, depth: int, prob: float):
             if isinstance(node, TerminalNode):
-                if depth == 0:
-                    return [(node, prob)]
+                # Actually we do not need terminal nodes as children of root of new virtual game
+                # if depth == 0:
+                #     return [(node, prob)]
                 return []
             if isinstance(node, InternalNode):
                 if depth == 0:
@@ -451,8 +450,11 @@ class Game:
         for i in self.information_sets:
             i.prepare_for_CFR()
 
-        for t in range(Game.total_iterations):
-            w = max(t - Game.d, 0)
+        for t in range(Game.total_iterations_subgame):
+            if t > Game.d_subgame:
+                w = math.sqrt(t) / (math.sqrt(t) +1)
+            else:
+                w=0
 
             for i in self.information_sets:
                 i.update_regret_strategy_plus()
@@ -512,6 +514,6 @@ class Game:
             # Consider case in which the node is a terminal node, so the get will return None
             if infoset_to_update is not None:
                 if infoset_to_update.name not in infoset_updated:
-                    infoset_to_update.final_strategy = infoset_to_update.cumulative_strategy
+                    infoset_to_update.final_strategy = infoset_to_update.get_average_strategy()
                     infoset_updated.append(infoset_to_update.name)
 
