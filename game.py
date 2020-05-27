@@ -10,7 +10,7 @@ class Game:
     total_iterations = 5000  # number of iteration to do
     d_subgame = 500
     total_iterations_subgame = 1000
-    n = 2  # number of card in a group (abstraction)
+    n = 1  # number of card in a group (abstraction)
 
     def __init__(self):
         self.root_node = None
@@ -35,8 +35,8 @@ class Game:
             for i in self.information_sets:
                 i.update_regret_strategy_plus()
 
-            self.CFR_plus(self.root_node, 1, w, 1)
-            self.CFR_plus(self.root_node, 2, w, 1)
+            self.root_node.CFR_plus(1, w, 1, self.history_dictionary)
+            self.root_node.CFR_plus(2, w, 1, self.history_dictionary)
 
             if (w != 0 and t % 10 == 0):
                 # regret_P1 = 0
@@ -50,74 +50,6 @@ class Game:
                 # ex = (regret_P1 + regret_P2) / 2.0
                 ex_val = self.expected_value(self.root_node)
                 print("Time: {}, Expected Value: {}".format(t, ex_val))
-
-    def CFR_plus(self, h: Node, i, w, pi) -> float:
-        """
-
-        :param h: current node that is examinated
-        :param i: current player whose regrets have to be updated
-        :param w: weight of current exploration of the tree
-                 increasing with the number of exploration to give more importance to later explorations
-        :param pi: probability that chance and other player play in such a way to arrive in h
-                    NOTE: pi must be greater than 0 to avoide useless computations
-        :return: expected utility from this node
-        """
-
-        # case when we are dealing with a Terminal Node
-        # no information sets/strategies/children involved, just return your payoff
-        if isinstance(h, TerminalNode):
-            # in case player is adversary, return negative payoff (since zero sum game)
-            if i == 2:
-                return -h.payoff
-            # return player 1 payoff otherwise
-            return h.payoff
-
-        # case when we are dealing with a ChanceNode
-        # no information sets/strategies involved, but children involved just return your children's payoff
-        if isinstance(h, ChanceNode):
-            expected_payoff = 0
-            for probability, node in zip(h.probabilities, h.children):
-                expected_payoff += probability * self.CFR_plus(node, i, w, pi * probability)
-            return expected_payoff
-
-        # case when we are dealing with an InternalNode
-        assert (isinstance(h, InternalNode))
-        # fetch infoset of current node
-        current_infoset: InformationSet = self.history_dictionary.get(h.name)
-        assert (current_infoset is not None)
-        # produce a strategy using regret matching
-        # we consume it immediately and don't need it anymore -> used as local variable
-        regret_matched_strategy = current_infoset.regret_strategy
-        expected_payoff = 0
-
-        if h.player == i:
-            # case when internal node is of player currently under regret update
-            expected_payoffs = []
-            # explore children in order to gather expected payoffs
-            for child, probability in zip(h.children, regret_matched_strategy):
-                u = self.CFR_plus(child, i, w, pi)
-                # expected payoffs are saved -> used for regret computation as payoffs in case of choosing action with
-                # probability 1
-                expected_payoffs.append(u)
-                expected_payoff += u * probability  # update total expected payoff at this node
-
-            for idx in range(len(h.actions)):
-                # update cumulative regret tables relative to the considered infoset
-                # RM+ computation and update will happen inside Infoset
-                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi
-
-        else:
-            # case when internal node is of adversary of player currently under regret update
-            # explore children in order to gather expected payoffs and compute expected payoff at node
-            for child, probability in zip(h.children, regret_matched_strategy):
-                u = self.CFR_plus(child, i, w, pi * probability)
-                expected_payoff += u * probability
-
-            for idx in range(len(h.actions)):
-                # update cumulative strategies
-                current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
-
-        return expected_payoff
 
     def parse_game(self, node_lines: [str], infoset_lines: [str]):
         node_dictionary = {}
@@ -400,8 +332,8 @@ class Game:
             for i in self.information_sets:
                 i.update_regret_strategy_plus()
 
-            self.root_node.CFR_solving_subgame(1, w, 1, 0, player_to_update, self.history_dictionary)
-            self.root_node.CFR_solving_subgame(2, w, 1, 0, player_to_update, self.history_dictionary)
+            self.root_node.CFR_plus(1, w, 1, self.history_dictionary, 0, True, player_to_update)
+            self.root_node.CFR_plus(2, w, 1, self.history_dictionary, 0, True, player_to_update)
 
     # This method will update the root information sets by considering the children of virtual root
     def update_infoset_from_subgame(self):
@@ -472,5 +404,73 @@ class Game:
     #         for idx in range(len(infoset.actions)):
     #             infoset.regret[idx] += pi_adv * (pure_payoffs[idx] - expected_payoff)
     #             infoset.cumulative_strategy[idx] += pi_i * strategy[idx]
+    #
+    #     return expected_payoff
+
+    # def CFR_plus(self, h: Node, i, w, pi) -> float:
+    #     """
+    #
+    #     :param h: current node that is examinated
+    #     :param i: current player whose regrets have to be updated
+    #     :param w: weight of current exploration of the tree
+    #              increasing with the number of exploration to give more importance to later explorations
+    #     :param pi: probability that chance and other player play in such a way to arrive in h
+    #                 NOTE: pi must be greater than 0 to avoide useless computations
+    #     :return: expected utility from this node
+    #     """
+    #
+    #     # case when we are dealing with a Terminal Node
+    #     # no information sets/strategies/children involved, just return your payoff
+    #     if isinstance(h, TerminalNode):
+    #         # in case player is adversary, return negative payoff (since zero sum game)
+    #         if i == 2:
+    #             return -h.payoff
+    #         # return player 1 payoff otherwise
+    #         return h.payoff
+    #
+    #     # case when we are dealing with a ChanceNode
+    #     # no information sets/strategies involved, but children involved just return your children's payoff
+    #     if isinstance(h, ChanceNode):
+    #         expected_payoff = 0
+    #         for probability, node in zip(h.probabilities, h.children):
+    #             expected_payoff += probability * self.CFR_plus(node, i, w, pi * probability)
+    #         return expected_payoff
+    #
+    #     # case when we are dealing with an InternalNode
+    #     assert (isinstance(h, InternalNode))
+    #     # fetch infoset of current node
+    #     current_infoset: InformationSet = self.history_dictionary.get(h.name)
+    #     assert (current_infoset is not None)
+    #     # produce a strategy using regret matching
+    #     # we consume it immediately and don't need it anymore -> used as local variable
+    #     regret_matched_strategy = current_infoset.regret_strategy
+    #     expected_payoff = 0
+    #
+    #     if h.player == i:
+    #         # case when internal node is of player currently under regret update
+    #         expected_payoffs = []
+    #         # explore children in order to gather expected payoffs
+    #         for child, probability in zip(h.children, regret_matched_strategy):
+    #             u = self.CFR_plus(child, i, w, pi)
+    #             # expected payoffs are saved -> used for regret computation as payoffs in case of choosing action with
+    #             # probability 1
+    #             expected_payoffs.append(u)
+    #             expected_payoff += u * probability  # update total expected payoff at this node
+    #
+    #         for idx in range(len(h.actions)):
+    #             # update cumulative regret tables relative to the considered infoset
+    #             # RM+ computation and update will happen inside Infoset
+    #             current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi
+    #
+    #     else:
+    #         # case when internal node is of adversary of player currently under regret update
+    #         # explore children in order to gather expected payoffs and compute expected payoff at node
+    #         for child, probability in zip(h.children, regret_matched_strategy):
+    #             u = self.CFR_plus(child, i, w, pi * probability)
+    #             expected_payoff += u * probability
+    #
+    #         for idx in range(len(h.actions)):
+    #             # update cumulative strategies
+    #             current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
     #
     #     return expected_payoff

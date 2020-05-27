@@ -68,9 +68,30 @@ class Manager:
     #
     #         substitute new_child in children
 
+def mini_refinement(player, depth):
+    n_refinements = 8
+    virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
+
+    if virtual_game.root_node.children:
+        for i in range(n_refinements):
+            virtual_game.compute_masks()
+
+            for node in ...:
+                node.temp_mask_children()
+
+            if virtual_game1.root_node.children:
+                virtual_game.solve_subgame(player)
+
+            for node in ...:
+                node.restore_masked_children()
+
+            virtual_game.adversary_response()
+
+        virtual_game.update_infoset_from_subgame()
+
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc5.txt"
+    file_path = "./Examples/input - kuhn.txt"
     manager = Manager(file_path)
     print("Game loaded!")
 
