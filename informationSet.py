@@ -44,7 +44,10 @@ class InformationSet:
         Returns normalized average strategy
         """
         if (sum(self.cumulative_strategy) == 0):
-            return [1/len(self.actions) for _ in self.actions]
+            if self.final_strategy == []:
+                return [1/len(self.actions) for _ in self.actions]
+            else:
+                return self.final_strategy
         else:
             return [round(p / sum(self.cumulative_strategy),6) for p in self.cumulative_strategy]
 

@@ -16,10 +16,15 @@ class Game:
         self.root_node = None
         self.information_sets = []
         self.history_dictionary = {}
+
         self.cards = []
         self.cards_sorted = []
         self.card_groups = []
         self.card_pair_groups = [[]]
+
+        self.masked = False
+        self.information_sets_masked = []
+        self.history_dictionary_masked = {}
 
     def find_optimal_strategy(self):
         # CFR+ algorithm
@@ -48,7 +53,7 @@ class Game:
                 #     else:
                 #         regret_P2 += sum(i.regret)
                 # ex = (regret_P1 + regret_P2) / 2.0
-                ex_val = self.expected_value(self.root_node)
+                ex_val = self.root_node.expected_value(self.history_dictionary)
                 print("Time: {}, Expected Value: {}".format(t, ex_val))
 
     def parse_game(self, node_lines: [str], infoset_lines: [str]):
@@ -221,30 +226,6 @@ class Game:
             if infoset.name == infoset_name:
                 return infoset
 
-    def expected_value(self, node: Node) -> float:
-
-        if isinstance(node, TerminalNode):
-            return node.payoff
-
-        if isinstance(node, ChanceNode):
-            expected_value = 0
-            for probability, child in zip(node.probabilities, node.children):
-                expected_value += probability * self.expected_value(child)
-            return expected_value
-
-        assert isinstance(node, InternalNode)
-        infoset: InformationSet = self.history_dictionary.get(node.name)
-        expected_value = 0
-
-        # Get strategies and normalize
-        player_strategy = infoset.get_average_strategy()
-
-        for child, probability in zip(node.children, player_strategy):
-            if probability > 0:
-                u = self.expected_value(child)
-                expected_value += u * probability
-
-        return expected_value
 
     # This method returns the list of the cards sorted by the strength, growing -> for instance: J-Q-K
     def cards_sorted_by_strength(self, cards: [str], root_node: 'Node') -> [str]:
@@ -304,7 +285,7 @@ class Game:
 
                 infoset: InformationSet = self.history_dictionary.get(node.name)
                 nested_results = [recursive_helper(self, child, p, depth - 1, prob * probability)
-                                  for child, probability in zip(node.children, infoset.final_strategy)]
+                                  for child, probability in zip(node.children, infoset.final_strategy) if probability > 0]
                 return itertools.chain.from_iterable(nested_results)
 
             assert (isinstance(node, ChanceNode))
@@ -312,7 +293,7 @@ class Game:
                 return []
             else:
                 nested_results = [recursive_helper(self, child, p, depth - 1, prob * probability)
-                                  for child, probability in zip(node.children, node.probabilities)]
+                                  for child, probability in zip(node.children, node.probabilities) if probability > 0]
                 return itertools.chain.from_iterable(nested_results)
 
         return list(recursive_helper(self, self.root_node, p, depth, 1.0))
@@ -346,6 +327,12 @@ class Game:
                 if infoset_to_update.name not in infoset_updated:
                     infoset_to_update.final_strategy = infoset_to_update.get_average_strategy()
                     infoset_updated.append(infoset_to_update.name)
+
+    def compute_masks(self):
+        for node in self.root_node:
+            pass
+        pass
+
 
     #
     # def CFR_optimize(self):

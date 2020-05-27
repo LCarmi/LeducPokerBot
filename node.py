@@ -7,7 +7,7 @@ class Node():
     def __init__(self, name: str):
         self.name = name
         self.children = []
-        self.infoset = None
+
 
     def addChild(self, node: 'Node', action: str):
         """
@@ -58,6 +58,10 @@ class Node():
     def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_to_update=0) -> float:
         pass
 
+    def expected_value(self, history_dictionary) -> float:
+        pass
+
+
 
 class TerminalNode(Node):
 
@@ -89,6 +93,9 @@ class TerminalNode(Node):
     def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_to_update=0) -> float:
         if i == 2:
             return -self.payoff
+        return self.payoff
+
+    def expected_value(self, history_dictionary) -> float:
         return self.payoff
 
 
@@ -190,6 +197,20 @@ class InternalNode(Node):
             for idx in range(len(self.actions)):
                 current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
         return expected_payoff
+
+    def expected_value(self, history_dictionary) -> float:
+        infoset = history_dictionary.get(self.name)
+        expected_value = 0
+
+        # Get strategies and normalize
+        player_strategy = infoset.get_average_strategy()
+
+        for child, probability in zip(self.children, player_strategy):
+            if probability > 0:
+                u = child.expected_value(history_dictionary)
+                expected_value += u * probability
+
+        return expected_value
 
 
 class ChanceNode(Node):
@@ -348,6 +369,14 @@ class ChanceNode(Node):
                                                                player_to_update)
         return expected_payoff
 
+    def expected_value(self, history_dictionary) -> float:
+        expected_value = 0
+        for probability, child in zip(self.probabilities, self.children):
+            expected_value += probability * child.expected_value(history_dictionary)
+        return expected_value
+
 
 if __name__ == "__main__":
     print("Test")
+
+

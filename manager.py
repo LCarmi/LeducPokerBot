@@ -75,16 +75,12 @@ def mini_refinement(player, depth):
     if virtual_game.root_node.children:
         for i in range(n_refinements):
             virtual_game.compute_masks()
-
-            for node in ...:
-                node.temp_mask_children()
+            virtual_game.mask_yourself()
 
             if virtual_game1.root_node.children:
                 virtual_game.solve_subgame(player)
 
-            for node in ...:
-                node.restore_masked_children()
-
+            virtual_game.restore_masks()
             virtual_game.adversary_response()
 
         virtual_game.update_infoset_from_subgame()
@@ -138,7 +134,7 @@ if __name__ == '__main__':
 
     print("Refine strategy done")
     print(manager.write_result())
-    print("Expected Value: {}".format(manager.originalGame.expected_value(manager.originalGame.root_node)))
+    print("Expected Value: {}".format(manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)))
     #print(res)
     # file_path_output = "./Examples/output.txt"
     # f = open(file_path_output, "w+")
