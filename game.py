@@ -27,66 +27,6 @@ class Game:
         self.CFR_plus_optimize()
         # self.CFR_optimize()
 
-    def CFR_optimize(self):
-        for t in range(Game.total_iterations):
-            w = max(t - Game.d, 0)
-
-            for i in self.information_sets:
-                i.update_regret_strategy()
-
-            self.CFR(self.root_node, 1, 1, 1)
-            self.CFR(self.root_node, 2, 1, 1)
-
-            if (w != 0 and t % 100 == 0):
-                # regret_P1 = 0
-                # regret_P2 = 0
-                # for i in self.information_sets:
-                #     assert(isinstance(i, InformationSet))
-                #     if i.player == 1:
-                #         regret_P1 += sum(i.regret)
-                #     else:
-                #         regret_P2 += sum(i.regret)
-                # ex = (regret_P1 + regret_P2)/2.0
-                ex_val = self.expected_value(self.root_node)
-                print("Time: {}, Expected Value: {}".format(t, ex_val))
-
-    def CFR(self, h: Node, i, pi1, pi2):
-        if (isinstance(h, TerminalNode)):
-            if i == 2:
-                return -1 * h.payoff
-            return h.payoff
-
-        if (isinstance(h, ChanceNode)):
-            if i == 1:
-                return sum(
-                    prob * self.CFR(child, i, pi1, pi2 * prob) for prob, child in zip(h.probabilities, h.children))
-            else:
-                return sum(
-                    prob * self.CFR(child, i, pi1 * prob, pi2) for prob, child in zip(h.probabilities, h.children))
-
-        assert (isinstance(h, InternalNode))
-        infoset: InformationSet = self.history_dictionary.get(h.name)
-        strategy = infoset.regret_strategy
-        pure_payoffs = []
-        expected_payoff = 0
-
-        for child, p in zip(h.children, strategy):
-            if (h.player == 1):
-                u = self.CFR(child, i, p * pi1, pi2)
-            else:
-                u = self.CFR(child, i, pi1, pi2 * p)
-            expected_payoff += u * p
-            pure_payoffs.append(u)
-
-        if (h.player == i):
-            pi_i, pi_adv = (pi1, pi2) if i == 1 else (pi2, pi1)
-            for idx in range(len(infoset.actions)):
-                infoset.regret[idx] += pi_adv * (pure_payoffs[idx] - expected_payoff)
-                infoset.cumulative_strategy[idx] += pi_i * strategy[idx]
-
-        return expected_payoff
-
-
     def CFR_plus_optimize(self):
         # call CFR_plus
         for t in range(Game.total_iterations):
@@ -200,6 +140,7 @@ class Game:
             assert (actions_first_node is not None)
             information_set = InformationSet(name, player, histories, actions_first_node)
             self.information_sets.append(information_set)
+
             # find card from a infoset
             card = parse_card_from_infoset(infoset_lines[i])
             # prevent the case in which the card is not in the first position - for instance ?K
@@ -430,7 +371,7 @@ class Game:
                     return []
 
                 infoset: InformationSet = self.history_dictionary.get(node.name)
-                nested_results = [recursive_helper(self, child, p, depth-1, prob * probability)
+                nested_results = [recursive_helper(self, child, p, depth - 1, prob * probability)
                                   for child, probability in zip(node.children, infoset.final_strategy)]
                 return itertools.chain.from_iterable(nested_results)
 
@@ -438,7 +379,7 @@ class Game:
             if depth == 0:
                 return []
             else:
-                nested_results = [recursive_helper(self, child, p, depth-1, prob * probability)
+                nested_results = [recursive_helper(self, child, p, depth - 1, prob * probability)
                                   for child, probability in zip(node.children, node.probabilities)]
                 return itertools.chain.from_iterable(nested_results)
 
@@ -452,58 +393,15 @@ class Game:
 
         for t in range(Game.total_iterations_subgame):
             if t > Game.d_subgame:
-                w = math.sqrt(t) / (math.sqrt(t) +1)
+                w = math.sqrt(t) / (math.sqrt(t) + 1)
             else:
-                w=0
+                w = 0
 
             for i in self.information_sets:
                 i.update_regret_strategy_plus()
 
-            self.CFR_solving_subgame(self.root_node, 1, w, 1, 0, player_to_update)
-            self.CFR_solving_subgame(self.root_node, 2, w, 1, 0, player_to_update)
-
-    def CFR_solving_subgame(self, h: Node, i, w, pi, curr_dist, player_to_update) -> float:
-
-        if isinstance(h, TerminalNode):
-            if i == 2:
-                return -h.payoff
-            return h.payoff
-
-        if isinstance(h, ChanceNode):
-            expected_payoff = 0
-            for prob, node in zip(h.probabilities, h.children):
-                expected_payoff += prob * self.CFR_solving_subgame(node, i, w, pi*prob, curr_dist+1, player_to_update)
-            return expected_payoff
-
-        assert (isinstance(h, InternalNode))
-
-        current_infoset: InformationSet = self.history_dictionary.get(h.name)
-        regret_matched_strategy = current_infoset.regret_strategy
-        expected_payoff = 0
-
-        # Consider the nodes of the player we want to update as chance node. In theory the nodes with curr_dist == 1 are
-        # the only ones belonging to such player that won't be considered as chance nodes.
-        if curr_dist > 1:
-            if h.player == player_to_update:
-                for prob, node in zip(current_infoset.final_strategy, h.children):
-                    expected_payoff += prob * self.CFR_solving_subgame(node, i, w, pi*prob,curr_dist+1,player_to_update)
-                return expected_payoff
-        # Compute CFR plus as usual. See CFR_plus() for more info.
-        if h.player == i:
-            expected_payoffs = []
-            for child, probability in zip(h.children, regret_matched_strategy):
-                u = self.CFR_solving_subgame(child, i, w, pi, curr_dist+1, player_to_update)
-                expected_payoffs.append(u)
-                expected_payoff += u * probability
-            for idx in range(len(h.actions)):
-                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff)*pi
-        else:
-            for child, probability in zip(h.children, regret_matched_strategy):
-                u = self.CFR_solving_subgame(child, i, w, pi*probability, curr_dist+1, player_to_update)
-                expected_payoff += u * probability
-            for idx in range(len(h.actions)):
-                current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
-        return expected_payoff
+            self.root_node.CFR_solving_subgame(1, w, 1, 0, player_to_update, self.history_dictionary)
+            self.root_node.CFR_solving_subgame(2, w, 1, 0, player_to_update, self.history_dictionary)
 
     # This method will update the root information sets by considering the children of virtual root
     def update_infoset_from_subgame(self):
@@ -517,3 +415,62 @@ class Game:
                     infoset_to_update.final_strategy = infoset_to_update.get_average_strategy()
                     infoset_updated.append(infoset_to_update.name)
 
+    #
+    # def CFR_optimize(self):
+    #     for t in range(Game.total_iterations):
+    #         w = max(t - Game.d, 0)
+    #
+    #         for i in self.information_sets:
+    #             i.update_regret_strategy()
+    #
+    #         self.CFR(self.root_node, 1, 1, 1)
+    #         self.CFR(self.root_node, 2, 1, 1)
+    #
+    #         if (w != 0 and t % 100 == 0):
+    #             # regret_P1 = 0
+    #             # regret_P2 = 0
+    #             # for i in self.information_sets:
+    #             #     assert(isinstance(i, InformationSet))
+    #             #     if i.player == 1:
+    #             #         regret_P1 += sum(i.regret)
+    #             #     else:
+    #             #         regret_P2 += sum(i.regret)
+    #             # ex = (regret_P1 + regret_P2)/2.0
+    #             ex_val = self.expected_value(self.root_node)
+    #             print("Time: {}, Expected Value: {}".format(t, ex_val))
+    #
+    # def CFR(self, h: Node, i, pi1, pi2):
+    #     if (isinstance(h, TerminalNode)):
+    #         if i == 2:
+    #             return -1 * h.payoff
+    #         return h.payoff
+    #
+    #     if (isinstance(h, ChanceNode)):
+    #         if i == 1:
+    #             return sum(
+    #                 prob * self.CFR(child, i, pi1, pi2 * prob) for prob, child in zip(h.probabilities, h.children))
+    #         else:
+    #             return sum(
+    #                 prob * self.CFR(child, i, pi1 * prob, pi2) for prob, child in zip(h.probabilities, h.children))
+    #
+    #     assert (isinstance(h, InternalNode))
+    #     infoset: InformationSet = self.history_dictionary.get(h.name)
+    #     strategy = infoset.regret_strategy
+    #     pure_payoffs = []
+    #     expected_payoff = 0
+    #
+    #     for child, p in zip(h.children, strategy):
+    #         if (h.player == 1):
+    #             u = self.CFR(child, i, p * pi1, pi2)
+    #         else:
+    #             u = self.CFR(child, i, pi1, pi2 * p)
+    #         expected_payoff += u * p
+    #         pure_payoffs.append(u)
+    #
+    #     if (h.player == i):
+    #         pi_i, pi_adv = (pi1, pi2) if i == 1 else (pi2, pi1)
+    #         for idx in range(len(infoset.actions)):
+    #             infoset.regret[idx] += pi_adv * (pure_payoffs[idx] - expected_payoff)
+    #             infoset.cumulative_strategy[idx] += pi_i * strategy[idx]
+    #
+    #     return expected_payoff

@@ -1,15 +1,14 @@
-from abc import ABC, abstractmethod
 import functools
 import numpy as np
 
 
-class Node(ABC):
+class Node():
 
     def __init__(self, name: str):
         self.name = name
         self.children = []
+        self.infoset = None
 
-    @abstractmethod
     def addChild(self, node: 'Node', action: str):
         """
         Adds a child to this node, preserving coherence in indexing among children and eventual probability/indexing.
@@ -19,7 +18,6 @@ class Node(ABC):
         """
         pass
 
-    @abstractmethod
     def getPayoffRepresentation(self) -> [int]:
         """
         Getter of Payoff representation of subtree
@@ -27,7 +25,6 @@ class Node(ABC):
         """
         pass
 
-    @abstractmethod
     def mapWithSubtree(self, node: 'Node', weight: float, weight_node: float) -> ([(str, str, str)]):
         """
         Modifies current subtree mapping the nodes of current subtree with the nodes of the subtree rooted at node
@@ -51,15 +48,14 @@ class Node(ABC):
     def __repr__(self):
         return self.name
 
-    @abstractmethod
     def get_actions(self):
-
         pass
 
     # TODO : Only for test - Eliminate also in the sub classes
-    @abstractmethod
     def print_children(self):
+        pass
 
+    def CFR_solving_subgame(self, i, w, pi, curr_dist, player_to_update, history_dict) -> float:
         pass
 
 
@@ -89,6 +85,11 @@ class TerminalNode(Node):
 
     def get_actions(self):
         return None
+
+    def CFR_solving_subgame(self, i, w, pi, curr_dist, player_to_update, history_dict) -> float:
+        if i == 2:
+            return -self.payoff
+        return self.payoff
 
 
 class InternalNode(Node):
@@ -158,6 +159,36 @@ class InternalNode(Node):
             ret += child.name + ' '
         print(ret)
 
+    def CFR_solving_subgame(self, i, w, pi, curr_dist, player_to_update, history_dict) -> float:
+        current_infoset = history_dict.get(self.name)
+        regret_matched_strategy = current_infoset.regret_strategy
+        expected_payoff = 0
+
+        # Consider the nodes of the player we want to update as chance node. In theory the nodes with curr_dist == 1 are
+        # the only ones belonging to such player that won't be considered as chance nodes.
+        if curr_dist > 1:
+            if self.player == player_to_update:
+                for prob, node in zip(current_infoset.final_strategy, self.children):
+                    expected_payoff += prob * node.CFR_solving_subgame(i, w, pi * prob, curr_dist + 1, player_to_update,
+                                                                       history_dict)
+                return expected_payoff
+        # Compute CFR plus as usual. See CFR_plus() for more info.
+        if self.player == i:
+            expected_payoffs = []
+            for child, probability in zip(self.children, regret_matched_strategy):
+                u = child.CFR_solving_subgame(i, w, pi, curr_dist + 1, player_to_update, history_dict)
+                expected_payoffs.append(u)
+                expected_payoff += u * probability
+            for idx in range(len(self.actions)):
+                current_infoset.regret[idx] += (expected_payoffs[idx] - expected_payoff) * pi
+        else:
+            for child, probability in zip(self.children, regret_matched_strategy):
+                u = child.CFR_solving_subgame(i, w, pi * probability, curr_dist + 1, player_to_update, history_dict)
+                expected_payoff += u * probability
+            for idx in range(len(self.actions)):
+                current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
+        return expected_payoff
+
 
 class ChanceNode(Node):
     iterNum = 0
@@ -171,7 +202,6 @@ class ChanceNode(Node):
         self.actions = actions
         self.probabilities = probabilities
         self.normalize_probabilites()
-
 
     def addChild(self, node: 'Node', action: str):
         idx = self.actions.index(action)
@@ -223,7 +253,9 @@ class ChanceNode(Node):
                 actions.append(self.actions[i_self])
                 probabilities.append(self.probabilities[i_self] * weight + node.probabilities[i_node] * weight_node)
                 # update on weight of branch of each node needed to keep total expected payoff constant
-                list_of_changes += self.children[i_self].mapWithSubtree(node.children[i_node], weight * self.probabilities[i_self], weight_node * node.probabilities[i_node])
+                list_of_changes += self.children[i_self].mapWithSubtree(node.children[i_node],
+                                                                        weight * self.probabilities[i_self],
+                                                                        weight_node * node.probabilities[i_node])
                 children.append(self.children[i_self])
                 i_self += 1
                 i_node += 1
@@ -307,6 +339,12 @@ class ChanceNode(Node):
             swap(i, 0)  # swap
             heapify(self.actions, i, 0)
 
+    def CFR_solving_subgame(self, i, w, pi, curr_dist, player_to_update, history_dict) -> float:
+        expected_payoff = 0
+        for prob, node in zip(self.probabilities, self.children):
+            expected_payoff += prob * node.CFR_solving_subgame(i, w, pi * prob, curr_dist + 1, player_to_update,
+                                                               history_dict)
+        return expected_payoff
 
 
 if __name__ == "__main__":
