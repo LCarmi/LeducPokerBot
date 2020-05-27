@@ -33,13 +33,18 @@ class Manager:
         return result
 
     def create_virtual_game(self, game:Game, p:int, depth: int) -> Game:
+        epsilon = 0.1
         res = game.find_nodes_at_depth_with_reach_probability(p,depth)
-        actions = [str(i) for i in range(len(res))]
+        l = len(res)
+
+        actions = [str(i) for i in range(l)]
         probabilities = []
         children = []
         for node,probability in res:
             children.append(node)
-            probabilities.append(probability)
+            probabilities.append(probability
+                                 #* (1.0-epsilon) + epsilon/l
+                                 )
         new_root = ChanceNode("Virtual_root", actions, probabilities, children)
         ret = Game()
         ret.root_node = new_root
@@ -68,47 +73,37 @@ class Manager:
     #
     #         substitute new_child in children
 
-def mini_refinement(player, depth):
-    n_refinements = 8
-    virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
+def self_generative_refinement(manager):
 
-    if virtual_game.root_node.children:
-        for i in range(n_refinements):
-            virtual_game.compute_masks()
-            virtual_game.mask_yourself()
+    def mini_refinement(manager, player, adversary, depth):
+        n_refinements = 8
+        virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
 
-            if virtual_game1.root_node.children:
+        if virtual_game.root_node.children:
+            virtual_game.setup_masks()
+
+            for i in range(n_refinements):
+                virtual_game.compute_masks()
+                virtual_game.mask_yourself()
+
                 virtual_game.solve_subgame(player)
+                virtual_game.update_infoset_from_subgame()
 
-            virtual_game.restore_masks()
-            virtual_game.adversary_response()
+                virtual_game.restore_masks()
+                virtual_game.adversary_response(player, adversary)
 
-        virtual_game.update_infoset_from_subgame()
 
-if __name__ == '__main__':
+    depth = 1
+    while depth < 8:
+        mini_refinement(manager, 1, 2, depth)
+        mini_refinement(manager, 2, 1, depth)
+        print("Refined level: " + str(depth))
+        depth += 1
 
-    file_path = "./Examples/input - kuhn.txt"
-    manager = Manager(file_path)
-    print("Game loaded!")
 
-    manager.create_abstraction()
-    print("Abstraction ended!")
-
-    manager.abstractedGame.find_optimal_strategy()
-    #manager.originalGame.find_optimal_strategy()
-    print("Blue print strategy done in abstract game!")
-
-    manager.map_strategies()
-    print("Blue print mapped on the real game")
-
-    print(manager.write_result())
-    #res = manager.write_result()
-    print("Refine strategy start")
+def CFR_refinement(manager):
     player = 1
     other_player = 2
-    #Initialize the final strategy
-    for infoset in manager.originalGame.information_sets:
-        infoset.final_strategy=infoset.get_average_strategy()
     #Do the subgame for each level
     depth=1
     virtual_game1 = manager.create_virtual_game(manager.originalGame, player, depth)
@@ -116,14 +111,10 @@ if __name__ == '__main__':
     while virtual_game1.root_node.children != [] or virtual_game2.root_node.children != []:
         if virtual_game1.root_node.children:
             virtual_game1.solve_subgame(player)
-
-        if virtual_game2.root_node.children:
-            virtual_game2.solve_subgame(other_player)
-
-        if virtual_game1.root_node.children:
             virtual_game1.update_infoset_from_subgame()
 
         if virtual_game2.root_node.children:
+            virtual_game2.solve_subgame(other_player)
             virtual_game2.update_infoset_from_subgame()
 
         print("Refined level: " + str(depth))
@@ -132,9 +123,38 @@ if __name__ == '__main__':
         virtual_game1 = manager.create_virtual_game(manager.originalGame, player, depth)
         virtual_game2 = manager.create_virtual_game(manager.originalGame, other_player, depth)
 
-    print("Refine strategy done")
+if __name__ == '__main__':
+
+    file_path = "./Examples/input - kuhn.txt"
+    manager = Manager(file_path)
+    print("Game loaded!")
+
+    #manager.create_abstraction()
+    print("Abstraction ended!")
+
+    #manager.abstractedGame.find_optimal_strategy()
+    #manager.originalGame.find_optimal_strategy()
+    print("Blue print strategy done in abstract game!")
+
+    #manager.map_strategies()
+    print("Blue print mapped on the real game")
+
+    # Initialize the final strategy
+    for infoset in manager.originalGame.information_sets:
+        infoset.final_strategy = infoset.get_average_strategy()
+
     print(manager.write_result())
-    print("Expected Value: {}".format(manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)))
+    #res = manager.write_result()
+    print("Refine strategy start")
+
+    #self_generative_refinement(manager)
+    for _ in range(5):
+        CFR_refinement(manager)
+
+        print("Refine strategy done")
+        print(manager.write_result())
+        print("Expected Value: {}".format(manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)))
+
     #print(res)
     # file_path_output = "./Examples/output.txt"
     # f = open(file_path_output, "w+")

@@ -10,7 +10,7 @@ class Game:
     total_iterations = 5000  # number of iteration to do
     d_subgame = 500
     total_iterations_subgame = 1000
-    n = 1  # number of card in a group (abstraction)
+    n = 2  # number of card in a group (abstraction)
 
     def __init__(self):
         self.root_node = None
@@ -23,8 +23,7 @@ class Game:
         self.card_pair_groups = [[]]
 
         self.masked = False
-        self.information_sets_masked = []
-        self.history_dictionary_masked = {}
+        self.n_mask = 0
 
     def find_optimal_strategy(self):
         # CFR+ algorithm
@@ -285,7 +284,9 @@ class Game:
 
                 infoset: InformationSet = self.history_dictionary.get(node.name)
                 nested_results = [recursive_helper(self, child, p, depth - 1, prob * probability)
-                                  for child, probability in zip(node.children, infoset.final_strategy) if probability > 0]
+                                  for child, probability in zip(node.children, infoset.final_strategy)
+                                  #if probability > 0
+                                  ]
                 return itertools.chain.from_iterable(nested_results)
 
             assert (isinstance(node, ChanceNode))
@@ -293,7 +294,9 @@ class Game:
                 return []
             else:
                 nested_results = [recursive_helper(self, child, p, depth - 1, prob * probability)
-                                  for child, probability in zip(node.children, node.probabilities) if probability > 0]
+                                  for child, probability in zip(node.children, node.probabilities)
+                                  #if probability > 0
+                                  ]
                 return itertools.chain.from_iterable(nested_results)
 
         return list(recursive_helper(self, self.root_node, p, depth, 1.0))
@@ -306,7 +309,8 @@ class Game:
 
         for t in range(Game.total_iterations_subgame):
             if t > Game.d_subgame:
-                w = math.sqrt(t) / (math.sqrt(t) + 1)
+                # w = math.sqrt(t) / (math.sqrt(t) + 1)
+                w = t
             else:
                 w = 0
 
@@ -315,6 +319,7 @@ class Game:
 
             self.root_node.CFR_plus(1, w, 1, self.history_dictionary, 0, True, player_to_update)
             self.root_node.CFR_plus(2, w, 1, self.history_dictionary, 0, True, player_to_update)
+        return
 
     # This method will update the root information sets by considering the children of virtual root
     def update_infoset_from_subgame(self):
@@ -329,10 +334,70 @@ class Game:
                     infoset_updated.append(infoset_to_update.name)
 
     def compute_masks(self):
-        for node in self.root_node:
-            pass
-        pass
+        new_nodes = []
+        # CFR for adversary in all subtrees assumed already done
+        #get paytoff from each child
+        #add new terminal node with that payoff to each masked node
+        for node in self.root_node.children:
+            for child, masked_child in zip(node.children, node.children_mask):
+                payoff = child.expected_value(self.history_dictionary)
+                new_node = TerminalNode("Result of strategy " + str(self.n_mask), payoff)
+                masked_child.actions.append(str(self.n_mask))
+                masked_child.children.append(new_node)
+        self.n_mask += 1
 
+
+    def setup_masks(self):
+
+        # create infoset of choices for adversary
+        new_infoset = InformationSet("Subgame_Masks", self.root_node.children[0].player, [], [])
+        self.information_sets.append(new_infoset)
+
+        # create internal nodes
+        for node in self.root_node.children:
+            node.children_mask = []
+            for child in node.children:
+                mask_name = "Subgame Mask of " + child.name
+                new_node = InternalNode(mask_name, [], node.player)
+                node.children_mask.append(new_node)
+                self.history_dictionary[new_node.name] = new_infoset
+                new_infoset.node_histories.append(new_node.name)
+
+        self.infoset_masks = new_infoset
+
+    def mask_yourself(self):
+        if self.masked:
+            raise Exception()
+
+        self.masked = True
+        for node in self.root_node.children:
+            swap = node.children
+            node.children = node.children_mask
+            node.children_mask = swap
+
+    def restore_masks(self):
+        if not self.masked:
+            raise Exception()
+        self.masked = False
+
+        for node in self.root_node.children:
+            swap = node.children
+            node.children = node.children_mask
+            node.children_mask = swap
+
+    def adversary_response(self, player, adversary):
+        for i in self.information_sets:
+            i.prepare_for_CFR()
+        for t in range(Game.total_iterations_subgame):
+            if t > Game.d_subgame:
+                w = math.sqrt(t) / (math.sqrt(t) + 1)
+            else:
+                w = 0
+            for i in self.information_sets:
+                i.update_regret_strategy_plus()
+            # Do cfr to approximate best response
+            # adversary will update his strategy, player will stay fixed, distance already to 1 to make it always fixed
+            self.root_node.CFR_plus(adversary, w, 1, self.history_dictionary, 1, True, player)
 
     #
     # def CFR_optimize(self):

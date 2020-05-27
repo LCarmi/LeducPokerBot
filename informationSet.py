@@ -6,7 +6,6 @@ class InformationSet:
         self.name = name
         self.player = player
         self.node_histories = node_histories
-        self.__time = -1
         self.actions = actions
         self.prepare_for_CFR()
         self.final_strategy = []
@@ -44,10 +43,7 @@ class InformationSet:
         Returns normalized average strategy
         """
         if (sum(self.cumulative_strategy) == 0):
-            if self.final_strategy == []:
-                return [1/len(self.actions) for _ in self.actions]
-            else:
-                return self.final_strategy
+            return [1/len(self.actions) for _ in self.actions]
         else:
             return [round(p / sum(self.cumulative_strategy),6) for p in self.cumulative_strategy]
 
@@ -63,10 +59,7 @@ class InformationSet:
 
     def __str__(self):
         result = "Infoset: " + self.name + ' with strategies '
-        if self.final_strategy != []:
-            avg_s = self.final_strategy
-        else:
-            avg_s = self.get_average_strategy()
+        avg_s = self.final_strategy
 
         for idx in range(len(self.actions)):
             result += self.actions[idx] + ':' + str(avg_s[idx]) + ' '

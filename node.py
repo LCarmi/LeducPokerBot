@@ -55,7 +55,7 @@ class Node():
     def print_children(self):
         pass
 
-    def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_to_update=0) -> float:
+    def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_fixed=0) -> float:
         pass
 
     def expected_value(self, history_dictionary) -> float:
@@ -90,7 +90,7 @@ class TerminalNode(Node):
     def get_actions(self):
         return None
 
-    def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_to_update=0) -> float:
+    def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_fixed=0) -> float:
         if i == 2:
             return -self.payoff
         return self.payoff
@@ -166,7 +166,7 @@ class InternalNode(Node):
             ret += child.name + ' '
         print(ret)
 
-    def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_to_update=0) -> float:
+    def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_fixed=0) -> float:
         current_infoset = history_dict.get(self.name)
         regret_matched_strategy = current_infoset.regret_strategy
         expected_payoff = 0
@@ -174,17 +174,16 @@ class InternalNode(Node):
         # Consider the nodes of the player we want to update as chance node. In theory the nodes with curr_dist == 1 are
         # the only ones belonging to such player that won't be considered as chance nodes.
         if curr_dist > 1 and isSubgame:
-            if self.player == player_to_update:
+            if self.player == player_fixed:
                 for prob, node in zip(current_infoset.final_strategy, self.children):
                     expected_payoff += prob * node.CFR_plus(i, w, pi * prob, history_dict, curr_dist + 1,
-                                                                       isSubgame, player_to_update
-                                                                       )
+                                                            isSubgame, player_fixed)
                 return expected_payoff
         # Compute CFR plus as usual. See CFR_plus() for more info.
         if self.player == i:
             expected_payoffs = []
             for child, probability in zip(self.children, regret_matched_strategy):
-                u = child.CFR_plus(i, w, pi, history_dict, curr_dist + 1, isSubgame, player_to_update)
+                u = child.CFR_plus(i, w, pi, history_dict, curr_dist + 1, isSubgame, player_fixed)
                 expected_payoffs.append(u)
                 expected_payoff += u * probability
             for idx in range(len(self.actions)):
@@ -192,7 +191,7 @@ class InternalNode(Node):
         else:
             for child, probability in zip(self.children, regret_matched_strategy):
                 u = child.CFR_plus(i, w, pi * probability, history_dict, curr_dist + 1, isSubgame,
-                                              player_to_update)
+                                   player_fixed)
                 expected_payoff += u * probability
             for idx in range(len(self.actions)):
                 current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
@@ -203,7 +202,7 @@ class InternalNode(Node):
         expected_value = 0
 
         # Get strategies and normalize
-        player_strategy = infoset.get_average_strategy()
+        player_strategy = infoset.final_strategy
 
         for child, probability in zip(self.children, player_strategy):
             if probability > 0:
@@ -362,11 +361,11 @@ class ChanceNode(Node):
             swap(i, 0)  # swap
             heapify(self.actions, i, 0)
 
-    def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_to_update=0) -> float:
+    def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_fixed=0) -> float:
         expected_payoff = 0
         for prob, node in zip(self.probabilities, self.children):
             expected_payoff += prob * node.CFR_plus(i, w, pi * prob, history_dict, curr_dist + 1, isSubgame,
-                                                               player_to_update)
+                                                    player_fixed)
         return expected_payoff
 
     def expected_value(self, history_dictionary) -> float:
