@@ -2,15 +2,15 @@ import itertools
 from myParser import *
 from operator import itemgetter
 import math
-
+import utilities
 
 # TODO: eliminate print
 class Game:
-    d = 2000  # number of regret explorations without strategy update
-    total_iterations = 5000  # number of iteration to do
-    d_subgame = 500
-    total_iterations_subgame = 1000
-    n = 2  # number of card in a group (abstraction)
+    d = 1000  # number of regret explorations without strategy update
+    total_iterations = 2000  # number of iteration to do
+    d_subgame = 50
+    total_iterations_subgame = 100
+    n = 1  # number of card in a group (abstraction)
 
     def __init__(self):
         self.root_node = None
@@ -24,6 +24,7 @@ class Game:
 
         self.masked = False
         self.n_mask = 0
+        self.added_masks = []
 
     def find_optimal_strategy(self):
         # CFR+ algorithm
@@ -52,7 +53,7 @@ class Game:
                 #     else:
                 #         regret_P2 += sum(i.regret)
                 # ex = (regret_P1 + regret_P2) / 2.0
-                ex_val = self.root_node.expected_value(self.history_dictionary)
+                ex_val = self.root_node.expected_value(self.history_dictionary, True)
                 print("Time: {}, Expected Value: {}".format(t, ex_val))
 
     def parse_game(self, node_lines: [str], infoset_lines: [str]):
@@ -89,9 +90,9 @@ class Game:
                 self.history_dictionary.update({history: infoset})
 
         # sort the cards by the strength
-        self.cards_sorted = self.cards_sorted_by_strength(self.cards, self.root_node)
-        self.card_groups = self.group_cards(self.cards_sorted)
-        self.card_pair_groups = self.group_pairs(self.card_groups)
+        self.cards_sorted = utilities.cards_sorted_by_strength(self.cards, self.root_node)
+        self.card_groups = utilities.group_cards(self.cards_sorted, Game.n)
+        self.card_pair_groups = utilities.group_pairs(self.card_groups)
         return
 
     def abstract_yourself(self):
@@ -226,48 +227,6 @@ class Game:
                 return infoset
 
 
-    # This method returns the list of the cards sorted by the strength, growing -> for instance: J-Q-K
-    def cards_sorted_by_strength(self, cards: [str], root_node: 'Node') -> [str]:
-        cards_strength = {}
-        result = []
-        assert isinstance(root_node, ChanceNode)
-        actions = root_node.actions
-        # create a local dictionary card - strength
-        for card in cards:
-            card_strength = 0
-            for action, child in zip(actions, root_node.children):
-                assert isinstance(action, str)
-                if action.startswith(card):
-                    card_strength += sum(child.getPayoffRepresentation())
-            cards_strength.update({card: card_strength})
-
-        # use the dictionary to find the order
-        for key, value in sorted(cards_strength.items(), key=itemgetter(1), reverse=False):
-            result.append(key)
-        return result
-
-    # This method creates the groups for the abstraction, given the cards sorted by the strength (growing)
-    # It returns a list containing the groups of cards that have to be merged.
-    def group_pairs(self, cards: [str]) -> [[str]]:
-        result = []
-        for g_i in cards:
-            for g_q in cards:
-                hands_set = []
-                for card_i in g_i:
-                    for card_q in g_q:
-                        hand = card_i + card_q
-                        hands_set.append(hand)
-                result.append(hands_set)
-        return result
-
-    def group_cards(self, cards: [str]) -> [[str]]:
-        number_elements = Game.n
-        result = []
-        k = len(cards)
-        for i in range(0, k, number_elements):
-            result.append(cards[i:i + number_elements])
-        return result
-
     def find_nodes_at_depth_with_reach_probability(self, p: int, depth: int) -> [
         (Node, float)]:
         def recursive_helper(self, node: Node, p: int, depth: int, prob: float):
@@ -285,7 +244,7 @@ class Game:
                 infoset: InformationSet = self.history_dictionary.get(node.name)
                 nested_results = [recursive_helper(self, child, p, depth - 1, prob * probability)
                                   for child, probability in zip(node.children, infoset.final_strategy)
-                                  #if probability > 0
+                                  if probability > 0
                                   ]
                 return itertools.chain.from_iterable(nested_results)
 
@@ -295,7 +254,7 @@ class Game:
             else:
                 nested_results = [recursive_helper(self, child, p, depth - 1, prob * probability)
                                   for child, probability in zip(node.children, node.probabilities)
-                                  #if probability > 0
+                                  if probability > 0
                                   ]
                 return itertools.chain.from_iterable(nested_results)
 
@@ -309,8 +268,8 @@ class Game:
 
         for t in range(Game.total_iterations_subgame):
             if t > Game.d_subgame:
-                # w = math.sqrt(t) / (math.sqrt(t) + 1)
-                w = t
+                w = math.sqrt(t) / (math.sqrt(t) + 1)
+                #w = t
             else:
                 w = 0
 
@@ -333,17 +292,20 @@ class Game:
                     infoset_to_update.final_strategy = infoset_to_update.get_average_strategy()
                     infoset_updated.append(infoset_to_update.name)
 
-    def compute_masks(self):
+    def compute_masks(self, player, use_average):
         new_nodes = []
         # CFR for adversary in all subtrees assumed already done
         #get paytoff from each child
         #add new terminal node with that payoff to each masked node
         for node in self.root_node.children:
             for child, masked_child in zip(node.children, node.children_mask):
-                payoff = child.expected_value(self.history_dictionary)
+                payoff = child.expected_value(self.history_dictionary, use_average, player)
                 new_node = TerminalNode("Result of strategy " + str(self.n_mask), payoff)
+                # Add new terminal node to Internal node of Adversary
                 masked_child.actions.append(str(self.n_mask))
                 masked_child.children.append(new_node)
+
+        self.infoset_masks.actions.append(str(self.n_mask))
         self.n_mask += 1
 
 
@@ -358,10 +320,11 @@ class Game:
             node.children_mask = []
             for child in node.children:
                 mask_name = "Subgame Mask of " + child.name
-                new_node = InternalNode(mask_name, [], node.player)
-                node.children_mask.append(new_node)
-                self.history_dictionary[new_node.name] = new_infoset
-                new_infoset.node_histories.append(new_node.name)
+                new_child = InternalNode(mask_name, [], utilities.adversary_of(node.player))
+                node.children_mask.append(new_child)
+                self.history_dictionary[new_child.name] = new_infoset
+                new_infoset.node_histories.append(new_child.name)
+                self.added_masks.append(mask_name)
 
         self.infoset_masks = new_infoset
 
@@ -390,14 +353,26 @@ class Game:
             i.prepare_for_CFR()
         for t in range(Game.total_iterations_subgame):
             if t > Game.d_subgame:
-                w = math.sqrt(t) / (math.sqrt(t) + 1)
+                # w = math.sqrt(t) / (math.sqrt(t) + 1)
+                w = t
             else:
                 w = 0
             for i in self.information_sets:
                 i.update_regret_strategy_plus()
             # Do cfr to approximate best response
             # adversary will update his strategy, player will stay fixed, distance already to 1 to make it always fixed
-            self.root_node.CFR_plus(adversary, w, 1, self.history_dictionary, 1, True, player)
+            self.root_node.CFR_plus(adversary, w, 1, self.history_dictionary, 2, True, player)
+            self.root_node.CFR_plus(player, w, 1, self.history_dictionary, 2, True, player)
+
+
+    def clean_masks(self):
+        while len(self.added_masks) != 0:
+            m = self.added_masks.pop()
+            self.history_dictionary.pop(m)
+        self.information_sets.remove(self.infoset_masks)
+        self.infoset_masks = None
+
+
 
     #
     # def CFR_optimize(self):

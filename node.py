@@ -58,7 +58,7 @@ class Node():
     def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_fixed=0) -> float:
         pass
 
-    def expected_value(self, history_dictionary) -> float:
+    def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         pass
 
 
@@ -95,7 +95,7 @@ class TerminalNode(Node):
             return -self.payoff
         return self.payoff
 
-    def expected_value(self, history_dictionary) -> float:
+    def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         return self.payoff
 
 
@@ -178,6 +178,8 @@ class InternalNode(Node):
                 for prob, node in zip(current_infoset.final_strategy, self.children):
                     expected_payoff += prob * node.CFR_plus(i, w, pi * prob, history_dict, curr_dist + 1,
                                                             isSubgame, player_fixed)
+                # for idx in range(len(self.actions)):
+                #     current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
                 return expected_payoff
         # Compute CFR plus as usual. See CFR_plus() for more info.
         if self.player == i:
@@ -197,16 +199,19 @@ class InternalNode(Node):
                 current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
         return expected_payoff
 
-    def expected_value(self, history_dictionary) -> float:
+    def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         infoset = history_dictionary.get(self.name)
         expected_value = 0
 
         # Get strategies and normalize
-        player_strategy = infoset.final_strategy
+        if use_average and self.player != fixed_player:
+            player_strategy = infoset.get_average_strategy()
+        else:
+            player_strategy = infoset.final_strategy
 
         for child, probability in zip(self.children, player_strategy):
             if probability > 0:
-                u = child.expected_value(history_dictionary)
+                u = child.expected_value(history_dictionary, use_average)
                 expected_value += u * probability
 
         return expected_value
@@ -368,10 +373,10 @@ class ChanceNode(Node):
                                                     player_fixed)
         return expected_payoff
 
-    def expected_value(self, history_dictionary) -> float:
+    def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         expected_value = 0
         for probability, child in zip(self.probabilities, self.children):
-            expected_value += probability * child.expected_value(history_dictionary)
+            expected_value += probability * child.expected_value(history_dictionary, use_average)
         return expected_value
 
 

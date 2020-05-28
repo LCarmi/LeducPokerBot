@@ -43,7 +43,7 @@ class Manager:
         for node,probability in res:
             children.append(node)
             probabilities.append(probability
-                                 #* (1.0-epsilon) + epsilon/l
+                                 #* (1.0-epsilon) + epsilon/l #try more exploration
                                  )
         new_root = ChanceNode("Virtual_root", actions, probabilities, children)
         ret = Game()
@@ -76,25 +76,29 @@ class Manager:
 def self_generative_refinement(manager):
 
     def mini_refinement(manager, player, adversary, depth):
-        n_refinements = 8
+        n_refinements = 4
         virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
 
         if virtual_game.root_node.children:
             virtual_game.setup_masks()
-
+            virtual_game.compute_masks(player, False)
+            virtual_game.mask_yourself()
+            virtual_game.solve_subgame(player)
+            virtual_game.update_infoset_from_subgame()
             for i in range(n_refinements):
-                virtual_game.compute_masks()
+                virtual_game.restore_masks()
+                virtual_game.adversary_response(player, adversary)
+                virtual_game.compute_masks(player, True)
                 virtual_game.mask_yourself()
-
                 virtual_game.solve_subgame(player)
                 virtual_game.update_infoset_from_subgame()
 
-                virtual_game.restore_masks()
-                virtual_game.adversary_response(player, adversary)
+            virtual_game.restore_masks()
+            virtual_game.clean_masks()
 
 
     depth = 1
-    while depth < 8:
+    while depth < 8: #TODO: something better maybe
         mini_refinement(manager, 1, 2, depth)
         mini_refinement(manager, 2, 1, depth)
         print("Refined level: " + str(depth))
@@ -125,18 +129,18 @@ def CFR_refinement(manager):
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - kuhn.txt"
+    file_path = "./Examples/input - leduc5.txt"
     manager = Manager(file_path)
     print("Game loaded!")
 
-    #manager.create_abstraction()
+    manager.create_abstraction()
     print("Abstraction ended!")
 
-    #manager.abstractedGame.find_optimal_strategy()
+    manager.abstractedGame.find_optimal_strategy()
     #manager.originalGame.find_optimal_strategy()
     print("Blue print strategy done in abstract game!")
 
-    #manager.map_strategies()
+    manager.map_strategies()
     print("Blue print mapped on the real game")
 
     # Initialize the final strategy
@@ -147,13 +151,13 @@ if __name__ == '__main__':
     #res = manager.write_result()
     print("Refine strategy start")
 
-    #self_generative_refinement(manager)
-    for _ in range(5):
-        CFR_refinement(manager)
 
-        print("Refine strategy done")
-        print(manager.write_result())
-        print("Expected Value: {}".format(manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)))
+    #self_generative_refinement(manager)
+    CFR_refinement(manager)
+
+    print("Refine strategy done")
+    print(manager.write_result())
+    print("Expected Value: {}".format(manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)))
 
     #print(res)
     # file_path_output = "./Examples/output.txt"

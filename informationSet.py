@@ -45,7 +45,7 @@ class InformationSet:
         if (sum(self.cumulative_strategy) == 0):
             return [1/len(self.actions) for _ in self.actions]
         else:
-            return [round(p / sum(self.cumulative_strategy),6) for p in self.cumulative_strategy]
+            return [p / sum(self.cumulative_strategy) for p in self.cumulative_strategy]
 
 
     def update_actions(self, infoset_to_copy: 'InformationSet'):
