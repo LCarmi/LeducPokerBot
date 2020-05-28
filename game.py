@@ -11,6 +11,7 @@ class Game:
     d_subgame = 50
     total_iterations_subgame = 100
     n = 1  # number of card in a group (abstraction)
+    n_groups = 3  # number of card groups
 
     def __init__(self):
         self.root_node = None
@@ -91,7 +92,10 @@ class Game:
 
         # sort the cards by the strength
         self.cards_sorted = utilities.cards_sorted_by_strength(self.cards, self.root_node)
+        # two different ways to find the groups
         self.card_groups = utilities.group_cards(self.cards_sorted, Game.n)
+        #self.card_groups = utilities.group_given_total_groups(self.cards_sorted, Game.n_groups)
+        # group hands
         self.card_pair_groups = utilities.group_pairs(self.card_groups)
         return
 

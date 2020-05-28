@@ -129,7 +129,7 @@ def CFR_refinement(manager):
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc5.txt"
+    file_path = "./Examples/input - kuhn.txt"
     manager = Manager(file_path)
     print("Game loaded!")
 

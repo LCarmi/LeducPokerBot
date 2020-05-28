@@ -1,5 +1,6 @@
 from operator import itemgetter
 from node import *
+import numpy as np
 
 
 def adversary_of(player):
@@ -50,3 +51,19 @@ def group_cards(cards: [str], number_elements) -> [[str]]:
     for i in range(0, k, number_elements):
         result.append(cards[i:i + number_elements])
     return result
+
+
+# This method creates the groups for the abstraction, given the cards sorted by strength and the number of groups wanted
+def group_given_total_groups(cards: [str], n: int) -> [[str]]:
+
+    temp = np.array_split(cards, n)
+    res = []
+    # convert the numpy array into list
+    for array in temp:
+        res.append(array.tolist())
+    return res
+
+
+if __name__ == '__main__':
+    array = ['A','B','C','D','E','F','G','H','I','L','J']
+    print(group_given_total_groups(array, 8))
