@@ -6,10 +6,10 @@ import utilities
 
 # TODO: eliminate print
 class Game:
-    d = 1000  # number of regret explorations without strategy update
-    total_iterations = 2000  # number of iteration to do
-    d_subgame = 50
-    total_iterations_subgame = 100
+    d = 2000  # number of regret explorations without strategy update
+    total_iterations = 4000  # number of iteration to do
+    d_subgame = 250
+    total_iterations_subgame = 500
     n = 1  # number of card in a group (abstraction)
     n_groups = 3  # number of card groups
 
@@ -36,7 +36,11 @@ class Game:
     def CFR_plus_optimize(self):
         # call CFR_plus
         for t in range(Game.total_iterations):
-            w = max(t - Game.d, 0)
+            #w = max(t - Game.d, 0)
+            if t > Game.d:
+                w = math.sqrt(t) / (math.sqrt(t) + 1)
+            else:
+                w = 0
 
             for i in self.information_sets:
                 i.update_regret_strategy_plus()
@@ -508,8 +512,10 @@ class Game:
 
 
     def exploitability(self) -> (float):
-        best_response_value1 = self.expected_value_best_response(self.root_node, 1, 1)
-        best_response_value2 = self.expected_value_best_response(self.root_node,2 , 1)
+        # best_response_value1 = self.expected_value_best_response(self.root_node, 1, 1)
+        # best_response_value2 = self.expected_value_best_response(self.root_node,2 , 1)
+        best_response_value1 = self.expected_value_best_response_Luca(self.root_node, 1)
+        best_response_value2 = self.expected_value_best_response_Luca(self.root_node, 2)
         res = (best_response_value1+best_response_value2)/2
         return res
 
@@ -540,6 +546,42 @@ class Game:
                 expected_value += prob * self.expected_value_best_response(node, player, prob*probability)
                 return expected_value
 
+    def exploitability_Luca(self) -> (float):
+        exp_value = self.root_node.expected_value(self.history_dictionary)
+        self.adversary_response(1,2)
+        best_response_value2 = self.root_node.expected_value(self.history_dictionary, True, 1)
+        self.adversary_response(2,1)
+        best_response_value1 = self.root_node.expected_value(self.history_dictionary, True, 2)
+        res = (best_response_value1 - best_response_value2) / 2
+        print("Exp value: {}, BR1 value: {}, BR2 value {}".format(exp_value, best_response_value1, best_response_value2))
+        return res
+
+    def expected_value_best_response_Luca(self, curr_node : Node , player : int):
+        expected_value = 0
+        if isinstance(curr_node, TerminalNode):
+            if player == 1:
+                return curr_node.payoff
+            return - curr_node.payoff
+
+        if isinstance(curr_node, ChanceNode):
+            for node, probability in zip(curr_node.children,curr_node.probabilities):
+                expected_value += probability * self.expected_value_best_response_Luca(node,player)
+
+            return  expected_value
+
+        assert isinstance(curr_node, InternalNode)
+        infoset: InformationSet = self.history_dictionary.get(curr_node.name)
+
+        if infoset.player == player:
+            expected_values = []
+            for node, probability in zip(curr_node.children, infoset.final_strategy):
+                u = self.expected_value_best_response_Luca(node, player)
+                expected_values.append(u)
+            return max(expected_values)
+        else:
+            for node, probability in zip(curr_node.children, infoset.final_strategy):
+                expected_value += probability * self.expected_value_best_response_Luca(node, player)
+                return expected_value
 
 
 

@@ -76,7 +76,7 @@ class Manager:
 def self_generative_refinement(manager):
 
     def mini_refinement(manager, player, adversary, depth):
-        n_refinements = 4
+        n_refinements = 16
         virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
 
         if virtual_game.root_node.children:
@@ -129,7 +129,7 @@ def CFR_refinement(manager):
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc3.txt"
+    file_path = "./Examples/input - kuhn.txt"
     manager = Manager(file_path)
     print("Game loaded!")
 
@@ -147,9 +147,9 @@ if __name__ == '__main__':
     for infoset in manager.originalGame.information_sets:
         infoset.final_strategy = infoset.get_average_strategy()
 
-    print("Exploitability: {}".format(manager.originalGame.exploitability()))
+    print("Exploitability: {}".format(manager.originalGame.exploitability_Luca()))
 
-    print(manager.write_result())
+    #print(manager.write_result())
     #res = manager.write_result()
     print("Refine strategy start")
 
@@ -158,10 +158,10 @@ if __name__ == '__main__':
     CFR_refinement(manager)
 
     print("Refine strategy done")
-    print(manager.write_result())
+    #print(manager.write_result())
     print("Expected Value: {}".format(manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)))
 
-    print("Exploitability: {}".format(manager.originalGame.exploitability()))
+    print("Exploitability: {}".format(manager.originalGame.exploitability_Luca()))
 
     #print(res)
     # file_path_output = "./Examples/output.txt"
