@@ -10,7 +10,7 @@ class Game:
     total_iterations = 4000  # number of iteration to do
     d_subgame = 250
     total_iterations_subgame = 500
-    n = 1  # number of card in a group (abstraction)
+    #n = 1  # number of card in a group (abstraction)
     n_groups = 3  # number of card groups
 
     def __init__(self):
@@ -97,8 +97,8 @@ class Game:
         # sort the cards by the strength
         self.cards_sorted = utilities.cards_sorted_by_strength(self.cards, self.root_node)
         # two different ways to find the groups
-        self.card_groups = utilities.group_cards(self.cards_sorted, Game.n)
-        #self.card_groups = utilities.group_given_total_groups(self.cards_sorted, Game.n_groups)
+        #self.card_groups = utilities.group_cards(self.cards_sorted, Game.n)
+        self.card_groups = utilities.group_given_total_groups(self.cards_sorted, Game.n_groups)
         # group hands
         self.card_pair_groups = utilities.group_pairs(self.card_groups)
         return
@@ -359,19 +359,18 @@ class Game:
     def adversary_response(self, player, adversary):
         for i in self.information_sets:
             i.prepare_for_CFR()
-        for t in range(Game.total_iterations_subgame):
-            if t > Game.d_subgame:
-                # w = math.sqrt(t) / (math.sqrt(t) + 1)
-                w = t
-            else:
-                w = 0
-            for i in self.information_sets:
-                i.update_regret_strategy_plus()
-            # Do cfr to approximate best response
-            # adversary will update his strategy, player will stay fixed, distance already to 1 to make it always fixed
-            self.root_node.CFR_plus(adversary, w, 1, self.history_dictionary, 2, True, player)
-            self.root_node.CFR_plus(player, w, 1, self.history_dictionary, 2, True, player)
 
+        w=1
+        for i in self.information_sets:
+            i.update_regret_strategy_plus()
+        # Do cfr to compute regrets
+        self.root_node.CFR_plus(adversary, w, 1, self.history_dictionary, 2, True, player)
+
+        for i in self.information_sets:
+            i.update_regret_strategy_plus()
+            #use regretstrategy greedily
+            i.cumulative_strategy = i.regret_strategy
+        return
 
     def clean_masks(self):
         while len(self.added_masks) != 0:
