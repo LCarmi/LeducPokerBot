@@ -505,3 +505,42 @@ class Game:
     #             current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
     #
     #     return expected_payoff
+
+
+    def exploitability(self) -> (float):
+        best_response_value1 = self.expected_value_best_response(self.root_node, 1, 1)
+        best_response_value2 = self.expected_value_best_response(self.root_node,2 , 1)
+        res = (best_response_value1+best_response_value2)/2
+        return res
+
+    def expected_value_best_response(self, curr_node : Node , player : int, prob : float ):
+        expected_value = 0
+        if isinstance(curr_node, TerminalNode):
+            if player == 1:
+                return curr_node.payoff
+            return - curr_node.payoff
+
+        if isinstance(curr_node, ChanceNode):
+            for node, probability in zip(curr_node.children,curr_node.probabilities):
+                expected_value += prob * self.expected_value_best_response(node,player,prob*probability)
+
+            return  expected_value
+
+        assert isinstance(curr_node, InternalNode)
+        infoset: InformationSet = self.history_dictionary.get(curr_node.name)
+
+        if infoset.player == player:
+            expected_values = []
+            for node, probability in zip(curr_node.children, infoset.final_strategy):
+                u =  prob * self.expected_value_best_response(node, player, prob * probability)
+                expected_values.append(u)
+            return max(expected_values)
+        else:
+            for node, probability in zip(curr_node.children, infoset.final_strategy):
+                expected_value += prob * self.expected_value_best_response(node, player, prob*probability)
+                return expected_value
+
+
+
+
+

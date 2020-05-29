@@ -129,7 +129,7 @@ def CFR_refinement(manager):
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - kuhn.txt"
+    file_path = "./Examples/input - leduc3.txt"
     manager = Manager(file_path)
     print("Game loaded!")
 
@@ -147,6 +147,8 @@ if __name__ == '__main__':
     for infoset in manager.originalGame.information_sets:
         infoset.final_strategy = infoset.get_average_strategy()
 
+    print("Exploitability: {}".format(manager.originalGame.exploitability()))
+
     print(manager.write_result())
     #res = manager.write_result()
     print("Refine strategy start")
@@ -158,6 +160,8 @@ if __name__ == '__main__':
     print("Refine strategy done")
     print(manager.write_result())
     print("Expected Value: {}".format(manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)))
+
+    print("Exploitability: {}".format(manager.originalGame.exploitability()))
 
     #print(res)
     # file_path_output = "./Examples/output.txt"
