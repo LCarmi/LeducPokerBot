@@ -2,7 +2,7 @@
 
 class InformationSet:
 
-    def __init__(self, name: str, player: str, node_histories: [str], actions: [str]):
+    def __init__(self, name: str, player: int, node_histories: [str], actions: [str]):
         self.name = name
         self.player = player
         self.node_histories = node_histories

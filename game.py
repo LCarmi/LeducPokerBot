@@ -8,8 +8,6 @@ import utilities
 class Game:
     d = 500  # number of regret explorations without strategy update
     total_iterations = 1000  # number of iteration to do
-    d_subgame = 250
-    total_iterations_subgame = 500
     #n = 1  # number of card in a group (abstraction)
     n_groups = 3  # number of card groups
 
@@ -25,7 +23,6 @@ class Game:
 
         self.masked = False
         self.n_mask = 0
-        self.added_masks = []
 
     def find_optimal_strategy(self):
         # CFR+ algorithm
@@ -269,13 +266,13 @@ class Game:
         return list(recursive_helper(self, self.root_node, p, depth, 1.0))
 
     # This method will be called to solve the subgame.
-    def solve_subgame(self, player_to_update: int):
+    def solve_subgame(self, player_to_update: int, n_iter, d):
 
         for i in self.information_sets:
             i.prepare_for_CFR()
 
-        for t in range(Game.total_iterations_subgame):
-            if t > Game.d_subgame:
+        for t in range(n_iter):
+            if t > d:
                 w = math.sqrt(t) / (math.sqrt(t) + 1)
                 #w = t
             else:
@@ -307,40 +304,72 @@ class Game:
         #add new terminal node with that payoff to each masked node
         for node in self.root_node.children:
             for child, masked_child in zip(node.children, node.children_mask):
+                #payoff_original = child.expected_value(self.history_dictionary)
                 payoff = child.expected_value(self.history_dictionary, use_average, player)
                 new_node = TerminalNode("Result of strategy " + str(self.n_mask), payoff)
                 # Add new terminal node to Internal node of Adversary
                 masked_child.actions.append(str(self.n_mask))
                 masked_child.children.append(new_node)
 
-        self.infoset_masks.actions.append(str(self.n_mask))
+                if self.history_dictionary_mask[masked_child.name].actions == [] or str(self.n_mask) != self.history_dictionary_mask[masked_child.name].actions[-1]:
+                    self.history_dictionary_mask[masked_child.name].actions.append(str(self.n_mask))
+
         self.n_mask += 1
 
 
     def setup_masks(self):
+        self.information_sets_mask = []
+        self.history_dictionary_mask = {}
+        infoset_mapping = {}
 
         # create infoset of choices for adversary
-        new_infoset = InformationSet("Subgame_Masks", self.root_node.children[0].player, [], [])
-        self.information_sets.append(new_infoset)
+        # self.infoset_masks = InformationSet("Subgame_Masks", self.root_node.children[0].player, [], [])
+        # self.information_sets_mask.append(self.infoset_masks)
+
 
         # create internal nodes
         for node in self.root_node.children:
             node.children_mask = []
+            self.history_dictionary_mask[node.name] = self.history_dictionary[node.name]
+            self.information_sets_mask.append(self.history_dictionary[node.name])
             for child in node.children:
                 mask_name = "Subgame Mask of " + child.name
                 new_child = InternalNode(mask_name, [], utilities.adversary_of(node.player))
-                node.children_mask.append(new_child)
-                self.history_dictionary[new_child.name] = new_infoset
-                new_infoset.node_histories.append(new_child.name)
-                self.added_masks.append(mask_name)
 
-        self.infoset_masks = new_infoset
+                node.children_mask.append(new_child)
+
+                if child.name not in self.history_dictionary:
+                    #TODO: remove them from here
+                    self.history_dictionary[child.name] = InformationSet(child.name[:2+ utilities.adversary_of(node.player)] + '?' + child.name[3+ utilities.adversary_of(node.player):], utilities.adversary_of(node.player), [], [])
+                if self.history_dictionary[child.name].name not in infoset_mapping:
+                    new_infoset = InformationSet("Subgame Infoset of " + self.history_dictionary[child.name].name, utilities.adversary_of(node.player), [], [])
+                    self.information_sets_mask.append(new_infoset)
+                    infoset_mapping[self.history_dictionary[child.name].name] = new_infoset
+
+                infoset = infoset_mapping[self.history_dictionary[child.name].name]
+                self.history_dictionary_mask[new_child.name] = infoset
+                infoset.node_histories.append(new_child.name)
+
+
+
 
     def mask_yourself(self):
         if self.masked:
             raise Exception()
-
         self.masked = True
+
+        self.__swap_masks()
+
+    def __swap_masks(self):
+        # swap Infoset list
+        swap = self.information_sets
+        self.information_sets = self.information_sets_mask
+        self.information_sets_mask = swap
+        # swap history dict
+        swap = self.history_dictionary
+        self.history_dictionary = self.history_dictionary_mask
+        self.history_dictionary_mask = swap
+        # swap children
         for node in self.root_node.children:
             swap = node.children
             node.children = node.children_mask
@@ -351,10 +380,7 @@ class Game:
             raise Exception()
         self.masked = False
 
-        for node in self.root_node.children:
-            swap = node.children
-            node.children = node.children_mask
-            node.children_mask = swap
+        self.__swap_masks()
 
     def adversary_response(self, player, adversary):
         for i in self.information_sets:
@@ -382,11 +408,8 @@ class Game:
         return
 
     def clean_masks(self):
-        while len(self.added_masks) != 0:
-            m = self.added_masks.pop()
-            self.history_dictionary.pop(m)
-        self.information_sets.remove(self.infoset_masks)
-        self.infoset_masks = None
+        self.history_dictionary_mask = None
+        self.information_sets_mask = None
 
 
 

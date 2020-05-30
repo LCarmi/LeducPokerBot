@@ -1,9 +1,58 @@
 Game loaded!
 Abstraction ended!
+Time: 510, Expected Value: -0.08542148780981651
+Time: 520, Expected Value: -0.08696246897415497
+Time: 530, Expected Value: -0.08588006220681674
+Time: 540, Expected Value: -0.08603220086235935
+Time: 550, Expected Value: -0.08515390092554893
+Time: 560, Expected Value: -0.08571011976938032
+Time: 570, Expected Value: -0.08542900297500436
+Time: 580, Expected Value: -0.08562615038791957
+Time: 590, Expected Value: -0.08570982210901142
+Time: 600, Expected Value: -0.08577100363690052
+Time: 610, Expected Value: -0.08581630844915786
+Time: 620, Expected Value: -0.08587222011186761
+Time: 630, Expected Value: -0.0857062608964648
+Time: 640, Expected Value: -0.0857809959185575
+Time: 650, Expected Value: -0.08579556976282143
+Time: 660, Expected Value: -0.08561276621389238
+Time: 670, Expected Value: -0.08582546739299919
+Time: 680, Expected Value: -0.0857094714866704
+Time: 690, Expected Value: -0.0856965934540631
+Time: 700, Expected Value: -0.08567654101257517
+Time: 710, Expected Value: -0.08568284523848088
+Time: 720, Expected Value: -0.08567529556247827
+Time: 730, Expected Value: -0.0855929295112779
+Time: 740, Expected Value: -0.08561170818704097
+Time: 750, Expected Value: -0.08561509841689263
+Time: 760, Expected Value: -0.0855569558073108
+Time: 770, Expected Value: -0.08556757862965757
+Time: 780, Expected Value: -0.08551472176831001
+Time: 790, Expected Value: -0.08559528960153613
+Time: 800, Expected Value: -0.08559391119824569
+Time: 810, Expected Value: -0.08557995465751253
+Time: 820, Expected Value: -0.08561545349662335
+Time: 830, Expected Value: -0.08559623359003708
+Time: 840, Expected Value: -0.08555737911292471
+Time: 850, Expected Value: -0.08556761391986274
+Time: 860, Expected Value: -0.0855479469650013
+Time: 870, Expected Value: -0.0855957326986586
+Time: 880, Expected Value: -0.0855584980806856
+Time: 890, Expected Value: -0.08552085994721721
+Time: 900, Expected Value: -0.08550448948903064
+Time: 910, Expected Value: -0.08548608798760532
+Time: 920, Expected Value: -0.08543304974061215
+Time: 930, Expected Value: -0.08545697822407833
+Time: 940, Expected Value: -0.08546485007425439
+Time: 950, Expected Value: -0.08541349357923345
+Time: 960, Expected Value: -0.08537234450833443
+Time: 970, Expected Value: -0.08536210673003976
+Time: 980, Expected Value: -0.08535908336219401
+Time: 990, Expected Value: -0.08534657057636982
 Blue print strategy done in abstract game!
 Blue print mapped on the real game
-Exp value: -0.07812500000000006, BR1 value: 2.0802671162429176, BR2 value -2.6224483616522596
-Exploitability: 2.3513577389475886
+Exp value: -0.08536313350201954, BR1 value: -0.08103957292765407, BR2 value -0.08591317072818942
+Exploitability: 0.002436798900267677
 Refine strategy start
 Self generative refinement
 Refined level: 1
@@ -14,97 +63,90 @@ Refined level: 5
 Refined level: 6
 Refined level: 7
 Refine strategy done
-Expected Value: -0.026002104651583022
-Exp value: -0.026002104651583022, BR1 value: 1.7196481395277716, BR2 value -0.9944734041535357
-Exploitability: 1.3570607718406538
-         866207645 function calls (849226557 primitive calls) in 479.075 seconds
+Expected Value: -0.08702031554134751
+Exp value: -0.08702031554134751, BR1 value: 1.2692738937465229, BR2 value -0.7947731128425408
+Exploitability: 1.032023503294532
+         226187519 function calls (211215417 primitive calls) in 109.961 seconds
 
    Ordered by: call count
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-194191003/194190702   20.013    0.000   20.013    0.000 {built-in method builtins.len}
-187654928   47.610    0.000   47.610    0.000 {built-in method builtins.max}
-149569720   25.535    0.000   25.535    0.000 node.py:93(CFR_plus)
- 83235523    9.256    0.000    9.256    0.000 {method 'append' of 'list' objects}
- 40426209    9.655    0.000    9.655    0.000 {built-in method builtins.sum}
- 40065288   71.091    0.000  259.445    0.000 informationSet.py:21(update_regret_strategy_plus)
- 40065288   23.152    0.000   46.521    0.000 informationSet.py:32(<listcomp>)
- 40065288   62.381    0.000  160.006    0.000 informationSet.py:28(__compute_regret_strategy)
- 38943917   27.591    0.000   36.892    0.000 informationSet.py:35(<listcomp>)
- 24466696    4.932    0.000    4.932    0.000 {method 'get' of 'dict' objects}
-24318920/7494280  159.377    0.000  201.529    0.000 node.py:169(CFR_plus)
-  1121371    0.477    0.000    0.477    0.000 informationSet.py:37(<listcomp>)
-   170995    0.033    0.000    0.033    0.000 {method 'split' of 'str' objects}
-   159324    0.044    0.000    0.044    0.000 informationSet.py:14(<listcomp>)
-   159324    0.034    0.000    0.034    0.000 informationSet.py:15(<listcomp>)
-   159324    0.073    0.000    0.073    0.000 informationSet.py:16(<listcomp>)
-   159324    0.263    0.000    0.414    0.000 informationSet.py:13(prepare_for_CFR)
-   142395    0.020    0.000    0.020    0.000 node.py:98(expected_value)
-117300/11225    0.218    0.000    0.474    0.000 node.py:202(expected_value)
-109600/102200    4.730    0.000  206.237    0.002 node.py:369(CFR_plus)
-   108705    0.075    0.000    0.214    0.000 informationSet.py:41(get_average_strategy)
-   107925    0.065    0.000    0.112    0.000 informationSet.py:48(<listcomp>)
-    55719    0.009    0.000    0.009    0.000 {built-in method builtins.isinstance}
-    50797    0.015    0.000    0.015    0.000 {built-in method math.sqrt}
-    49694    0.007    0.000    0.007    0.000 {method 'group' of 're.Match' objects}
-    40983    0.012    0.000    0.031    0.000 re.py:289(_compile)
-    37501    0.005    0.000    0.005    0.000 {method 'rfind' of 'str' objects}
-    36316    0.011    0.000    0.011    0.000 node.py:7(__init__)
-    29876    0.010    0.000    0.073    0.000 re.py:193(fullmatch)
-    29876    0.047    0.000    0.047    0.000 {method 'fullmatch' of 're.Pattern' objects}
-    27575    0.017    0.000    0.026    0.000 node.py:68(__init__)
-    26613    0.006    0.000    0.006    0.000 {method 'update' of 'dict' objects}
-    18752    0.026    0.000    0.123    0.000 myParser.py:18(parse_node_line)
-  18751/1    0.005    0.000    0.091    0.091 orderFile.py:51(_quick_sort)
-    18750    0.007    0.000    0.010    0.000 node.py:36(history_father)
-    18750    0.002    0.000    0.002    0.000 {method 'index' of 'list' objects}
-    17500    0.005    0.000    0.007    0.000 node.py:112(addChild)
-    13350    0.002    0.000    0.002    0.000 {method 'rstrip' of 'str' objects}
-    11081    0.002    0.000    0.002    0.000 {method 'match' of 're.Pattern' objects}
-    11077    0.003    0.000    0.010    0.000 re.py:188(match)
-    11000    0.001    0.000    0.001    0.000 node.py:75(getPayoffRepresentation)
-    10173    0.002    0.000    0.011    0.000 myParser.py:48(is_node)
-    10000    0.001    0.000    0.001    0.000 node.py:117(concatenate)
-     9375    0.048    0.000    0.085    0.000 orderFile.py:29(partition)
-     8478    0.002    0.000    0.002    0.000 {built-in method builtins.sorted}
-     8475    0.002    0.000    0.002    0.000 node.py:108(<listcomp>)
-     8475    0.017    0.000    0.022    0.000 node.py:104(__init__)
-  7500/50    0.004    0.000    0.014    0.000 node.py:120(<listcomp>)
-  7500/50    0.003    0.000    0.014    0.000 node.py:116(getPayoffRepresentation)
-     7500    0.002    0.000    0.003    0.000 {built-in method _functools.reduce}
-  3954/14    0.017    0.000    0.032    0.002 game.py:240(recursive_helper)
-     3872    0.001    0.000    0.001    0.000 {built-in method builtins.getattr}
-3802/3277    0.010    0.000    0.382    0.000 node.py:376(expected_value)
-     2354    0.001    0.000    0.001    0.000 {built-in method from_iterable}
- 2140/300    0.008    0.000    0.030    0.000 game.py:253(<listcomp>)
+ 80721472   10.071    0.000   10.071    0.000 node.py:93(CFR_plus)
+ 47702280    4.185    0.000    4.185    0.000 {method 'append' of 'list' objects}
+23966426/23966125    1.803    0.000    1.803    0.000 {built-in method builtins.len}
+ 20431373    2.211    0.000    2.211    0.000 {method 'get' of 'dict' objects}
+20361248/5558288   74.437    0.000   92.477    0.000 node.py:169(CFR_plus)
+ 15761504    2.888    0.000    2.888    0.000 {built-in method builtins.max}
+  3405812    0.649    0.000    0.649    0.000 {built-in method builtins.sum}
+  3246244    4.447    0.000   13.372    0.000 informationSet.py:21(update_regret_strategy_plus)
+  3246244    1.474    0.000    2.875    0.000 informationSet.py:32(<listcomp>)
+  3246244    2.753    0.000    7.144    0.000 informationSet.py:28(__compute_regret_strategy)
+  3092900    0.762    0.000    0.762    0.000 informationSet.py:38(<listcomp>)
+225432/123912    2.706    0.000   95.061    0.001 node.py:369(CFR_plus)
+   153344    0.088    0.000    0.115    0.000 informationSet.py:36(<listcomp>)
+    61257    0.010    0.000    0.010    0.000 {built-in method math.sqrt}
+56193/7973    0.071    0.000    0.150    0.000 node.py:202(expected_value)
+    52640    0.006    0.000    0.006    0.000 node.py:98(expected_value)
+    47567    0.023    0.000    0.067    0.000 informationSet.py:42(get_average_strategy)
+    47556    0.021    0.000    0.036    0.000 informationSet.py:49(<listcomp>)
+    32035    0.009    0.000    0.009    0.000 {method 'split' of 'str' objects}
+    26143    0.004    0.000    0.004    0.000 {built-in method builtins.isinstance}
+    22624    0.005    0.000    0.005    0.000 informationSet.py:14(<listcomp>)
+    22624    0.003    0.000    0.003    0.000 informationSet.py:15(<listcomp>)
+    22624    0.007    0.000    0.007    0.000 informationSet.py:16(<listcomp>)
+    22624    0.028    0.000    0.043    0.000 informationSet.py:13(prepare_for_CFR)
+    18070    0.005    0.000    0.005    0.000 node.py:7(__init__)
+    15234    0.008    0.000    0.012    0.000 node.py:68(__init__)
+    11030    0.002    0.000    0.002    0.000 {method 'group' of 're.Match' objects}
+     9439    0.004    0.000    0.020    0.000 re.py:289(_compile)
+     7741    0.001    0.000    0.001    0.000 {method 'rfind' of 'str' objects}
+     7325    0.002    0.000    0.002    0.000 {method 'update' of 'dict' objects}
+     6756    0.002    0.000    0.020    0.000 re.py:193(fullmatch)
+     6756    0.012    0.000    0.012    0.000 {method 'fullmatch' of 're.Pattern' objects}
+     5418    0.001    0.000    0.001    0.000 {method 'rstrip' of 'str' objects}
+     4257    0.001    0.000    0.001    0.000 {method 'index' of 'list' objects}
+     3872    0.006    0.000    0.028    0.000 myParser.py:18(parse_node_line)
+     3872    0.002    0.000    0.002    0.000 {built-in method builtins.getattr}
+   3871/1    0.002    0.000    0.026    0.026 orderFile.py:51(_quick_sort)
+     3870    0.002    0.000    0.002    0.000 node.py:36(history_father)
+3665/1238    0.004    0.000    0.120    0.000 node.py:376(expected_value)
+     3612    0.001    0.000    0.002    0.000 node.py:112(addChild)
+  3522/14    0.004    0.000    0.008    0.001 game.py:239(recursive_helper)
+     2733    0.001    0.000    0.001    0.000 {built-in method builtins.sorted}
+     2730    0.001    0.000    0.001    0.000 node.py:108(<listcomp>)
+     2730    0.003    0.000    0.005    0.000 node.py:104(__init__)
+     2657    0.001    0.000    0.001    0.000 {method 'match' of 're.Pattern' objects}
+     2653    0.002    0.000    0.005    0.000 re.py:188(match)
+     2241    0.001    0.000    0.005    0.000 myParser.py:48(is_node)
+     2232    0.000    0.000    0.000    0.000 node.py:75(getPayoffRepresentation)
+     2064    0.000    0.000    0.000    0.000 node.py:117(concatenate)
      2041    0.001    0.000    0.001    0.000 sre_parse.py:233(__next)
      2032    0.001    0.000    0.001    0.000 sre_parse.py:164(__getitem__)
+   1936/1    0.001    0.000    0.002    0.002 game.py:177(abstractSubtree)
+     1935    0.014    0.000    0.025    0.000 orderFile.py:29(partition)
+     1906    0.000    0.000    0.000    0.000 {built-in method from_iterable}
      1844    0.001    0.000    0.001    0.000 {method 'join' of 'str' objects}
      1701    0.000    0.000    0.000    0.000 {built-in method builtins.setattr}
      1631    0.001    0.000    0.001    0.000 <frozen importlib._bootstrap>:222(_verbose_message)
-     1566    0.001    0.000    0.004    0.000 informationSet.py:5(__init__)
-     1560    0.001    0.000    0.013    0.000 myParser.py:39(parse_infoset_line)
-     1560    0.001    0.000    0.003    0.000 myParser.py:43(parse_card_from_infoset)
-     1560    0.000    0.000    0.000    0.000 node.py:160(get_actions)
+ 1604/108    0.002    0.000    0.008    0.000 game.py:252(<listcomp>)
      1556    0.001    0.000    0.001    0.000 sre_parse.py:254(get)
+  1548/18    0.001    0.000    0.003    0.000 node.py:120(<listcomp>)
+  1548/18    0.001    0.000    0.003    0.000 node.py:116(getPayoffRepresentation)
+     1548    0.000    0.000    0.001    0.000 {built-in method _functools.reduce}
      1527    0.001    0.000    0.001    0.000 {built-in method builtins.hasattr}
      1480    0.001    0.000    0.002    0.000 <frozen importlib._bootstrap_external>:64(<listcomp>)
-     1480    0.001    0.000    0.003    0.000 <frozen importlib._bootstrap_external>:62(_path_join)
+     1480    0.002    0.000    0.004    0.000 <frozen importlib._bootstrap_external>:62(_path_join)
      1252    0.000    0.000    0.000    0.000 {method 'rpartition' of 'str' objects}
-     1250    0.000    0.000    0.001    0.000 node.py:233(addChild)
-     1162    0.000    0.000    0.000    0.000 {method 'pop' of 'dict' objects}
+     1182    0.000    0.000    0.000    0.000 utilities.py:6(adversary_of)
      1078    0.000    0.000    0.000    0.000 {built-in method _imp.acquire_lock}
      1078    0.000    0.000    0.000    0.000 {built-in method _imp.release_lock}
-      975    0.000    0.000    0.000    0.000 utilities.py:6(adversary_of)
-      975    0.000    0.000    0.000    0.000 {method 'pop' of 'list' objects}
       928    0.000    0.000    0.000    0.000 {built-in method _thread.get_ident}
-      797    0.000    0.000    0.001    0.000 myParser.py:52(is_infoset)
-      780    0.000    0.000    0.001    0.000 informationSet.py:46(<listcomp>)
       659    0.000    0.000    0.000    0.000 sre_parse.py:249(match)
       651    0.000    0.000    0.000    0.000 {built-in method builtins.min}
-      622    0.000    0.000    0.008    0.000 <frozen importlib._bootstrap_external>:80(_path_stat)
-      622    0.007    0.000    0.007    0.000 {built-in method posix.stat}
-      622    0.001    0.000    0.001    0.000 {built-in method __new__ of type object at 0x7f470cc81160}
+      642    0.001    0.000    0.001    0.000 {method 'format' of 'str' objects}
+      622    0.000    0.000    0.010    0.000 <frozen importlib._bootstrap_external>:80(_path_stat)
+      622    0.010    0.000    0.010    0.000 {built-in method posix.stat}
+      622    0.001    0.000    0.001    0.000 {built-in method __new__ of type object at 0x7ff02b796160}
       617    0.000    0.000    0.000    0.000 sre_parse.py:172(append)
       616    0.000    0.000    0.000    0.000 _inspect.py:15(ismethod)
       616    0.000    0.000    0.000    0.000 _inspect.py:28(isfunction)
@@ -112,126 +154,133 @@ Exploitability: 1.3570607718406538
       615    0.000    0.000    0.000    0.000 sre_parse.py:160(__len__)
       612    0.000    0.000    0.000    0.000 _inspect.py:43(iscode)
       612    0.002    0.000    0.002    0.000 _inspect.py:67(getargs)
-      610    0.001    0.000    0.001    0.000 {built-in method numpy.array}
-      593    0.001    0.000    0.001    0.000 {method 'format' of 'str' objects}
+      587    0.000    0.000    0.001    0.000 informationSet.py:5(__init__)
+      576    0.000    0.000    0.005    0.000 myParser.py:39(parse_infoset_line)
+      576    0.000    0.000    0.001    0.000 myParser.py:43(parse_card_from_infoset)
+      576    0.000    0.000    0.000    0.000 node.py:160(get_actions)
       572    0.000    0.000    0.001    0.000 <string>:1(__new__)
-      502    0.000    0.000    0.001    0.000 _asarray.py:16(asarray)
       493    0.000    0.000    0.000    0.000 {built-in method builtins.ord}
       464    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:863(__enter__)
       464    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:867(__exit__)
       456    0.001    0.000    0.001    0.000 <frozen importlib._bootstrap>:78(acquire)
       456    0.001    0.000    0.001    0.000 <frozen importlib._bootstrap>:103(release)
-      456    0.001    0.000    0.001    0.000 <frozen importlib._bootstrap>:157(_get_module_lock)
-    441/1    0.001    0.000  479.076  479.076 {built-in method builtins.exec}
+      456    0.001    0.000    0.002    0.000 <frozen importlib._bootstrap>:157(_get_module_lock)
+    441/1    0.001    0.000  109.962  109.962 {built-in method builtins.exec}
       405    0.000    0.000    0.000    0.000 sre_parse.py:286(tell)
+      387    0.000    0.000    0.000    0.000 node.py:233(addChild)
       382    0.000    0.000    0.000    0.000 {built-in method posix.fspath}
   365/112    0.001    0.000    0.001    0.000 sre_parse.py:174(getwidth)
       357    0.000    0.000    0.000    0.000 {built-in method builtins.globals}
       348    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:1265(_path_importer_cache)
       345    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:389(parent)
-      333    0.000    0.000    0.000    0.000 {method 'startswith' of 'str' objects}
       326    0.001    0.000    0.003    0.000 functools.py:34(update_wrapper)
       324    0.000    0.000    0.000    0.000 functools.py:64(wraps)
       319    0.000    0.000    0.000    0.000 {built-in method _thread.allocate_lock}
-    317/8    0.001    0.000    0.265    0.033 {built-in method builtins.__import__}
+    317/8    0.001    0.000    0.295    0.037 {built-in method builtins.__import__}
       316    0.001    0.000    0.032    0.000 overrides.py:166(decorator)
       316    0.000    0.000    0.000    0.000 overrides.py:124(array_function_dispatch)
       316    0.020    0.000    0.020    0.000 {built-in method builtins.compile}
+      305    0.000    0.000    0.001    0.000 myParser.py:52(is_infoset)
+   302/14    0.001    0.000    0.008    0.001 game.py:262(<listcomp>)
       299    0.000    0.000    0.000    0.000 sre_parse.py:111(__init__)
       298    0.000    0.000    0.000    0.000 {built-in method numpy.core._multiarray_umath.add_docstring}
       297    0.000    0.000    0.002    0.000 <frozen importlib._bootstrap>:194(_lock_unlock_module)
-      296    0.003    0.000    0.014    0.000 <frozen importlib._bootstrap_external>:1431(find_spec)
+      296    0.003    0.000    0.018    0.000 <frozen importlib._bootstrap_external>:1431(find_spec)
       296    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:40(_relax_case)
       295    0.000    0.000    0.000    0.000 {method 'strip' of 'str' objects}
+      290    0.001    0.000    0.001    0.000 {built-in method numpy.array}
    290/32    0.002    0.000    0.004    0.000 sre_compile.py:71(_compile)
       289    0.000    0.000    0.000    0.000 {built-in method from_bytes}
+      288    0.000    0.000    0.000    0.000 informationSet.py:52(update_actions)
+      288    0.002    0.000    0.002    0.000 game.py:231(get_infoset_from_name)
       288    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:51(_unpack_uint32)
       286    0.001    0.000    0.006    0.000 overrides.py:72(verify_matching_signatures)
-      273    0.000    0.000    0.000    0.000 function_base.py:428(_needs_add_docstring)
       273    0.000    0.000    0.001    0.000 function_base.py:446(_add_docstring)
       273    0.001    0.000    0.005    0.000 function_base.py:460(add_newdoc)
-      266    0.000    0.000    0.000    0.000 node.py:327(normalize_probabilites)
-      266    0.000    0.000    0.001    0.000 node.py:223(__init__)
+      273    0.000    0.000    0.000    0.000 function_base.py:428(_needs_add_docstring)
       263    0.000    0.000    0.002    0.000 <frozen importlib._bootstrap>:376(cached)
-  262/254    0.000    0.000    0.000    0.000 {built-in method numpy.core._multiarray_umath.implement_array_function}
       257    0.000    0.000    0.000    0.000 hmac.py:17(<genexpr>)
       257    0.000    0.000    0.000    0.000 hmac.py:18(<genexpr>)
-      256    0.000    0.000    0.000    0.000 {method 'tolist' of 'numpy.ndarray' objects}
       256    0.000    0.000    0.000    0.000 {built-in method builtins.chr}
-      252    0.000    0.000    0.000    0.000 node.py:226(<listcomp>)
-  251/250    0.004    0.000    0.006    0.000 {built-in method builtins.__build_class__}
-      250    0.000    0.000    0.000    0.000 <__array_function__ internals>:2(dot)
-      250    0.000    0.000    0.011    0.000 node.py:239(<listcomp>)
-      250    0.000    0.000    0.013    0.000 node.py:237(getPayoffRepresentation)
-      250    0.000    0.000    0.000    0.000 multiarray.py:707(dot)
+  251/250    0.005    0.000    0.007    0.000 {built-in method builtins.__build_class__}
+      242    0.002    0.000    0.002    0.000 game.py:349(__swap_masks)
       232    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:68(_path_split)
       232    0.001    0.000    0.002    0.000 <frozen importlib._bootstrap_external>:294(cache_from_source)
-    227/2    0.000    0.000    0.270    0.135 <frozen importlib._bootstrap>:211(_call_with_frames_removed)
+    227/2    0.000    0.000    0.306    0.153 <frozen importlib._bootstrap>:211(_call_with_frames_removed)
       224    0.000    0.000    0.000    0.000 sre_parse.py:81(groups)
       215    0.000    0.000    0.000    0.000 {method 'find' of 'bytearray' objects}
-   214/14    0.002    0.000    0.032    0.002 game.py:263(<listcomp>)
-      197    0.000    0.000    0.006    0.000 <frozen importlib._bootstrap_external>:90(_path_is_mode_type)
-   188/16    0.001    0.000    0.266    0.017 <frozen importlib._bootstrap>:1017(_handle_fromlist)
-      184    0.000    0.000    0.006    0.000 <frozen importlib._bootstrap_external>:99(_path_isfile)
+      197    0.000    0.000    0.008    0.000 <frozen importlib._bootstrap_external>:90(_path_is_mode_type)
+   188/16    0.001    0.000    0.296    0.018 <frozen importlib._bootstrap>:1017(_handle_fromlist)
+      187    0.000    0.000    0.000    0.000 {method 'pop' of 'dict' objects}
+      184    0.000    0.000    0.008    0.000 <frozen importlib._bootstrap_external>:99(_path_isfile)
+      182    0.000    0.000    0.000    0.000 _asarray.py:16(asarray)
       179    0.000    0.000    0.000    0.000 {method 'endswith' of 'str' objects}
       159    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:143(__init__)
       159    0.000    0.000    0.002    0.000 <frozen importlib._bootstrap>:147(__enter__)
       159    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap>:151(__exit__)
-    159/2    0.001    0.000    0.270    0.135 <frozen importlib._bootstrap>:956(_find_and_load_unlocked)
-    159/2    0.001    0.000    0.270    0.135 <frozen importlib._bootstrap>:986(_find_and_load)
+    159/2    0.001    0.000    0.307    0.153 <frozen importlib._bootstrap>:956(_find_and_load_unlocked)
+    159/2    0.001    0.000    0.307    0.154 <frozen importlib._bootstrap>:986(_find_and_load)
       158    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:58(__init__)
       158    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:176(cb)
       156    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:342(__init__)
       156    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:725(find_spec)
-      156    0.001    0.000    0.018    0.000 <frozen importlib._bootstrap>:890(_find_spec)
-      154    0.001    0.000    0.016    0.000 <frozen importlib._bootstrap_external>:1302(_get_spec)
-      154    0.000    0.000    0.017    0.000 <frozen importlib._bootstrap_external>:1334(find_spec)
+      156    0.001    0.000    0.023    0.000 <frozen importlib._bootstrap>:890(_find_spec)
+      154    0.001    0.000    0.020    0.000 <frozen importlib._bootstrap_external>:1302(_get_spec)
+      154    0.000    0.000    0.021    0.000 <frozen importlib._bootstrap_external>:1334(find_spec)
       154    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:800(find_spec)
       154    0.000    0.000    0.000    0.000 {built-in method _imp.is_frozen}
-  150/147    0.000    0.000    0.128    0.001 <frozen importlib._bootstrap>:549(module_from_spec)
-    150/2    0.001    0.000    0.270    0.135 <frozen importlib._bootstrap>:650(_load_unlocked)
+      152    0.000    0.000    0.000    0.000 node.py:327(normalize_probabilites)
+  150/147    0.000    0.000    0.148    0.001 <frozen importlib._bootstrap>:549(module_from_spec)
+    150/2    0.001    0.000    0.307    0.153 <frozen importlib._bootstrap>:650(_load_unlocked)
       149    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:397(has_location)
-      149    0.001    0.000    0.003    0.000 <frozen importlib._bootstrap>:477(_init_module_attrs)
+      149    0.001    0.000    0.004    0.000 <frozen importlib._bootstrap>:477(_init_module_attrs)
       148    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:1426(_get_spec)
       148    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:629(spec_from_file_location)
    147/34    0.003    0.000    0.008    0.000 sre_parse.py:493(_parse)
       147    0.000    0.000    0.002    0.000 <frozen importlib._bootstrap_external>:424(_get_cached)
-      146    0.001    0.000    0.033    0.000 <frozen importlib._bootstrap_external>:969(get_data)
-      146    0.027    0.000    0.027    0.000 {method 'read' of '_io.BufferedReader' objects}
-      146    0.005    0.000    0.005    0.000 {built-in method io.open_code}
+      146    0.001    0.000    0.039    0.000 <frozen importlib._bootstrap_external>:969(get_data)
+      146    0.032    0.000    0.032    0.000 {method 'read' of '_io.BufferedReader' objects}
+      146    0.006    0.000    0.006    0.000 {built-in method io.open_code}
       142    0.000    0.000    0.000    0.000 sre_parse.py:168(__setitem__)
       141    0.000    0.000    0.000    0.000 sre_compile.py:423(_simple)
+      137    0.000    0.000    0.000    0.000 {method 'startswith' of 'str' objects}
    124/32    0.000    0.000    0.008    0.000 sre_parse.py:435(_parse_sub)
-      122    0.000    0.000    0.000    0.000 codecs.py:319(decode)
-      122    0.000    0.000    0.000    0.000 {built-in method _codecs.utf_8_decode}
+      121    0.749    0.006  103.121    0.852 game.py:271(solve_subgame)
+      121    0.001    0.000    0.001    0.000 game.py:292(<listcomp>)
+      121    0.005    0.000    0.011    0.000 game.py:291(update_infoset_from_subgame)
+      121    0.026    0.000    0.098    0.001 game.py:302(compute_masks)
+      121    0.000    0.000    0.001    0.000 game.py:342(mask_yourself)
+      121    0.000    0.000    0.001    0.000 game.py:364(restore_masks)
       116    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap>:35(_new_module)
       116    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:456(_check_name_wrapper)
       116    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:493(_classify_pyc)
-      116    0.000    0.000    0.014    0.000 <frozen importlib._bootstrap_external>:578(_compile_bytecode)
+      116    0.000    0.000    0.016    0.000 <frozen importlib._bootstrap_external>:578(_compile_bytecode)
       116    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:774(create_module)
-    116/2    0.000    0.000    0.270    0.135 <frozen importlib._bootstrap_external>:777(exec_module)
-      116    0.001    0.000    0.052    0.000 <frozen importlib._bootstrap_external>:849(get_code)
+    116/2    0.000    0.000    0.307    0.153 <frozen importlib._bootstrap_external>:777(exec_module)
+      116    0.002    0.000    0.060    0.001 <frozen importlib._bootstrap_external>:849(get_code)
       116    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:939(__init__)
       116    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:964(get_filename)
       116    0.000    0.000    0.001    0.000 <frozen importlib._bootstrap_external>:1010(path_stats)
-      116    0.013    0.000    0.013    0.000 {built-in method marshal.loads}
+      116    0.015    0.000    0.015    0.000 {built-in method marshal.loads}
       116    0.000    0.000    0.000    0.000 {built-in method _imp._fix_co_filename}
+      114    0.061    0.001    1.617    0.014 game.py:371(adversary_response)
+      106    0.000    0.000    0.001    0.000 node.py:223(__init__)
       104    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1400(<genexpr>)
-      102   11.658    0.114  475.063    4.657 game.py:272(solve_subgame)
-      102    0.001    0.000    0.001    0.000 game.py:293(<listcomp>)
-      102    0.008    0.000    0.017    0.000 game.py:292(update_infoset_from_subgame)
-      102    0.047    0.000    0.516    0.005 game.py:303(compute_masks)
-      102    0.002    0.000    0.002    0.000 game.py:339(mask_yourself)
-      102    0.002    0.000    0.002    0.000 game.py:349(restore_masks)
-      100    0.103    0.001    2.805    0.028 game.py:359(adversary_response)
+   102/94    0.000    0.000    0.000    0.000 {built-in method numpy.core._multiarray_umath.implement_array_function}
       100    0.000    0.000    0.000    0.000 {built-in method _sre.unicode_iscased}
        99    0.000    0.000    0.000    0.000 {built-in method builtins.abs}
        99    0.000    0.000    0.000    0.000 {method 'extend' of 'list' objects}
        98    0.000    0.000    0.000    0.000 sre_compile.py:65(_combine_flags)
        97    0.000    0.000    0.000    0.000 sre_compile.py:249(_compile_charset)
        97    0.001    0.000    0.001    0.000 sre_compile.py:276(_optimize_charset)
+       96    0.000    0.000    0.000    0.000 {method 'tolist' of 'numpy.ndarray' objects}
+       92    0.000    0.000    0.000    0.000 node.py:226(<listcomp>)
        91    0.000    0.000    0.000    0.000 sre_parse.py:355(_escape)
+       90    0.000    0.000    0.000    0.000 <__array_function__ internals>:2(dot)
        90    0.000    0.000    0.000    0.000 _inspect.py:133(strseq)
+       90    0.000    0.000    0.000    0.000 multiarray.py:707(dot)
+       90    0.000    0.000    0.002    0.000 node.py:239(<listcomp>)
+       90    0.000    0.000    0.003    0.000 node.py:237(getPayoffRepresentation)
        86    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:526(_validate_timestamp_pyc)
        85    0.000    0.000    0.000    0.000 _compat_pickle.py:167(<genexpr>)
        85    0.000    0.000    0.000    0.000 {built-in method _sre.unicode_tolower}
@@ -243,6 +292,7 @@ Exploitability: 1.3570607718406538
        76    0.000    0.000    0.000    0.000 {method 'isidentifier' of 'str' objects}
        68    0.000    0.000    0.000    0.000 enum.py:278(__call__)
        68    0.000    0.000    0.000    0.000 enum.py:557(__new__)
+       68    0.000    0.000    0.000    0.000 {built-in method builtins.print}
        67    0.000    0.000    0.000    0.000 {built-in method builtins.repr}
        64    0.000    0.000    0.000    0.000 sre_compile.py:595(isstring)
        64    0.000    0.000    0.000    0.000 {built-in method builtins.issubclass}
@@ -257,9 +307,11 @@ Exploitability: 1.3570607718406538
        52    0.000    0.000    0.000    0.000 core.py:900(__init__)
        52    0.000    0.000    0.000    0.000 {method 'translate' of 'str' objects}
        50    0.000    0.000    0.000    0.000 _internal.py:784(_ufunc_doc_signature_formatter)
+       46    0.000    0.000    0.000    0.000 game.py:194(<listcomp>)
+       46    0.000    0.000    0.000    0.000 game.py:216(<listcomp>)
        46    0.000    0.000    0.000    0.000 sre_parse.py:432(_uniq)
        46    0.000    0.000    0.000    0.000 {built-in method fromkeys}
-       44    0.000    0.000    0.000    0.000 core.py:145(get_object_signature)
+       44    0.000    0.000    0.001    0.000 core.py:145(get_object_signature)
        44    0.000    0.000    0.000    0.000 {method 'items' of 'dict' objects}
        43    0.000    0.000    0.000    0.000 _compat_pickle.py:165(<genexpr>)
        43    0.000    0.000    0.000    0.000 __init__.py:385(<genexpr>)
@@ -277,44 +329,45 @@ Exploitability: 1.3570607718406538
        32    0.000    0.000    0.000    0.000 _type_aliases.py:68(<genexpr>)
        32    0.000    0.000    0.000    0.000 sre_parse.py:224(__init__)
        32    0.000    0.000    0.000    0.000 sre_parse.py:921(fix_flags)
-       32    0.000    0.000    0.008    0.000 sre_parse.py:937(parse)
+       32    0.000    0.000    0.009    0.000 sre_parse.py:937(parse)
        32    0.000    0.000    0.000    0.000 enum.py:828(__and__)
        32    0.000    0.000    0.001    0.000 sre_compile.py:536(_compile_info)
        32    0.000    0.000    0.005    0.000 sre_compile.py:598(_code)
-       32    0.000    0.000    0.013    0.000 sre_compile.py:759(compile)
+       32    0.000    0.000    0.014    0.000 sre_compile.py:759(compile)
        32    0.000    0.000    0.000    0.000 sre_parse.py:76(__init__)
        32    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:1088(__init__)
-    32/30    0.000    0.000    0.124    0.004 <frozen importlib._bootstrap_external>:1099(create_module)
+    32/30    0.000    0.000    0.144    0.005 <frozen importlib._bootstrap_external>:1099(create_module)
        32    0.000    0.000    0.000    0.000 {built-in method _sre.compile}
-    32/30    0.122    0.004    0.124    0.004 {built-in method _imp.create_dynamic}
-    31/20    0.000    0.000    0.033    0.002 <frozen importlib._bootstrap_external>:1107(exec_module)
-    31/20    0.001    0.000    0.033    0.002 {built-in method _imp.exec_dynamic}
+    32/30    0.138    0.004    0.144    0.005 {built-in method _imp.create_dynamic}
+    31/20    0.000    0.000    0.032    0.002 <frozen importlib._bootstrap_external>:1107(exec_module)
+    31/20    0.002    0.000    0.032    0.002 {built-in method _imp.exec_dynamic}
        30    0.000    0.000    0.000    0.000 _pydecimal.py:3920(<genexpr>)
        30    0.000    0.000    0.000    0.000 getlimits.py:19(_fr0)
        30    0.000    0.000    0.000    0.000 getlimits.py:27(_fr1)
        30    0.000    0.000    0.000    0.000 getlimits.py:42(<lambda>)
-       30    0.000    0.000    0.000    0.000 getlimits.py:43(<lambda>)
+       30    0.000    0.000    0.001    0.000 getlimits.py:43(<lambda>)
        30    0.000    0.000    0.000    0.000 _type_aliases.py:238(_add_array_type)
        30    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:554(_validate_hash_pyc)
-       30    0.000    0.000    0.000    0.000 {built-in method _imp.source_hash}
+       30    0.001    0.000    0.001    0.000 {built-in method _imp.source_hash}
        28    0.000    0.000    0.000    0.000 {method 'lstrip' of 'str' objects}
        27    0.000    0.000    0.000    0.000 _pydecimal.py:3949(__setattr__)
        27    0.000    0.000    0.000    0.000 _add_newdocs.py:6743(<genexpr>)
-       26    0.000    0.000    0.000    0.000 core.py:6660(__init__)
-       26    0.000    0.000    0.000    0.000 core.py:6665(getdoc)
+       27    0.000    0.000    0.000    0.000 codecs.py:319(decode)
+       27    0.000    0.000    0.000    0.000 {built-in method _codecs.utf_8_decode}
+       26    0.000    0.000    0.001    0.000 core.py:6660(__init__)
+       26    0.000    0.000    0.001    0.000 core.py:6665(getdoc)
        26    0.000    0.000    0.000    0.000 core.py:927(__init__)
     26/12    0.000    0.000    0.000    0.000 abc.py:100(__subclasscheck__)
     26/12    0.000    0.000    0.000    0.000 {built-in method _abc._abc_subclasscheck}
        23    0.000    0.000    0.002    0.000 overrides.py:206(decorator)
        23    0.000    0.000    0.000    0.000 overrides.py:202(array_function_from_dispatcher)
        22    0.000    0.000    0.000    0.000 sre_parse.py:295(_class_escape)
-       21    0.000    0.000    0.010    0.000 re.py:250(compile)
+       21    0.000    0.000    0.011    0.001 re.py:250(compile)
        21    0.000    0.000    0.000    0.000 types.py:171(__get__)
        20    0.000    0.000    0.000    0.000 mixins.py:20(_binary_method)
        20    0.000    0.000    0.001    0.000 abc.py:84(__new__)
        20    0.000    0.000    0.000    0.000 {built-in method _abc._abc_init}
        19    0.000    0.000    0.000    0.000 _add_newdocs.py:6738(add_newdoc_for_scalar_type)
-       19    0.000    0.000    0.000    0.000 {built-in method builtins.print}
        18    0.000    0.000    0.000    0.000 core.py:1003(__init__)
        18    0.000    0.000    0.000    0.000 _add_newdocs.py:6703(type_aliases_gen)
        18    0.000    0.000    0.000    0.000 {built-in method numpy.geterrobj}
@@ -331,19 +384,19 @@ Exploitability: 1.3570607718406538
        16    0.000    0.000    0.000    0.000 {built-in method builtins.next}
        16    0.000    0.000    0.000    0.000 {method 'values' of 'dict' objects}
        15    0.000    0.000    0.000    0.000 _pydecimal.py:3924(_set_integer_check)
-       15    0.000    0.000    0.000    0.000 arrayprint.py:477(wrapper)
-       15    0.000    0.000    0.000    0.000 arrayprint.py:1482(_guarded_repr_or_str)
-       15    0.000    0.000    0.000    0.000 arrayprint.py:1489(_array_str_implementation)
+       15    0.000    0.000    0.001    0.000 arrayprint.py:477(wrapper)
+       15    0.001    0.000    0.001    0.000 arrayprint.py:1482(_guarded_repr_or_str)
+       15    0.000    0.000    0.001    0.000 arrayprint.py:1489(_array_str_implementation)
        15    0.000    0.000    0.000    0.000 _inspect.py:144(<lambda>)
        15    0.000    0.000    0.000    0.000 {built-in method builtins.id}
        15    0.000    0.000    0.000    0.000 {method 'discard' of 'set' objects}
-       14    0.000    0.000    0.000    0.000 hashlib.py:123(__get_openssl_constructor)
+       14    0.000    0.000    0.001    0.000 hashlib.py:123(__get_openssl_constructor)
        14    0.000    0.000    0.000    0.000 mixins.py:30(_reflected_binary_method)
        14    0.000    0.000    0.000    0.000 __init__.py:141(_check_size)
        14    0.000    0.000    0.000    0.000 manager.py:40(<listcomp>)
-       14    0.000    0.000    0.034    0.002 manager.py:35(create_virtual_game)
-       14    0.001    0.000  478.343   34.167 manager.py:79(mini_refinement)
-       14    0.001    0.000    0.033    0.002 game.py:238(find_nodes_at_depth_with_reach_probability)
+       14    0.000    0.000    0.009    0.001 manager.py:35(create_virtual_game)
+       14    0.001    0.000  104.755    7.482 manager.py:79(mini_refinement)
+       14    0.000    0.000    0.009    0.001 game.py:237(find_nodes_at_depth_with_reach_probability)
        13    0.000    0.000    0.000    0.000 mixins.py:40(_inplace_binary_method)
        13    0.000    0.000    0.000    0.000 mixins.py:48(_numeric_methods)
        13    0.000    0.000    0.000    0.000 _internal.py:830(npy_ctypes_check)
@@ -356,10 +409,12 @@ Exploitability: 1.3570607718406538
        13    0.000    0.000    0.000    0.000 <frozen zipimport>:63(__init__)
        13    0.000    0.000    0.000    0.000 <frozen importlib._bootstrap_external>:104(_path_isdir)
        13    0.000    0.000    0.000    0.000 {built-in method posix.listdir}
-       13    0.000    0.000    0.000    0.000 {method 'remove' of 'list' objects}
-       12    0.001    0.000    0.555    0.046 __init__.py:1(<module>)
+       12    0.001    0.000    0.619    0.052 __init__.py:1(<module>)
        12    0.000    0.000    0.000    0.000 datetime.py:488(__new__)
        12    0.000    0.000    0.000    0.000 {built-in method builtins.round}
+       11    0.000    0.000    0.000    0.000 informationSet.py:47(<listcomp>)
+       11    0.002    0.000    0.005    0.000 game.py:319(setup_masks)
+       11    0.000    0.000    0.000    0.000 game.py:396(clean_masks)
        11    0.000    0.000    0.000    0.000 enum.py:654(name)
        11    0.000    0.000    0.000    0.000 sre_compile.py:432(_generate_overlap_table)
        11    0.000    0.000    0.000    0.000 abc.py:89(register)
@@ -377,7 +432,7 @@ Exploitability: 1.3570607718406538
         9    0.000    0.000    0.000    0.000 {method 'encode' of 'str' objects}
         8    0.000    0.000    0.000    0.000 core.py:7996(__init__)
         8    0.000    0.000    0.000    0.000 core.py:8001(getdoc)
-        8    0.000    0.000    0.000    0.000 hashlib.py:79(__get_builtin_constructor)
+        8    0.000    0.000    0.001    0.000 hashlib.py:79(__get_builtin_constructor)
         8    0.000    0.000    0.000    0.000 getlimits.py:92(_register_type)
         8    0.000    0.000    0.000    0.000 _ufunc_config.py:39(seterr)
         8    0.000    0.000    0.000    0.000 _ufunc_config.py:139(geterr)
@@ -393,16 +448,15 @@ Exploitability: 1.3570607718406538
         8    0.000    0.000    0.000    0.000 {method 'translate' of 'bytearray' objects}
         7    0.000    0.000    0.000    0.000 core.py:2562(_arraymethod)
         7    0.000    0.000    0.000    0.000 getlimits.py:497(__init__)
+        7    0.000    0.000    0.000    0.000 {method 'remove' of 'list' objects}
         6    0.000    0.000    0.000    0.000 core.py:852(__init__)
         6    0.000    0.000    0.000    0.000 core.py:1152(__init__)
         6    0.000    0.000    0.000    0.000 _pydecimal.py:3938(_set_signal_dict)
         6    0.000    0.000    0.000    0.000 _pydecimal.py:522(__new__)
         6    0.000    0.000    0.001    0.000 getlimits.py:37(__init__)
+        6    0.000    0.000    0.000    0.000 numeric.py:2388(extend_all)
         6    0.000    0.000    0.000    0.000 _exceptions.py:17(_display_as_base)
         6    0.000    0.000    0.000    0.000 _type_aliases.py:113(<genexpr>)
-        6    0.000    0.000    0.000    0.000 numeric.py:2388(extend_all)
-        6    0.002    0.000    0.003    0.001 game.py:320(setup_masks)
-        6    0.001    0.000    0.002    0.000 game.py:380(clean_masks)
         5    0.000    0.000    0.000    0.000 datetime.py:46(_days_in_month)
         5    0.000    0.000    0.000    0.000 datetime.py:411(_check_date_fields)
         5    0.000    0.000    0.000    0.000 datetime.py:424(_check_time_fields)
@@ -436,9 +490,9 @@ Exploitability: 1.3570607718406538
         3    0.000    0.000    0.000    0.000 datetime.py:41(_days_before_year)
         3    0.000    0.000    0.000    0.000 datetime.py:1566(__new__)
         3    0.000    0.000    0.000    0.000 datetime.py:2199(_create)
-        3    0.000    0.000    0.000    0.000 warnings.py:130(filterwarnings)
+        3    0.000    0.000    0.001    0.000 warnings.py:130(filterwarnings)
         3    0.000    0.000    0.000    0.000 os.py:670(__getitem__)
-        2    0.000    0.000    0.014    0.007 utilities.py:13(cards_sorted_by_strength)
+        2    0.000    0.000    0.003    0.002 utilities.py:13(cards_sorted_by_strength)
         2    0.000    0.000    0.000    0.000 utilities.py:35(group_pairs)
         2    0.000    0.000    0.000    0.000 utilities.py:57(group_given_total_groups)
         2    0.000    0.000    0.000    0.000 core.py:2912(_update_from)
@@ -446,8 +500,8 @@ Exploitability: 1.3570607718406538
         2    0.000    0.000    0.000    0.000 core.py:3379(shape)
         2    0.000    0.000    0.000    0.000 core.py:6440(__setattr__)
         2    0.000    0.000    0.000    0.000 core.py:6541(__init__)
-        2    0.000    0.000    0.000    0.000 core.py:889(__init__)
         2    0.000    0.000    0.000    0.000 random.py:94(__init__)
+        2    0.000    0.000    0.000    0.000 core.py:889(__init__)
         2    0.000    0.000    0.000    0.000 shape_base.py:733(_array_split_dispatcher)
         2    0.000    0.000    0.000    0.000 shape_base.py:737(array_split)
         2    0.000    0.000    0.010    0.005 shape_base.py:1(<module>)
@@ -470,8 +524,8 @@ Exploitability: 1.3570607718406538
         2    0.000    0.000    0.000    0.000 datetime.py:661(__neg__)
         2    0.000    0.000    0.000    0.000 datetime.py:819(__new__)
         2    0.000    0.000    0.000    0.000 datetime.py:1236(__new__)
-        2    0.031    0.015    0.217    0.109 game.py:64(parse_game)
-        2    0.000    0.000    0.133    0.066 game.py:553(exploitability_Luca)
+        2    0.007    0.004    0.053    0.027 game.py:63(parse_game)
+        2    0.000    0.000    0.115    0.057 game.py:567(exploitability_Luca)
         2    0.000    0.000    0.000    0.000 sre_parse.py:861(_parse_flags)
         2    0.000    0.000    0.000    0.000 enum.py:822(__or__)
         2    0.000    0.000    0.000    0.000 enum.py:893(<lambda>)
@@ -506,12 +560,12 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 extras.py:1474(MAxisConcatenator)
         1    0.000    0.000    0.000    0.000 extras.py:1522(__init__)
         1    0.000    0.000    0.000    0.000 extras.py:1504(mr_class)
-        1    0.000    0.000    0.000    0.000 extras.py:1(<module>)
+        1    0.000    0.000    0.001    0.001 extras.py:1(<module>)
         1    0.000    0.000    0.000    0.000 informationSet.py:3(InformationSet)
         1    0.000    0.000    0.000    0.000 informationSet.py:3(<module>)
         1    0.000    0.000    0.000    0.000 utilities.py:1(<module>)
-        1    0.004    0.004    0.110    0.110 orderFile.py:8(text_order_by_history_length)
-        1    0.000    0.000    0.091    0.091 orderFile.py:49(quick_sort)
+        1    0.002    0.002    0.036    0.036 orderFile.py:8(text_order_by_history_length)
+        1    0.000    0.000    0.026    0.026 orderFile.py:49(quick_sort)
         1    0.000    0.000    0.000    0.000 orderFile.py:1(<module>)
         1    0.000    0.000    0.000    0.000 core.py:2395(__init__)
         1    0.000    0.000    0.000    0.000 core.py:2389(_MaskedPrintOption)
@@ -526,7 +580,9 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 core.py:6532(_extrema_operation)
         1    0.000    0.000    0.000    0.000 core.py:6649(_frommethod)
         1    0.000    0.000    0.000    0.000 core.py:7983(_convert2ma)
-        1    0.000    0.000    0.002    0.002 core.py:1(<module>)
+        1    0.000    0.000    0.003    0.003 core.py:1(<module>)
+        1    0.000    0.000    0.000    0.000 {function Random.seed at 0x7ff0156575e0}
+        1    0.000    0.000    0.001    0.001 hashlib.py:5(<module>)
         1    0.000    0.000    0.000    0.000 random.py:103(__init_subclass__)
         1    0.000    0.000    0.000    0.000 random.py:123(seed)
         1    0.000    0.000    0.000    0.000 random.py:78(Random)
@@ -558,7 +614,25 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 core.py:1289(_replace_dtype_fields_recursive)
         1    0.000    0.000    0.000    0.000 core.py:1321(_replace_dtype_fields)
         1    0.000    0.000    0.000    0.000 core.py:1335(make_mask_descr)
-        1    0.000    0.000    0.000    0.000 {function SeedSequence.generate_state at 0x7f46f7289280}
+        1    0.000    0.000    0.000    0.000 {function SeedSequence.generate_state at 0x7ff0160bd280}
+        1    0.000    0.000    0.000    0.000 _pydecimal.py:3854(_ContextManager)
+        1    0.000    0.000    0.000    0.000 _pydecimal.py:3869(Context)
+        1    0.000    0.000    0.000    0.000 _pydecimal.py:5614(_WorkRep)
+        1    0.000    0.000    0.000    0.000 _pydecimal.py:5854(__init__)
+        1    0.000    0.000    0.000    0.000 _pydecimal.py:5850(_Log10Memoize)
+        1    0.000    0.000    0.006    0.006 _pydecimal.py:16(<module>)
+        1    0.000    0.000    0.000    0.000 <string>:1(<module>)
+        1    0.000    0.000    0.000    0.000 contextvars.py:1(<module>)
+        1    0.000    0.000    0.000    0.000 <__array_function__ internals>:2(<module>)
+        1    0.000    0.000    0.000    0.000 arrayterator.py:20(Arrayterator)
+        1    0.000    0.000    0.000    0.000 arrayterator.py:1(<module>)
+        1    0.000    0.000    0.000    0.000 arraypad.py:1(<module>)
+        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_md5}
+        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha1}
+        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha224}
+        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha256}
+        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha384}
+        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha512}
         1    0.000    0.000    0.000    0.000 legendre.py:1613(Legendre)
         1    0.000    0.000    0.000    0.000 legendre.py:1(<module>)
         1    0.000    0.000    0.000    0.000 hermite.py:1627(Hermite)
@@ -567,32 +641,11 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 hermite_e.py:1(<module>)
         1    0.000    0.000    0.000    0.000 laguerre.py:1578(Laguerre)
         1    0.000    0.000    0.000    0.000 laguerre.py:1(<module>)
-        1    0.000    0.000    0.054    0.054 _pickle.py:1(<module>)
-        1    0.000    0.000    0.000    0.000 <string>:1(<module>)
-        1    0.000    0.000    0.003    0.003 secrets.py:1(<module>)
+        1    0.000    0.000    0.060    0.060 _pickle.py:1(<module>)
+        1    0.000    0.000    0.004    0.004 secrets.py:1(<module>)
         1    0.000    0.000    0.000    0.000 base64.py:3(<module>)
         1    0.000    0.000    0.000    0.000 hmac.py:26(HMAC)
-        1    0.000    0.000    0.001    0.001 hmac.py:1(<module>)
-        1    0.000    0.000    0.000    0.000 hashlib.py:5(<module>)
-        1    0.000    0.000    0.000    0.000 _pydecimal.py:3869(Context)
-        1    0.000    0.000    0.000    0.000 _pydecimal.py:5614(_WorkRep)
-        1    0.000    0.000    0.000    0.000 _pydecimal.py:5854(__init__)
-        1    0.000    0.000    0.000    0.000 _pydecimal.py:5850(_Log10Memoize)
-        1    0.000    0.000    0.005    0.005 _pydecimal.py:16(<module>)
-        1    0.000    0.000    0.000    0.000 contextvars.py:1(<module>)
-        1    0.000    0.000    0.000    0.000 <__array_function__ internals>:2(<module>)
-        1    0.000    0.000    0.000    0.000 arrayterator.py:20(Arrayterator)
-        1    0.000    0.000    0.000    0.000 arrayterator.py:1(<module>)
-        1    0.000    0.000    0.000    0.000 arraypad.py:1(<module>)
-        1    0.000    0.000    0.000    0.000 _version.py:18(NumpyVersion)
-        1    0.000    0.000    0.000    0.000 _version.py:1(<module>)
-        1    0.000    0.000    0.000    0.000 {function Random.seed at 0x7f46f6b2a5e0}
-        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_md5}
-        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha1}
-        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha224}
-        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha256}
-        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha384}
-        1    0.000    0.000    0.000    0.000 {built-in method _hashlib.openssl_sha512}
+        1    0.000    0.000    0.002    0.002 hmac.py:1(<module>)
         1    0.000    0.000    0.000    0.000 _iotools.py:176(LineSplitter)
         1    0.000    0.000    0.000    0.000 _iotools.py:276(NameValidator)
         1    0.000    0.000    0.000    0.000 _iotools.py:470(ConverterError)
@@ -601,7 +654,7 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 _iotools.py:499(StringConverter)
         1    0.000    0.000    0.000    0.000 _iotools.py:1(<module>)
         1    0.000    0.000    0.009    0.009 financial.py:1(<module>)
-        1    0.000    0.000    0.007    0.007 decimal.py:2(<module>)
+        1    0.000    0.000    0.008    0.008 decimal.py:2(<module>)
         1    0.000    0.000    0.000    0.000 _pydecimal.py:192(DecimalException)
         1    0.000    0.000    0.000    0.000 _pydecimal.py:215(Clamped)
         1    0.000    0.000    0.000    0.000 _pydecimal.py:227(InvalidOperation)
@@ -617,7 +670,6 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 _pydecimal.py:391(Underflow)
         1    0.000    0.000    0.000    0.000 _pydecimal.py:406(FloatOperation)
         1    0.000    0.000    0.000    0.000 _pydecimal.py:513(Decimal)
-        1    0.000    0.000    0.000    0.000 _pydecimal.py:3854(_ContextManager)
         1    0.000    0.000    0.004    0.004 shutil.py:1(<module>)
         1    0.000    0.000    0.000    0.000 bz2.py:30(BZ2File)
         1    0.000    0.000    0.002    0.002 bz2.py:1(<module>)
@@ -653,6 +705,7 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 threading.py:1(<module>)
         1    0.000    0.000    0.000    0.000 lzma.py:38(LZMAFile)
         1    0.000    0.000    0.001    0.001 lzma.py:1(<module>)
+        1    0.000    0.000    0.001    0.001 utils.py:1(<module>)
         1    0.000    0.000    0.001    0.001 arraysetops.py:1(<module>)
         1    0.000    0.000    0.000    0.000 npyio.py:58(BagObj)
         1    0.000    0.000    0.000    0.000 npyio.py:122(NpzFile)
@@ -670,7 +723,7 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 shutil.py:79(ReadError)
         1    0.000    0.000    0.000    0.000 shutil.py:82(RegistryError)
         1    0.000    0.000    0.000    0.000 shutil.py:86(_GiveupOnFastCopy)
-        1    0.000    0.000    0.001    0.001 nanfunctions.py:1(<module>)
+        1    0.000    0.000    0.002    0.002 nanfunctions.py:1(<module>)
         1    0.000    0.000    0.000    0.000 polynomial.py:30(RankWarning)
         1    0.000    0.000    0.000    0.000 polynomial.py:1009(poly1d)
         1    0.000    0.000    0.000    0.000 utils.py:53(_set_function_name)
@@ -679,7 +732,6 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 utils.py:58(_Deprecate)
         1    0.000    0.000    0.000    0.000 utils.py:133(_get_indent)
         1    0.000    0.000    0.000    0.000 utils.py:147(deprecate)
-        1    0.000    0.000    0.001    0.001 utils.py:1(<module>)
         1    0.000    0.000    0.000    0.000 function_base.py:1878(vectorize)
         1    0.000    0.000    0.000    0.000 histograms.py:1(<module>)
         1    0.000    0.000    0.000    0.000 stride_tricks.py:16(DummyArray)
@@ -718,7 +770,7 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 index_tricks.py:554(ndenumerate)
         1    0.000    0.000    0.000    0.000 index_tricks.py:605(ndindex)
         1    0.000    0.000    0.000    0.000 index_tricks.py:684(IndexExpression)
-        1    0.000    0.000    0.020    0.020 index_tricks.py:1(<module>)
+        1    0.000    0.000    0.021    0.021 index_tricks.py:1(<module>)
         1    0.000    0.000    0.000    0.000 defmatrix.py:74(matrix)
         1    0.000    0.000    0.012    0.012 defmatrix.py:1(<module>)
         1    0.000    0.000    0.000    0.000 {built-in method _ctypes.dlopen}
@@ -763,7 +815,7 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 machar.py:18(MachAr)
         1    0.000    0.000    0.000    0.000 machar.py:1(<module>)
         1    0.000    0.000    0.000    0.000 getlimits.py:34(MachArLike)
-        1    0.000    0.000    0.001    0.001 getlimits.py:96(_register_known_types)
+        1    0.000    0.000    0.002    0.002 getlimits.py:96(_register_known_types)
         1    0.000    0.000    0.000    0.000 getlimits.py:293(finfo)
         1    0.000    0.000    0.000    0.000 getlimits.py:444(iinfo)
         1    0.000    0.000    0.000    0.000 getlimits.py:1(<module>)
@@ -873,7 +925,7 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.001    0.001 parse.py:1(<module>)
         1    0.000    0.000    0.000    0.000 _inspect.py:1(<module>)
         1    0.000    0.000    0.000    0.000 py3k.py:116(contextlib_nullcontext)
-        1    0.000    0.000    0.009    0.009 py3k.py:1(<module>)
+        1    0.000    0.000    0.010    0.010 py3k.py:1(<module>)
         1    0.000    0.000    0.000    0.000 pathlib.py:56(_Flavour)
         1    0.000    0.000    0.000    0.000 pathlib.py:135(<setcomp>)
         1    0.000    0.000    0.000    0.000 pathlib.py:136(<setcomp>)
@@ -891,29 +943,37 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 {built-in method numpy.core._multiarray_umath.set_typeDict}
         1    0.000    0.000    0.000    0.000 {built-in method numpy.empty}
         1    0.000    0.000    0.000    0.000 {method 'view' of 'numpy.generic' objects}
-        1    0.000    0.000    0.076    0.076 overrides.py:1(<module>)
+        1    0.000    0.000    0.000    0.000 multiarray.py:145(concatenate)
+        1    0.000    0.000    0.000    0.000 multiarray.py:1043(copyto)
+        1    0.000    0.000    0.096    0.096 multiarray.py:1(<module>)
+        1    0.000    0.000    0.093    0.093 overrides.py:1(<module>)
         1    0.000    0.000    0.000    0.000 datetime.py:469(timedelta)
         1    0.000    0.000    0.000    0.000 datetime.py:789(date)
         1    0.000    0.000    0.000    0.000 datetime.py:1141(tzinfo)
         1    0.000    0.000    0.000    0.000 datetime.py:1211(time)
         1    0.000    0.000    0.000    0.000 datetime.py:1558(datetime)
         1    0.000    0.000    0.000    0.000 datetime.py:2179(timezone)
-        1    0.000    0.000    0.001    0.001 datetime.py:1(<module>)
-        1    0.000    0.000    0.327    0.327 manager.py:8(__init__)
+        1    0.000    0.000    0.003    0.003 datetime.py:1(<module>)
+        1    0.000    0.000    0.089    0.089 manager.py:8(__init__)
+        1    0.000    0.000    0.003    0.003 manager.py:17(create_abstraction)
+        1    0.000    0.000    0.002    0.002 manager.py:20(map_strategies)
         1    0.000    0.000    0.000    0.000 manager.py:5(Manager)
-        1    0.000    0.000  478.343  478.343 manager.py:76(self_generative_refinement)
-        1    0.001    0.001  479.076  479.076 manager.py:1(<module>)
+        1    0.000    0.000  104.755  104.755 manager.py:76(self_generative_refinement)
+        1    0.000    0.000  109.962  109.962 manager.py:1(<module>)
+        1    0.000    0.000    4.689    4.689 game.py:29(find_optimal_strategy)
+        1    0.046    0.046    4.689    4.689 game.py:35(CFR_plus_optimize)
+        1    0.001    0.001    0.003    0.003 game.py:105(abstract_yourself)
         1    0.000    0.000    0.000    0.000 game.py:8(Game)
-        1    0.000    0.000    0.270    0.270 game.py:1(<module>)
-        1    0.000    0.000    0.269    0.269 myParser.py:1(<module>)
+        1    0.000    0.000    0.306    0.306 game.py:1(<module>)
+        1    0.000    0.000    0.306    0.306 myParser.py:1(<module>)
         1    0.000    0.000    0.000    0.000 node.py:5(Node)
+        1    0.000    0.000    0.000    0.000 node.py:66(TerminalNode)
+        1    0.000    0.000    0.000    0.000 node.py:102(InternalNode)
         1    0.000    0.000    0.000    0.000 node.py:220(ChanceNode)
-        1    0.000    0.000    0.269    0.269 node.py:1(<module>)
+        1    0.000    0.000    0.305    0.305 node.py:1(<module>)
         1    0.000    0.000    0.000    0.000 __init__.py:236(_sanity_check)
         1    0.000    0.000    0.000    0.000 __future__.py:80(_Feature)
         1    0.000    0.000    0.000    0.000 __future__.py:1(<module>)
-        1    0.000    0.000    0.000    0.000 node.py:66(TerminalNode)
-        1    0.000    0.000    0.000    0.000 node.py:102(InternalNode)
         1    0.000    0.000    0.000    0.000 _globals.py:32(ModuleDeprecationWarning)
         1    0.000    0.000    0.000    0.000 _globals.py:46(VisibleDeprecationWarning)
         1    0.000    0.000    0.000    0.000 _globals.py:67(__new__)
@@ -922,9 +982,8 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 __config__.py:3(<module>)
         1    0.000    0.000    0.000    0.000 version.py:5(<module>)
         1    0.000    0.000    0.000    0.000 _distributor_init.py:1(<module>)
-        1    0.000    0.000    0.000    0.000 multiarray.py:145(concatenate)
-        1    0.000    0.000    0.000    0.000 multiarray.py:1043(copyto)
-        1    0.000    0.000    0.079    0.079 multiarray.py:1(<module>)
+        1    0.000    0.000    0.000    0.000 _version.py:18(NumpyVersion)
+        1    0.000    0.000    0.000    0.000 _version.py:1(<module>)
         1    0.000    0.000    0.004    0.004 _pocketfft.py:1(<module>)
         1    0.000    0.000    0.000    0.000 helper.py:1(<module>)
         1    0.000    0.000    0.000    0.000 polynomial.py:1442(Polynomial)
@@ -983,7 +1042,7 @@ Exploitability: 1.3570607718406538
         1    0.000    0.000    0.000    0.000 {method 'setdefault' of 'dict' objects}
         1    0.000    0.000    0.000    0.000 {method 'bit_length' of 'int' objects}
         1    0.000    0.000    0.000    0.000 {method 'sort' of 'list' objects}
-        1    0.001    0.001    0.001    0.001 {method 'readlines' of '_io._IOBase' objects}
+        1    0.000    0.000    0.001    0.001 {method 'readlines' of '_io._IOBase' objects}
         1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
 
 

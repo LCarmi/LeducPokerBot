@@ -40,16 +40,31 @@ class Manager:
         actions = [str(i) for i in range(l)]
         probabilities = []
         children = []
+        todo_list = []
+        new_history_dictionary = {}
+        new_information_sets = []
         for node,probability in res:
             children.append(node)
             probabilities.append(probability
                                  #* (1.0-epsilon) + epsilon/l #try more exploration
                                  )
+        todo_list.extend(children)
+        while todo_list:
+            n = todo_list.pop()
+            try:
+                i = game.history_dictionary[n.name]
+                new_history_dictionary[n.name] = i
+                new_information_sets.append(i)
+            except:
+                pass
+
+            todo_list.extend(n.children)
+
         new_root = ChanceNode("Virtual_root", actions, probabilities, children)
         ret = Game()
         ret.root_node = new_root
-        ret.information_sets = game.information_sets
-        ret.history_dictionary = game.history_dictionary
+        ret.information_sets = new_information_sets
+        ret.history_dictionary = new_history_dictionary
         return ret
 
 
@@ -78,6 +93,8 @@ def self_generative_refinement(manager):
 
     def mini_refinement(manager, player, adversary, depth):
         n_refinements = 10
+        n_iter = 50
+        d = 40
         virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
 
         if virtual_game.root_node.children:
@@ -85,14 +102,14 @@ def self_generative_refinement(manager):
 
             virtual_game.compute_masks(player, False)
             virtual_game.mask_yourself()
-            virtual_game.solve_subgame(player)
+            virtual_game.solve_subgame(player, n_iter, d)
             virtual_game.update_infoset_from_subgame()
             for i in range(n_refinements):
                 virtual_game.restore_masks()
                 virtual_game.adversary_response(player, adversary)
                 virtual_game.compute_masks(player, True)
                 virtual_game.mask_yourself()
-                virtual_game.solve_subgame(player)
+                virtual_game.solve_subgame(player, n_iter, d)
                 virtual_game.update_infoset_from_subgame()
 
             virtual_game.restore_masks()
@@ -118,11 +135,11 @@ def CFR_refinement(manager):
     virtual_game2 = manager.create_virtual_game(manager.originalGame, other_player, depth)
     while virtual_game1.root_node.children != [] or virtual_game2.root_node.children != []:
         if virtual_game1.root_node.children:
-            virtual_game1.solve_subgame(player)
+            virtual_game1.solve_subgame(player, 1000, 500)
             virtual_game1.update_infoset_from_subgame()
 
         if virtual_game2.root_node.children:
-            virtual_game2.solve_subgame(other_player)
+            virtual_game2.solve_subgame(other_player, 100, 50)
             virtual_game2.update_infoset_from_subgame()
 
         print("Refined level: " + str(depth))
@@ -158,8 +175,8 @@ if __name__ == '__main__':
     print("Refine strategy start")
 
 
-    self_generative_refinement(manager)
-    #CFR_refinement(manager)
+    #self_generative_refinement(manager)
+    CFR_refinement(manager)
 
     print("Refine strategy done")
     #print(manager.write_result())
