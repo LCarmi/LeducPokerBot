@@ -96,18 +96,22 @@ def self_generative_refinement(manager):
         n_iter = 50
         d = 40
         virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
+        # create infosets on chance/terminal nodes too
+        # Leaf nodes as children
 
+        # CFR on Leaf nodes ~ CFR on values of infosets
+        # adversary_response on Leaf Nodes ~ pass dversary response on child
         if virtual_game.root_node.children:
             virtual_game.setup_masks()
 
-            virtual_game.compute_masks(player, False)
+            virtual_game.compute_masks(player, False) ##set max value here
             virtual_game.mask_yourself()
             virtual_game.solve_subgame(player, n_iter, d)
             virtual_game.update_infoset_from_subgame()
             for i in range(n_refinements):
                 virtual_game.restore_masks()
                 virtual_game.adversary_response(player, adversary)
-                virtual_game.compute_masks(player, True)
+                virtual_game.compute_masks(player, True) ## compute infoset value
                 virtual_game.mask_yourself()
                 virtual_game.solve_subgame(player, n_iter, d)
                 virtual_game.update_infoset_from_subgame()
@@ -124,9 +128,41 @@ def self_generative_refinement(manager):
         print("Refined level: " + str(depth))
         depth += 1
 
+def bias_refinement(manager):
+    print("Bias refinement")
+
+    def mini_refinement(manager, player, adversary, depth):
+        n_iter = 50
+        d = 40
+        profiles = [
+            (1, 1, 10),
+            (1, 10, 1),
+            (10, 1, 1)
+        ]
+        virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
+
+        if virtual_game.root_node.children:
+            virtual_game.setup_masks() # create infosets on chance/terminal nodes too
+
+            virtual_game.compute_bias_masks(profiles)
+            virtual_game.mask_yourself()
+            virtual_game.solve_subgame(player, n_iter, d)
+            virtual_game.update_infoset_from_subgame()
+            virtual_game.restore_masks()
+            virtual_game.clean_masks()
+
+    depth = 1
+    while depth < 8: #TODO: something better maybe
+        mini_refinement(manager, 1, 2, depth)
+        mini_refinement(manager, 2, 1, depth)
+        print("Refined level: " + str(depth))
+        depth += 1
+
 
 def CFR_refinement(manager):
     print("CFR refinement")
+    n_iter = 1000
+    d = 500
     player = 1
     other_player = 2
     #Do the subgame for each level
@@ -135,11 +171,11 @@ def CFR_refinement(manager):
     virtual_game2 = manager.create_virtual_game(manager.originalGame, other_player, depth)
     while virtual_game1.root_node.children != [] or virtual_game2.root_node.children != []:
         if virtual_game1.root_node.children:
-            virtual_game1.solve_subgame(player, 1000, 500)
+            virtual_game1.solve_subgame(player, n_iter, d)
             virtual_game1.update_infoset_from_subgame()
 
         if virtual_game2.root_node.children:
-            virtual_game2.solve_subgame(other_player, 100, 50)
+            virtual_game2.solve_subgame(other_player, n_iter, d)
             virtual_game2.update_infoset_from_subgame()
 
         print("Refined level: " + str(depth))
@@ -174,9 +210,9 @@ if __name__ == '__main__':
     #res = manager.write_result()
     print("Refine strategy start")
 
-
+    bias_refinement(manager)
     #self_generative_refinement(manager)
-    CFR_refinement(manager)
+    #CFR_refinement(manager)
 
     print("Refine strategy done")
     #print(manager.write_result())

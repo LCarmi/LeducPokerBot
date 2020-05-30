@@ -77,6 +77,7 @@ class Game:
             actions_first_node = first_node.get_actions()
             player = first_node.player
             assert (actions_first_node is not None)
+
             information_set = InformationSet(name, player, histories, actions_first_node)
             self.information_sets.append(information_set)
 
@@ -273,8 +274,8 @@ class Game:
 
         for t in range(n_iter):
             if t > d:
-                w = math.sqrt(t) / (math.sqrt(t) + 1)
-                #w = t
+                #w = math.sqrt(t) / (math.sqrt(t) + 1)
+                w = t
             else:
                 w = 0
 
@@ -316,12 +317,60 @@ class Game:
 
         self.n_mask += 1
 
+    def compute_bias_masks(self, profiles):
+
+        def add_terminal_to_mask(node, payoff, n):
+            # Adds one payoff terminal node to a leaf mask node
+            new_node = TerminalNode("Result of strategy " + str(n), payoff)
+            node.actions.append(str(n))
+            masked_child.children.append(new_node)
+
+            infoset = self.history_dictionary_mask[masked_child.name]
+            if n == 0:
+                self.history_dictionary_mask[masked_child.name].actions.append(str(n))
+            elif str(n) != infoset.actions[-1]:
+                self.history_dictionary_mask[masked_child.name].actions.append(str(n))
+
+        n = 0
+
+        for node,p in zip(self.root_node.children, self.root_node.probabilities):
+            for child, masked_child, p_action in zip(node.children, node.children_mask, self.history_dictionary[node.name].final_strategy):
+                infoset = self.history_dictionary_mask[masked_child.name]
+                value = child.expected_value(self.history_dictionary) #payoff using blueprint strats
+                add_terminal_to_mask(masked_child, value, n)
+                try:
+                    infoset.blueprint_payoff += value * p * p_action
+                except:
+                    infoset.blueprint_payoff = value * p * p_action
+
+        n+=1
+        for c,r,f in profiles:
+            # Compute payoff for each profile
+            for node, p in zip(self.root_node.children, self.root_node.probabilities):
+                for child, masked_child, p_action in zip(node.children, node.children_mask, self.history_dictionary[node.name].final_strategy):
+                    infoset = self.history_dictionary_mask[masked_child.name]
+                    value = child.expected_value(self.history_dictionary, c=c, r=r, f=f)  # payoff using blueprint strats
+                    add_terminal_to_mask(masked_child, value, n)
+                    try:
+                        infoset.profile_payoff += value * p * p_action
+                    except:
+                        infoset.profile_payoff = value * p * p_action
+
+            # Adjust payoffs to guarantee safeness of newly introduced payoffs
+            for node in self.root_node.children:
+                for child, masked_child in zip(node.children, node.children_mask):
+                    infoset = self.history_dictionary_mask[masked_child.name]
+                    masked_child.children[-1].payoff -= min(infoset.blueprint_payoff-infoset.profile_payoff, 0)
+            n+=1
+
+
+
 
     def setup_masks(self):
         self.information_sets_mask = []
         self.history_dictionary_mask = {}
         infoset_mapping = {}
-
+        self.added_histories = []
         # create infoset of choices for adversary
         # self.infoset_masks = InformationSet("Subgame_Masks", self.root_node.children[0].player, [], [])
         # self.information_sets_mask.append(self.infoset_masks)
@@ -339,8 +388,8 @@ class Game:
                 node.children_mask.append(new_child)
 
                 if child.name not in self.history_dictionary:
-                    #TODO: remove them from here
                     self.history_dictionary[child.name] = InformationSet(child.name[:2+ utilities.adversary_of(node.player)] + '?' + child.name[3+ utilities.adversary_of(node.player):], utilities.adversary_of(node.player), [], [])
+                    self.added_histories.append(child.name)
                 if self.history_dictionary[child.name].name not in infoset_mapping:
                     new_infoset = InformationSet("Subgame Infoset of " + self.history_dictionary[child.name].name, utilities.adversary_of(node.player), [], [])
                     self.information_sets_mask.append(new_infoset)
@@ -387,7 +436,7 @@ class Game:
             if i.player == adversary:
                 i.prepare_for_CFR()
 
-        for w in range(8):
+        for w in range(10):
             #w = 1
             for i in self.information_sets:
                 if i.player == adversary:
@@ -411,7 +460,9 @@ class Game:
         self.history_dictionary_mask = None
         self.information_sets_mask = None
 
-
+        while self.added_histories:
+            h = self.added_histories.pop()
+            self.history_dictionary[h] = None
 
     #
     # def CFR_optimize(self):
