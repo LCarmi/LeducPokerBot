@@ -211,7 +211,7 @@ class InternalNode(Node):
 
         for child, probability in zip(self.children, player_strategy):
             if probability > 0:
-                u = child.expected_value(history_dictionary, use_average)
+                u = child.expected_value(history_dictionary, use_average, fixed_player)
                 expected_value += u * probability
 
         return expected_value
@@ -376,7 +376,7 @@ class ChanceNode(Node):
     def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         expected_value = 0
         for probability, child in zip(self.probabilities, self.children):
-            expected_value += probability * child.expected_value(history_dictionary, use_average)
+            expected_value += probability * child.expected_value(history_dictionary, use_average, fixed_player)
         return expected_value
 
 

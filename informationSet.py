@@ -15,8 +15,8 @@ class InformationSet:
         self.regret_strategy = [0.0 for _ in self.actions]
         self.cumulative_strategy = [0.0 for _ in self.actions]
 
-    def update_regret_strategy(self):
-        self.regret_strategy = self.__compute_regret_strategy()
+    # def update_regret_strategy(self):
+    #     self.regret_strategy = self.__compute_regret_strategy()
 
     def update_regret_strategy_plus(self):
 
@@ -30,6 +30,7 @@ class InformationSet:
         Computes and stores the new regret strategy associated to the current cumulative regret
         """
         regret_plus = [max(r, 0) for r in self.regret]
+        #regret_plus = self.regret
         s = sum(regret_plus)
         if  s == 0:
             new_strategy = [1 / len(self.actions) for _ in range(len(self.actions))]

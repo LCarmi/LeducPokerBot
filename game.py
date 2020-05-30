@@ -6,8 +6,8 @@ import utilities
 
 # TODO: eliminate print
 class Game:
-    d = 2000  # number of regret explorations without strategy update
-    total_iterations = 4000  # number of iteration to do
+    d = 500  # number of regret explorations without strategy update
+    total_iterations = 1000  # number of iteration to do
     d_subgame = 250
     total_iterations_subgame = 500
     #n = 1  # number of card in a group (abstraction)
@@ -358,18 +358,27 @@ class Game:
 
     def adversary_response(self, player, adversary):
         for i in self.information_sets:
-            i.prepare_for_CFR()
+            if i.player == adversary:
+                i.prepare_for_CFR()
 
-        w=1
-        for i in self.information_sets:
-            i.update_regret_strategy_plus()
-        # Do cfr to compute regrets
-        self.root_node.CFR_plus(adversary, w, 1, self.history_dictionary, 2, True, player)
+        for w in range(8):
+            #w = 1
+            for i in self.information_sets:
+                if i.player == adversary:
+                    i.update_regret_strategy_plus()
+            # Do cfr to compute regrets
+            self.root_node.CFR_plus(adversary, w, 1, self.history_dictionary, 2, True, player)
+
+        # for i in self.information_sets:
+        #     i.update_regret_strategy_plus()
+        #
+        # self.root_node.CFR_plus(adversary, w, 1, self.history_dictionary, 2, True, player)
 
         for i in self.information_sets:
-            i.update_regret_strategy_plus()
-            #use regretstrategy greedily
-            i.cumulative_strategy = i.regret_strategy
+            if i.player == adversary:
+                i.update_regret_strategy_plus()
+                #use regret strategy greedily
+                i.cumulative_strategy = i.regret_strategy
         return
 
     def clean_masks(self):

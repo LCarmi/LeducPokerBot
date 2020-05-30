@@ -74,13 +74,15 @@ class Manager:
     #         substitute new_child in children
 
 def self_generative_refinement(manager):
+    print("Self generative refinement")
 
     def mini_refinement(manager, player, adversary, depth):
-        n_refinements = 16
+        n_refinements = 10
         virtual_game = manager.create_virtual_game(manager.originalGame, player, depth)
 
         if virtual_game.root_node.children:
             virtual_game.setup_masks()
+
             virtual_game.compute_masks(player, False)
             virtual_game.mask_yourself()
             virtual_game.solve_subgame(player)
@@ -94,6 +96,7 @@ def self_generative_refinement(manager):
                 virtual_game.update_infoset_from_subgame()
 
             virtual_game.restore_masks()
+
             virtual_game.clean_masks()
 
 
@@ -106,6 +109,7 @@ def self_generative_refinement(manager):
 
 
 def CFR_refinement(manager):
+    print("CFR refinement")
     player = 1
     other_player = 2
     #Do the subgame for each level
@@ -129,7 +133,7 @@ def CFR_refinement(manager):
 
 if __name__ == '__main__':
 
-    file_path = "./Examples/input - leduc5.txt"
+    file_path = "./Examples/input - leduc3.txt"
     manager = Manager(file_path)
     print("Game loaded!")
 
@@ -154,8 +158,8 @@ if __name__ == '__main__':
     print("Refine strategy start")
 
 
-    #self_generative_refinement(manager)
-    CFR_refinement(manager)
+    self_generative_refinement(manager)
+    #CFR_refinement(manager)
 
     print("Refine strategy done")
     #print(manager.write_result())
