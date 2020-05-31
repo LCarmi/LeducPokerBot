@@ -17,31 +17,36 @@ reFindCard = 'infoset /(C:|)(?P<card>\w+)?(.+)\n?'
 
 def parse_node_line(node_line):
     # Internal player nodes
-    if match := re.fullmatch(reTerminal, node_line):
+    matchTerm = re.fullmatch(reTerminal, node_line)
+    matchInt = re.fullmatch(rePlayer, node_line)
+    matchChance = re.fullmatch(reChance, node_line)
+    if matchTerm:
         #print("History: {}, P1: {}, P2: {}".format(match.group('history'), match.group('payoff1'), match.group('payoff2')))
-        return TerminalNode(match.group('history'), float(match.group('payoff1')))
-    elif match := re.fullmatch(rePlayer, node_line):
+        return TerminalNode(matchTerm.group('history'), float(matchTerm.group('payoff1')))
+    elif matchInt:
         #print("History: {}, Player: {}, Actions: {}".format(match.group('history'), match.group('player'), match.group('actions')))
-        return InternalNode(match.group('history'), match.group('actions').split(), int(match.group('player')))
+        return InternalNode(matchInt.group('history'), matchInt.group('actions').split(), int(matchInt.group('player')))
     # Chance nodes
-    elif match := re.fullmatch(reChance, node_line):
+    elif matchChance:
         #print("History : {}, Chance actions: {}".format(match.group('history'), match.group('chance_actions')))
-        chance_actions = match.group('chance_actions').split()
+        chance_actions = matchChance.group('chance_actions').split()
         res_actions = []
         res_prob = []
         for chance_action in chance_actions:
             action, prob = chance_action.split('=')
             res_actions.append(action)
             res_prob.append(float(prob))
-        return ChanceNode(match.group('history'), res_actions, res_prob)
+        return ChanceNode(matchChance.group('history'), res_actions, res_prob)
 
 
 def parse_infoset_line(infoset_line):
-    if match := re.fullmatch(reInfoSet, infoset_line):
+    match = re.fullmatch(reInfoSet, infoset_line)
+    if match:
         return match.group('name'), match.group('histories').split()
 
 def parse_card_from_infoset(infoset_line:str):
-    if match := re.fullmatch(reFindCard, infoset_line):
+    match = re.fullmatch(reFindCard, infoset_line)
+    if match:
         return match.group('card')
 
 
