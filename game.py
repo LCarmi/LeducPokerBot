@@ -6,10 +6,10 @@ import utilities
 
 # TODO: eliminate print
 class Game:
-    d = 500  # number of regret explorations without strategy update
-    total_iterations = 1000  # number of iteration to do
+    d = 1000  # number of regret explorations without strategy update
+    total_iterations = 2000  # number of iteration to do
     #n = 1  # number of card in a group (abstraction)
-    n_groups = 3  # number of card groups
+    n_groups = 4  # number of card groups
 
     def __init__(self):
         self.root_node = None
@@ -45,18 +45,18 @@ class Game:
             self.root_node.CFR_plus(1, w, 1, self.history_dictionary)
             self.root_node.CFR_plus(2, w, 1, self.history_dictionary)
 
-            if (w != 0 and t % 10 == 0):
-                # regret_P1 = 0
-                # regret_P2 = 0
-                # for i in self.information_sets:
-                #     assert (isinstance(i, InformationSet))
-                #     if i.player == 1:
-                #         regret_P1 += sum(i.regret)
-                #     else:
-                #         regret_P2 += sum(i.regret)
-                # ex = (regret_P1 + regret_P2) / 2.0
-                ex_val = self.root_node.expected_value(self.history_dictionary, True)
-                print("Time: {}, Expected Value: {}".format(t, ex_val))
+            # if (w != 0 and t % 10 == 0):
+            #     # regret_P1 = 0
+            #     # regret_P2 = 0
+            #     # for i in self.information_sets:
+            #     #     assert (isinstance(i, InformationSet))
+            #     #     if i.player == 1:
+            #     #         regret_P1 += sum(i.regret)
+            #     #     else:
+            #     #         regret_P2 += sum(i.regret)
+            #     # ex = (regret_P1 + regret_P2) / 2.0
+            #     ex_val = self.root_node.expected_value(self.history_dictionary, True)
+            #     print("Time: {}, Expected Value: {}".format(t, ex_val))
 
     def parse_game(self, node_lines: [str], infoset_lines: [str]):
         node_dictionary = {}
@@ -274,8 +274,8 @@ class Game:
 
         for t in range(n_iter):
             if t > d:
-                #w = math.sqrt(t) / (math.sqrt(t) + 1)
-                w = t
+                w = math.sqrt(t) / (math.sqrt(t) + 1)
+                #w = t
             else:
                 w = 0
 
@@ -317,7 +317,7 @@ class Game:
 
         self.n_mask += 1
 
-    def compute_bias_masks(self, profiles):
+    def compute_bias_masks(self, profiles, player, adversary):
 
         def add_terminal_to_mask(node, payoff, n):
             # Adds one payoff terminal node to a leaf mask node
@@ -326,7 +326,7 @@ class Game:
             masked_child.children.append(new_node)
 
             infoset = self.history_dictionary_mask[masked_child.name]
-            if n == 0:
+            if len(infoset.actions) == 0:
                 self.history_dictionary_mask[masked_child.name].actions.append(str(n))
             elif str(n) != infoset.actions[-1]:
                 self.history_dictionary_mask[masked_child.name].actions.append(str(n))
@@ -336,7 +336,7 @@ class Game:
         for node,p in zip(self.root_node.children, self.root_node.probabilities):
             for child, masked_child, p_action in zip(node.children, node.children_mask, self.history_dictionary[node.name].final_strategy):
                 infoset = self.history_dictionary_mask[masked_child.name]
-                value = child.expected_value(self.history_dictionary) #payoff using blueprint strats
+                value = child.expected_value_bias_strat(self.history_dictionary,0, 1,1,1) # payoff using blueprint strats
                 add_terminal_to_mask(masked_child, value, n)
                 try:
                     infoset.blueprint_payoff += value * p * p_action
@@ -349,7 +349,7 @@ class Game:
             for node, p in zip(self.root_node.children, self.root_node.probabilities):
                 for child, masked_child, p_action in zip(node.children, node.children_mask, self.history_dictionary[node.name].final_strategy):
                     infoset = self.history_dictionary_mask[masked_child.name]
-                    value = child.expected_value(self.history_dictionary, c=c, r=r, f=f)  # payoff using blueprint strats
+                    value = child.expected_value_bias_strat(self.history_dictionary, adversary, c=c, r=r, f=f)  # payoff using blueprint strats
                     add_terminal_to_mask(masked_child, value, n)
                     try:
                         infoset.profile_payoff += value * p * p_action
@@ -360,21 +360,21 @@ class Game:
             for node in self.root_node.children:
                 for child, masked_child in zip(node.children, node.children_mask):
                     infoset = self.history_dictionary_mask[masked_child.name]
-                    masked_child.children[-1].payoff -= min(infoset.blueprint_payoff-infoset.profile_payoff, 0)
+                    if adversary == 1:
+                        masked_child.children[-1].payoff -= max(infoset.profile_payoff - infoset.blueprint_payoff, 0)
+                    else:
+                        masked_child.children[-1].payoff -= min(infoset.blueprint_payoff-infoset.profile_payoff, 0)
+                    infoset.profile_payoff = 0 # initial value for next repetitions
+                    infoset.blueprint_payoff = 0
             n+=1
 
 
 
-
-    def setup_masks(self):
+    def setup_masks(self, player, adversary):
         self.information_sets_mask = []
         self.history_dictionary_mask = {}
         infoset_mapping = {}
         self.added_histories = []
-        # create infoset of choices for adversary
-        # self.infoset_masks = InformationSet("Subgame_Masks", self.root_node.children[0].player, [], [])
-        # self.information_sets_mask.append(self.infoset_masks)
-
 
         # create internal nodes
         for node in self.root_node.children:
@@ -383,23 +383,21 @@ class Game:
             self.information_sets_mask.append(self.history_dictionary[node.name])
             for child in node.children:
                 mask_name = "Subgame Mask of " + child.name
-                new_child = InternalNode(mask_name, [], utilities.adversary_of(node.player))
+                new_child = InternalNode(mask_name, [], adversary)
 
                 node.children_mask.append(new_child)
 
                 if child.name not in self.history_dictionary:
-                    self.history_dictionary[child.name] = InformationSet(child.name[:2+ utilities.adversary_of(node.player)] + '?' + child.name[3+ utilities.adversary_of(node.player):], utilities.adversary_of(node.player), [], [])
+                    self.history_dictionary[child.name] = InformationSet(child.name[:2+ adversary] + '?' + child.name[3+ adversary:], adversary, [], [])
                     self.added_histories.append(child.name)
                 if self.history_dictionary[child.name].name not in infoset_mapping:
-                    new_infoset = InformationSet("Subgame Infoset of " + self.history_dictionary[child.name].name, utilities.adversary_of(node.player), [], [])
+                    new_infoset = InformationSet("Subgame Infoset of " + self.history_dictionary[child.name].name, adversary, [], [])
                     self.information_sets_mask.append(new_infoset)
                     infoset_mapping[self.history_dictionary[child.name].name] = new_infoset
 
                 infoset = infoset_mapping[self.history_dictionary[child.name].name]
                 self.history_dictionary_mask[new_child.name] = infoset
                 infoset.node_histories.append(new_child.name)
-
-
 
 
     def mask_yourself(self):
@@ -436,8 +434,11 @@ class Game:
             if i.player == adversary:
                 i.prepare_for_CFR()
 
-        for w in range(10):
-            #w = 1
+        for t in range(20):
+            if t > 10:
+                w = math.sqrt(t) / (math.sqrt(t) + 1)
+            else:
+                w = 0
             for i in self.information_sets:
                 if i.player == adversary:
                     i.update_regret_strategy_plus()
@@ -464,6 +465,160 @@ class Game:
             h = self.added_histories.pop()
             self.history_dictionary[h] = None
 
+    def setup_masks_ingame(self, adversary):
+        infoset_mapping = {}
+        self.added_histories = []
+        self.added_infosets = []
+
+        # create internal nodes
+        for node in self.leaf_nodes:
+            node.children_mask = []
+            for child in node.children:
+                mask_name = "Subgame Mask of " + child.name
+                new_child = InternalNode(mask_name, [], adversary)
+
+                node.children_mask.append(new_child)
+
+                if child.name not in self.history_dictionary:
+                    new_infoset_name = child.name[:2 + adversary] + '?' + child.name[3 + adversary:]
+                    self.history_dictionary[child.name] = InformationSet(new_infoset_name, adversary, [], [])
+                    self.added_histories.append(child.name)
+
+                if self.history_dictionary[child.name].name not in infoset_mapping:
+                    new_infoset = InformationSet("Subgame Infoset of " + self.history_dictionary[child.name].name,
+                                                 adversary, [], [])
+                    self.information_sets.append(new_infoset)
+                    self.added_infosets.append(new_infoset)
+                    infoset_mapping[self.history_dictionary[child.name].name] = new_infoset
+
+                infoset = infoset_mapping[self.history_dictionary[child.name].name]
+                self.history_dictionary[new_child.name] = infoset
+                self.added_histories.append(new_child.name)
+                infoset.node_histories.append(new_child.name)
+
+
+    def init_leaves(self,  depth):
+        def explore_tree(history_dict, node, probability, depth):
+            if isinstance(node, TerminalNode):
+                return
+
+            if depth != 0:
+                if isinstance(node, ChanceNode):
+                    for c, p in zip(node.children, node.probabilities):
+                        explore_tree(history_dict, c, p * probability, depth-1)
+                    return
+                assert(isinstance(node, InternalNode))
+                i = history_dict[node.name]
+                for c, p in zip(node.children, i.final_strategy):
+                    explore_tree(history_dict, c, p * probability, depth - 1)
+                return
+            else:
+                self.leaf_nodes.append(node)
+                self.leaf_probability.append(probability)
+                return
+
+        self.leaf_nodes = []
+        self.leaf_probability = []
+        explore_tree(self.history_dictionary, self.root_node, 1, depth)
+
+
+    def mask_yourself_ingame(self):
+        if self.masked:
+            raise Exception()
+        self.masked = True
+        for node in self.leaf_nodes:
+            swap = node.children
+            node.children = node.children_mask
+            node.children_mask = swap
+
+    def restore_masks_ingame(self):
+        if not self.masked:
+            raise Exception()
+        self.masked = False
+        for node in self.leaf_nodes:
+            swap = node.children
+            node.children = node.children_mask
+            node.children_mask = swap
+
+    def clean_masks_ingame(self):
+        while self.added_histories:
+            h = self.added_histories.pop()
+            self.history_dictionary.pop(h)
+        while self.added_infosets:
+            i = self.added_infosets.pop()
+            self.information_sets.remove(i)
+
+    def map_strategies_until_depth(self, node, player, depth):
+        if isinstance(node, TerminalNode):
+            return
+        if depth >= 0:
+            if isinstance(node, InternalNode):
+                if node.player == player:
+                    infoset = self.history_dictionary[node.name]
+                    infoset.final_strategy = infoset.get_average_strategy()
+            for child in node.children:
+                self.map_strategies_until_depth(child, player, depth-1)
+
+    def compute_bias_masks_ingame(self, profiles, adversary):
+
+        def add_terminal_to_mask(node, payoff, n):
+            # Adds one payoff terminal node to a leaf mask node
+            new_node = TerminalNode("Result of strategy " + str(n), payoff)
+            node.actions.append(str(n))
+            node.children.append(new_node)
+
+            infoset = self.history_dictionary[masked_child.name]
+            if len(infoset.actions) == 0:
+                self.history_dictionary[masked_child.name].actions.append(str(n))
+            elif str(n) != infoset.actions[-1]:
+                self.history_dictionary[masked_child.name].actions.append(str(n))
+
+        n = 0
+
+        for node,p in zip(self.leaf_nodes, self.leaf_probability):
+            try:
+                probabilities = self.history_dictionary[node.name].final_strategy
+            except:
+                probabilities = node.probabilities
+            for child, masked_child, p_action in zip(node.children, node.children_mask, probabilities):
+                infoset = self.history_dictionary[masked_child.name]
+                value = child.expected_value_bias_strat(self.history_dictionary, 0, 1,1,1) # payoff using blueprint strats
+                add_terminal_to_mask(masked_child, value, n)
+                try:
+                    infoset.blueprint_payoff += value * p * p_action
+                except:
+                    infoset.blueprint_payoff = value * p * p_action
+
+        n+=1
+        for c,r,f in profiles:
+
+            # Compute payoff for each profile
+            for node, p in zip(self.leaf_nodes, self.leaf_probability):
+                try:
+                    probabilities = self.history_dictionary[node.name].final_strategy
+                except:
+                    probabilities = node.probabilities
+
+                for child, masked_child, p_action in zip(node.children, node.children_mask, probabilities):
+                    infoset = self.history_dictionary[masked_child.name]
+                    value = child.expected_value_bias_strat(self.history_dictionary, adversary, c=c, r=r, f=f)  # payoff using blueprint strats
+                    add_terminal_to_mask(masked_child, value, n)
+                    try:
+                        infoset.profile_payoff += value * p * p_action
+                    except:
+                        infoset.profile_payoff = value * p * p_action
+
+            # Adjust payoffs to guarantee safeness of newly introduced payoffs
+            for node in self.leaf_nodes:
+                for child, masked_child in zip(node.children, node.children_mask):
+                    infoset = self.history_dictionary[masked_child.name]
+                    if adversary == 1:
+                        masked_child.children[-1].payoff -= max(infoset.profile_payoff - infoset.blueprint_payoff, 0)
+                    else:
+                        masked_child.children[-1].payoff -= min(infoset.blueprint_payoff-infoset.profile_payoff, 0)
+                    infoset.profile_payoff = 0 # initial value for next repetitions
+                    infoset.blueprint_payoff = 0
+            n+=1
     #
     # def CFR_optimize(self):
     #     for t in range(Game.total_iterations):

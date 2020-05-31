@@ -57,7 +57,7 @@ class Node():
     def CFR_plus(self, i, w, pi, history_dict, curr_dist=0, isSubgame=False, player_fixed=0) -> float:
         pass
 
-    def expected_value(self, history_dictionary, use_average=False, fixed_player=0, c=1, f=1, r=1) -> float:
+    def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         pass
 
 
@@ -93,8 +93,15 @@ class TerminalNode(Node):
             return -self.payoff
         return self.payoff
 
-    def expected_value(self, history_dictionary, use_average=False, fixed_player=0, c=1, f=1, r=1) -> float:
+    def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         return self.payoff
+
+    def expected_value_bias_strat(self, history_dictionary, player_to_bias, c, f, r) -> float:
+        return self.payoff
+
+    def __str__(self):
+        ret = "My name is " + self.name + " Payoff: " + str(self.payoff)
+        return ret
 
 
 class InternalNode(Node):
@@ -197,9 +204,8 @@ class InternalNode(Node):
                 current_infoset.cumulative_strategy[idx] += pi * regret_matched_strategy[idx] * w
         return expected_payoff
 
-    def expected_value(self, history_dictionary, use_average=False, fixed_player=0, c=1, f=1, r=1) -> float:
+    def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         infoset = history_dictionary.get(self.name)
-        prob_dict = {"c": c, "f": f, "r": r}
         expected_value = 0
 
         # Get strategies and normalize
@@ -208,16 +214,32 @@ class InternalNode(Node):
         else:
             player_strategy = infoset.final_strategy
 
+        for child, probability, action in zip(self.children, player_strategy, self.actions):
+            if probability > 0:
+                u = child.expected_value(history_dictionary, use_average, fixed_player)
+                expected_value += u * probability
+
+        return expected_value
+
+    def expected_value_bias_strat(self, history_dictionary, player_to_bias, c, f, r) -> float:
+        infoset = history_dictionary.get(self.name)
+        if player_to_bias == self.player:
+            prob_dict = {"c": c, "f": f, "r": r}
+        else:
+            prob_dict = {"c": 1, "f": 1, "r": 1}
+        expected_value = 0
+
+        player_strategy = infoset.final_strategy
+
         norm = 0
         for child, probability, action in zip(self.children, player_strategy, self.actions):
             if probability > 0:
-                u = child.expected_value(history_dictionary, use_average, fixed_player, c, f, r)
+                u = child.expected_value_bias_strat(history_dictionary, player_to_bias, c, f, r)
                 temp = probability * prob_dict[action[0]]
                 expected_value += u * temp
                 norm += temp
 
         return expected_value/norm
-
 
 class ChanceNode(Node):
     iterNum = 0
@@ -375,12 +397,20 @@ class ChanceNode(Node):
                                                     player_fixed)
         return expected_payoff
 
-    def expected_value(self, history_dictionary, use_average=False, fixed_player=0, c=1, f=1, r=1) -> float:
+    def expected_value(self, history_dictionary, use_average=False, fixed_player=0) -> float:
         expected_value = 0
         for probability, child in zip(self.probabilities, self.children):
-            expected_value += probability * child.expected_value(history_dictionary, use_average, fixed_player, c, f, r)
+            expected_value += probability * child.expected_value(history_dictionary, use_average, fixed_player)
         return expected_value
 
+    def expected_value_bias_strat(self, history_dictionary, player_to_bias, c, f, r) -> float:
+        expected_value = 0
+
+        for child, probability in zip(self.children, self.probabilities):
+                u = child.expected_value_bias_strat(history_dictionary, player_to_bias, c, f, r)
+                expected_value += u * probability
+
+        return expected_value
 
 if __name__ == "__main__":
     print("Test")
