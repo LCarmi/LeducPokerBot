@@ -1,3 +1,5 @@
+import time
+
 from game import *
 from orderFile import *
 
@@ -210,53 +212,131 @@ def ingame_refinement(manager, depth):
         manager.originalGame.clean_masks_ingame()
         manager.originalGame.map_strategies_until_depth(manager.originalGame.root_node,player,depth)
 
+    print("P1 refinement")
     single_refinement(1,2,depth)
+    print("P2 refinement")
     single_refinement(2,1,depth)
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
+#     basename = "Leduc_A_4_cards"
+#     file_path = "./Examples/Leduc_A.txt"
+#     Game.d = 10000  # number of regret explorations without strategy update
+#     Game.total_iterations = 20000  # number of iteration to do
+#     Game.n_groups = 4  # number of card groups
+#
+#     manager = Manager(file_path)
+#     print("Game loaded!")
+#
+#     t_start = time.time()
+#     manager.create_abstraction()
+#     print("Abstraction ended!")
+#     t_end_abstraction = time.time()
+#
+#     manager.abstractedGame.find_optimal_strategy()
+#     #manager.originalGame.find_optimal_strategy()
+#     print("Blue print strategy done in abstract game!")
+#
+#     manager.map_strategies()
+#     print("Blue print mapped on the real game")
+#     t_blueprint = time.time()
+#
+#     # Initialize the final strategy
+#     for infoset in manager.originalGame.information_sets:
+#         infoset.final_strategy = infoset.get_average_strategy()
+#
+#     exploitability_blueprint = manager.originalGame.exploitability_Luca()
+#     expected_val_blueprint = manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)
+#     res_blue = manager.write_result()
+#
+#     Game.d = 2000  # number of regret explorations without strategy update
+#     Game.total_iterations = 4000  # number of iteration to do
+#
+#     t_start_ref = time.time()
+#     #print(manager.write_result())
+#     #res = manager.write_result()
+#     print("Refine strategy start")
+#
+#     #bias_refinement(manager)
+#     #self_generative_refinement(manager)
+#     #CFR_refinement(manager)
+#     ingame_refinement(manager, 6)
+#     t_end_ref = time.time()
+#     print("Refine strategy done")
+#     #print(manager.write_result())
+#
+#     exploitability_ref = manager.originalGame.exploitability_Luca()
+#     expected_val_ref = manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)
+#     res_ref = manager.write_result()
+#
+#     s = ""
+#     s += "Time for Abstraction: {}\n".format(t_end_abstraction-t_start)
+#     s += "Time for Blueprint: {}\n".format(t_blueprint-t_end_abstraction)
+#     s += "Time for Refinement: {}\n".format(t_end_ref-t_start_ref)
+#     s += "Expected Value Blueprint: {}\n".format(expected_val_blueprint)
+#     s += "Exploitability Blueprint: {}\n".format(exploitability_blueprint)
+#     s += "Expected Value Refinement: {}\n".format(expected_val_ref)
+#     s += "Exploitability Refinement: {}\n".format(exploitability_ref)
+#
+#     print(s)
+#
+#     file_path_output = "./Examples/Output_" + basename + "_blueprint.txt"
+#     f = open(file_path_output, "w+")
+#     f.write(res_blue)
+#     f.close()
+#
+#     file_path_output = "./Examples/Output_" + basename + "_refined.txt"
+#     f = open(file_path_output, "w+")
+#     f.write(res_ref)
+#     f.close()
+#
+#     file_path_output = "./Examples/Output_" + basename + "_log.txt"
+#     f = open(file_path_output, "w+")
+#     f.write(s)
+#     f.close()
+#
+#     print("Write finished")
 
-    file_path = "./Examples/input - leduc5.txt"
+
+if __name__ == '__main__':
+    basename = "Leduc_A_5_cards"
+    file_path = "./Examples/Leduc_A.txt"
+    Game.d = 10000  # number of regret explorations without strategy update
+    Game.total_iterations = 20000  # number of iteration to do
+    Game.n_groups = 5  # number of card groups
+
     manager = Manager(file_path)
     print("Game loaded!")
 
-    manager.create_abstraction()
-    print("Abstraction ended!")
+    t_end_abstraction = time.time()
 
-    manager.abstractedGame.find_optimal_strategy()
-    #manager.originalGame.find_optimal_strategy()
-    print("Blue print strategy done in abstract game!")
+    manager.originalGame.find_optimal_strategy()
 
-    manager.map_strategies()
-    print("Blue print mapped on the real game")
+    t_blueprint = time.time()
 
     # Initialize the final strategy
     for infoset in manager.originalGame.information_sets:
         infoset.final_strategy = infoset.get_average_strategy()
 
-    print("Exploitability: {}".format(manager.originalGame.exploitability_Luca()))
+    exploitability_res = manager.originalGame.exploitability_Luca()
+    expected_val_res = manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)
+    res = manager.write_result()
 
-    #print(manager.write_result())
-    #res = manager.write_result()
-    print("Refine strategy start")
+    s = ""
+    s += "Time for Solution: {}\n".format(t_blueprint-t_end_abstraction)
+    s += "Expected Value Blueprint: {}\n".format(expected_val_res)
+    s += "Exploitability Blueprint: {}\n".format(exploitability_res)
 
-    #bias_refinement(manager)
-    #self_generative_refinement(manager)
-    #CFR_refinement(manager)
-    ingame_refinement(manager, 6)
+    print(s)
 
-    print("Refine strategy done")
-    #print(manager.write_result())
-    print("Expected Value: {}".format(manager.originalGame.root_node.expected_value(manager.originalGame.history_dictionary)))
+    file_path_output = "./Examples/Output_" + basename + "_res.txt"
+    f = open(file_path_output, "w+")
+    f.write(res)
+    f.close()
 
-    print("Exploitability: {}".format(manager.originalGame.exploitability_Luca()))
+    file_path_output = "./Examples/Output_" + basename + "_log.txt"
+    f = open(file_path_output, "w+")
+    f.write(s)
+    f.close()
 
-    #print(res)
-    # file_path_output = "./Examples/output.txt"
-    # f = open(file_path_output, "w+")
-    # f.write(out)
-    # f.close()
-    # print("Write finished")
-
-
-
+    print("Write finished")

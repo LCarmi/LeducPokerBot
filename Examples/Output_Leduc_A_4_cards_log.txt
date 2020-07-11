@@ -1,0 +1,7 @@
+Time for Abstraction: 0.05901288986206055
+Time for Blueprint: 58.197657108306885
+Time for Refinement: 82.76758217811584
+Expected Value Blueprint: -0.04448999990672635
+Exploitability Blueprint: 0.24624401939784982
+Expected Value Refinement: -0.12819529954139078
+Exploitability Refinement: 0.16779651636030196

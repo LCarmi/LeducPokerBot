@@ -9,7 +9,7 @@ class Game:
     d = 1000  # number of regret explorations without strategy update
     total_iterations = 2000  # number of iteration to do
     #n = 1  # number of card in a group (abstraction)
-    n_groups = 4  # number of card groups
+    n_groups = 5  # number of card groups
 
     def __init__(self):
         self.root_node = None
@@ -45,6 +45,7 @@ class Game:
             self.root_node.CFR_plus(1, w, 1, self.history_dictionary)
             self.root_node.CFR_plus(2, w, 1, self.history_dictionary)
 
+            print(t)
             # if (w != 0 and t % 10 == 0):
             #     # regret_P1 = 0
             #     # regret_P2 = 0
